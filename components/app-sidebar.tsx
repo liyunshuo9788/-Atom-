@@ -45,7 +45,7 @@ export function AppSidebar({ activePage, onNavigate }: AppSidebarProps) {
       {/* Logo */}
       <div className="flex h-16 items-center px-6">
         <span className="text-xl font-semibold italic text-white tracking-tight">
-          InvestOS
+          AtomCAP
         </span>
       </div>
 
