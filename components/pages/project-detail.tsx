@@ -58,7 +58,7 @@ interface ProjectDetailProps {
 export function ProjectDetail({ projectId }: ProjectDetailProps) {
   const [activeSubPage, setActiveSubPage] = useState<SubPageKey>("overview")
   const [collapsed, setCollapsed] = useState(false)
-  const ActiveComponent = subPageComponents[activeSubPage]
+  const [currentPhase, setCurrentPhase] = useState<string>("")
 
   return (
     <div className="flex h-full overflow-hidden">
@@ -86,6 +86,23 @@ export function ProjectDetail({ projectId }: ProjectDetailProps) {
             )}
           </button>
         </div>
+
+        {/* Phase Label */}
+        {currentPhase && !collapsed && (
+          <div className="px-3 pb-2">
+            <div className="rounded-lg bg-[#1E293B] px-3 py-2">
+              <p className="text-[10px] font-medium text-[#64748B] uppercase tracking-wider">{"\u5F53\u524D\u9636\u6BB5"}</p>
+              <p className="text-xs font-semibold text-[#E2E8F0] mt-0.5">{currentPhase}</p>
+            </div>
+          </div>
+        )}
+        {currentPhase && collapsed && (
+          <div className="px-2 pb-2">
+            <div className="flex items-center justify-center rounded-lg bg-[#1E293B] p-1.5" title={currentPhase}>
+              <span className="h-2 w-2 rounded-full bg-[#2563EB]" />
+            </div>
+          </div>
+        )}
 
         {/* Navigation Items */}
         <nav className="flex-1 px-2 py-2 space-y-0.5">
@@ -117,7 +134,14 @@ export function ProjectDetail({ projectId }: ProjectDetailProps) {
 
       {/* Main Content */}
       <div className="flex-1 overflow-hidden">
-        <ActiveComponent />
+        {activeSubPage === "workflow" ? (
+          <Workflow onSelectPhase={setCurrentPhase} />
+        ) : (
+          (() => {
+            const ActiveComponent = subPageComponents[activeSubPage]
+            return <ActiveComponent />
+          })()
+        )}
       </div>
     </div>
   )
