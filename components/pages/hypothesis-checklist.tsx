@@ -12,6 +12,7 @@ import {
   PanelRightClose,
   PanelRightOpen,
   Send,
+  Plus,
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -101,6 +102,7 @@ interface HypothesisDetail {
   createdAt: string
   updatedAt: string
   status: "verified" | "pending" | "risky"
+  creator: PersonInfo
   valuePoints: ValuePoint[]
   riskPoints: RiskPoint[]
   committeeDecision: CommitteeDecision
@@ -271,6 +273,7 @@ const detailsMap: Record<string, HypothesisDetail> = {
     createdAt: "2024-01-15",
     updatedAt: "2024-01-20",
     status: "verified",
+    creator: PEOPLE.zhangwei,
     valuePoints: [
       {
         id: "vp1",
@@ -359,6 +362,7 @@ const detailsMap: Record<string, HypothesisDetail> = {
     createdAt: "2024-01-16",
     updatedAt: "2024-01-21",
     status: "pending",
+    creator: PEOPLE.lisi,
     valuePoints: [
       {
         id: "vp1",
@@ -403,6 +407,7 @@ const detailsMap: Record<string, HypothesisDetail> = {
     createdAt: "2024-02-01",
     updatedAt: "2024-02-10",
     status: "risky",
+    creator: PEOPLE.lisi,
     valuePoints: [
       {
         id: "vp1",
@@ -466,7 +471,7 @@ const detailsMap: Record<string, HypothesisDetail> = {
 /*  Status helpers                                                     */
 /* ------------------------------------------------------------------ */
 function statusDot(status: "verified" | "pending" | "risky") {
-  const colors = { verified: "bg-emerald-500", pending: "bg-gray-300", risky: "bg-amber-500" }
+  const colors = { verified: "bg-emerald-500", pending: "bg-gray-300", risky: "bg-red-500" }
   return <span className={cn("inline-block h-2 w-2 rounded-full shrink-0", colors[status])} />
 }
 
@@ -560,7 +565,7 @@ function TreeNode({
         ) : (
           <span className="w-3.5 shrink-0" />
         )}
-        {statusDot(node.status)}
+        {isLeaf && statusDot(node.status)}
         <span className={cn(isLeaf ? "line-clamp-2" : "truncate")}>{displayLabel}</span>
       </button>
       {hasChildren && expanded && (
@@ -768,24 +773,29 @@ function DetailPanel({ detail }: { detail: HypothesisDetail }) {
               <p className="mt-1.5 text-sm text-[#6B7280]">
                 {"ID: "}{detail.qaId}{" | "}{"\u521B\u5EFA\u65F6\u95F4: "}{detail.createdAt}{" | "}{"\u66F4\u65B0\u65F6\u95F4: "}{detail.updatedAt}
               </p>
+              {detail.creator && detail.creator.name && (
+                <div className="mt-2">
+                  <AvatarChip person={detail.creator} label={"\u521B\u5EFA\u8005:"} />
+                </div>
+              )}
             </div>
             <Badge
               className={cn(
                 "shrink-0",
                 detail.status === "verified"
                   ? "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-50"
-                  : detail.status === "risky"
-                    ? "bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-50"
+                  :                 detail.status === "risky"
+                    ? "bg-red-50 text-red-700 border-red-200 hover:bg-red-50"
                     : "bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-50"
               )}
             >
               <span
                 className={cn(
                   "mr-1 inline-block h-1.5 w-1.5 rounded-full",
-                  detail.status === "verified" ? "bg-emerald-500" : detail.status === "risky" ? "bg-amber-500" : "bg-gray-400"
+                  detail.status === "verified" ? "bg-emerald-500" : detail.status === "risky" ? "bg-red-500" : "bg-gray-400"
                 )}
               />
-              {detail.status === "verified" ? "\u5DF2\u9A8C\u8BC1" : detail.status === "risky" ? "\u5B58\u7591" : "\u5F85\u9A8C\u8BC1"}
+              {detail.status === "verified" ? "\u6210\u7ACB" : detail.status === "risky" ? "\u4E0D\u6210\u7ACB" : "\u5F85\u51B3\u8BAE"}
             </Badge>
           </div>
         </div>
@@ -916,7 +926,13 @@ export function HypothesisChecklist() {
         <div className="border-b border-[#E5E7EB] p-4 flex items-center gap-2">
           {(!hasSelection || !middleCollapsed) && (
             <div className="flex-1 min-w-0">
-              <h2 className="mb-3 text-base font-semibold text-[#111827]">{"\u5047\u8BBE\u6E05\u5355"}</h2>
+              <div className="flex items-center justify-between mb-3">
+                <h2 className="text-base font-semibold text-[#111827]">{"\u5047\u8BBE\u6E05\u5355"}</h2>
+                <button className="inline-flex items-center gap-1 rounded-lg bg-[#2563EB] px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-[#1D4ED8]">
+                  <Plus className="h-3.5 w-3.5" />
+                  {"\u521B\u5EFA\u5047\u8BBE"}
+                </button>
+              </div>
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#9CA3AF]" />
                 <Input
