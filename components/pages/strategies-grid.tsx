@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Briefcase, Search, Plus, Target, TrendingUp, Building2, Cpu, Zap, Leaf, Upload, X } from "lucide-react"
+import { Briefcase, Search, Plus, Target, TrendingUp, Building2, Cpu, Zap, Leaf } from "lucide-react"
 import {
   Dialog,
   DialogContent,
@@ -11,7 +11,17 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { cn } from "@/lib/utils"
+
+// Available owners
+const availableOwners = [
+  { id: "zhangwei", name: "\u5F20\u4F1F", initials: "\u5F20\u4F1F" },
+  { id: "lisi", name: "\u674E\u56DB", initials: "\u674E\u56DB" },
+  { id: "wangfang", name: "\u738B\u82B3", initials: "\u738B\u82B3" },
+  { id: "zhaoqiang", name: "\u8D75\u5F3A", initials: "\u8D75\u5F3A" },
+  { id: "chenzong", name: "\u9648\u603B", initials: "\u9648\u603B" },
+]
 
 // Strategy type configurations
 const strategyTypeConfig = {
@@ -42,6 +52,17 @@ export interface Strategy {
   projectCount: number
   totalInvest: string
   returnRate: string
+  owner: { id: string; name: string; initials: string }
+}
+
+export interface PendingStrategy {
+  id: string
+  strategy: Omit<Strategy, "id">
+  changeId: string
+  changeName: string
+  initiator: { id: string; name: string; initials: string }
+  initiatedAt: string
+  reviewers: { id: string; name: string; initials: string }[]
 }
 
 export const initialStrategies: Strategy[] = [
@@ -56,6 +77,7 @@ export const initialStrategies: Strategy[] = [
     projectCount: 12,
     totalInvest: "8.5\u4EBF",
     returnRate: "+32%",
+    owner: { id: "zhangwei", name: "\u5F20\u4F1F", initials: "\u5F20\u4F1F" },
   },
   {
     id: "2",
@@ -68,6 +90,7 @@ export const initialStrategies: Strategy[] = [
     projectCount: 8,
     totalInvest: "5.2\u4EBF",
     returnRate: "+18%",
+    owner: { id: "lisi", name: "\u674E\u56DB", initials: "\u674E\u56DB" },
   },
   {
     id: "3",
@@ -80,6 +103,7 @@ export const initialStrategies: Strategy[] = [
     projectCount: 15,
     totalInvest: "12\u4EBF",
     returnRate: "+25%",
+    owner: { id: "wangfang", name: "\u738B\u82B3", initials: "\u738B\u82B3" },
   },
   {
     id: "4",
@@ -92,6 +116,7 @@ export const initialStrategies: Strategy[] = [
     projectCount: 6,
     totalInvest: "4.8\u4EBF",
     returnRate: "+12%",
+    owner: { id: "zhaoqiang", name: "\u8D75\u5F3A", initials: "\u8D75\u5F3A" },
   },
   {
     id: "5",
@@ -104,6 +129,7 @@ export const initialStrategies: Strategy[] = [
     projectCount: 10,
     totalInvest: "18\u4EBF",
     returnRate: "+28%",
+    owner: { id: "lisi", name: "\u674E\u56DB", initials: "\u674E\u56DB" },
   },
   {
     id: "6",
@@ -116,6 +142,7 @@ export const initialStrategies: Strategy[] = [
     projectCount: 9,
     totalInvest: "6.3\u4EBF",
     returnRate: "+22%",
+    owner: { id: "chenzong", name: "\u9648\u603B", initials: "\u9648\u603B" },
   },
 ]
 
@@ -123,9 +150,10 @@ interface StrategiesGridProps {
   strategies: Strategy[]
   onStrategiesChange: (strategies: Strategy[]) => void
   onSelectStrategy?: (strategyId: string) => void
+  onCreatePending?: (pending: PendingStrategy) => void
 }
 
-export function StrategiesGrid({ strategies, onStrategiesChange, onSelectStrategy }: StrategiesGridProps) {
+export function StrategiesGrid({ strategies, onStrategiesChange, onSelectStrategy, onCreatePending }: StrategiesGridProps) {
   const [isCreateOpen, setIsCreateOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
   
@@ -134,6 +162,7 @@ export function StrategiesGrid({ strategies, onStrategiesChange, onSelectStrateg
   const [newDescription, setNewDescription] = useState("")
   const [newType, setNewType] = useState<string>("\u4E3B\u9898\u7B56\u7565")
   const [selectedIconIndex, setSelectedIconIndex] = useState(0)
+  const [selectedOwnerId, setSelectedOwnerId] = useState("zhangwei")
 
   const filteredStrategies = strategies.filter(
     (s) =>
@@ -146,9 +175,9 @@ export function StrategiesGrid({ strategies, onStrategiesChange, onSelectStrateg
 
     const typeConfig = strategyTypeConfig[newType as keyof typeof strategyTypeConfig]
     const iconConfig = availableIcons[selectedIconIndex]
+    const owner = availableOwners.find((o) => o.id === selectedOwnerId) || availableOwners[0]
 
-    const newStrategy: Strategy = {
-      id: `new-${Date.now()}`,
+    const newStrategy: Omit<Strategy, "id"> = {
       name: newName.trim(),
       type: newType,
       typeColor: typeConfig.color,
@@ -158,9 +187,23 @@ export function StrategiesGrid({ strategies, onStrategiesChange, onSelectStrateg
       projectCount: 0,
       totalInvest: "0",
       returnRate: "+0%",
+      owner,
     }
 
-    onStrategiesChange([newStrategy, ...strategies])
+    const pendingRequest: PendingStrategy = {
+      id: `pending-${Date.now()}`,
+      strategy: newStrategy,
+      changeId: `CR-${Date.now().toString().slice(-6)}`,
+      changeName: `\u65B0\u5EFA\u7B56\u7565: ${newName.trim()}`,
+      initiator: { id: "zhangwei", name: "\u5F20\u4F1F", initials: "\u5F20\u4F1F" },
+      initiatedAt: new Date().toISOString().split("T")[0],
+      reviewers: [
+        { id: "zhangwei", name: "\u5F20\u4F1F", initials: "\u5F20\u4F1F" },
+        { id: "lisi", name: "\u674E\u56DB", initials: "\u674E\u56DB" },
+      ],
+    }
+
+    onCreatePending?.(pendingRequest)
     setIsCreateOpen(false)
     resetForm()
   }
@@ -170,6 +213,7 @@ export function StrategiesGrid({ strategies, onStrategiesChange, onSelectStrateg
     setNewDescription("")
     setNewType("\u4E3B\u9898\u7B56\u7565")
     setSelectedIconIndex(0)
+    setSelectedOwnerId("zhangwei")
   }
 
   return (
@@ -237,9 +281,19 @@ export function StrategiesGrid({ strategies, onStrategiesChange, onSelectStrateg
                 <h3 className="text-base font-semibold text-[#111827] mb-1">
                   {strategy.name}
                 </h3>
-                <p className="text-xs text-[#6B7280] mb-5 leading-relaxed">
+                <p className="text-xs text-[#6B7280] mb-3 leading-relaxed">
                   {strategy.description}
                 </p>
+
+                {/* Owner */}
+                <div className="flex items-center gap-2 mb-4">
+                  <Avatar className="h-6 w-6">
+                    <AvatarFallback className="bg-[#E5E7EB] text-[9px] text-[#374151]">
+                      {strategy.owner.initials.slice(0, 1)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <span className="text-xs text-[#6B7280]">{"\u8D1F\u8D23\u4EBA: "}{strategy.owner.name}</span>
+                </div>
 
                 {/* Stats Row */}
                 <div className="mt-auto grid grid-cols-3 gap-3 rounded-lg bg-[#F9FAFB] p-3">
@@ -332,6 +386,33 @@ export function StrategiesGrid({ strategies, onStrategiesChange, onSelectStrateg
                 rows={3}
                 className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 resize-none"
               />
+            </div>
+
+            {/* Owner Selection */}
+            <div className="space-y-2">
+              <Label className="text-sm font-medium text-[#374151]">{"\u8D1F\u8D23\u4EBA"}</Label>
+              <div className="flex flex-wrap gap-2">
+                {availableOwners.map((owner) => (
+                  <button
+                    key={owner.id}
+                    type="button"
+                    onClick={() => setSelectedOwnerId(owner.id)}
+                    className={cn(
+                      "flex items-center gap-2 rounded-lg border px-3 py-2 text-sm transition-all",
+                      selectedOwnerId === owner.id
+                        ? "border-[#2563EB] bg-[#2563EB]/5 text-[#2563EB]"
+                        : "border-[#E5E7EB] bg-white text-[#6B7280] hover:border-[#D1D5DB]"
+                    )}
+                  >
+                    <Avatar className="h-5 w-5">
+                      <AvatarFallback className="bg-[#E5E7EB] text-[8px] text-[#374151]">
+                        {owner.initials.slice(0, 1)}
+                      </AvatarFallback>
+                    </Avatar>
+                    {owner.name}
+                  </button>
+                ))}
+              </div>
             </div>
 
             {/* Type Selection */}
