@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils"
 import { HypothesisChecklist } from "@/components/pages/hypothesis-checklist"
 import { ProjectOverview } from "@/components/pages/project-overview"
 import { TermSheet } from "@/components/pages/term-sheet"
-import { Workflow } from "@/components/pages/workflow"
+import { Workflow, type Phase, type PendingPhase } from "@/components/pages/workflow"
 import { ProjectMaterials } from "@/components/pages/project-materials"
 import { type Project } from "@/components/pages/projects-grid"
 
@@ -50,9 +50,12 @@ const subPageComponents: Record<SubPageKey, React.ComponentType> = {
 interface ProjectDetailProps {
   projectId: string
   project?: Project
+  phases?: Phase[]
+  onPhasesChange?: (phases: Phase[]) => void
+  onCreatePendingPhase?: (pending: PendingPhase) => void
 }
 
-export function ProjectDetail({ projectId, project }: ProjectDetailProps) {
+export function ProjectDetail({ projectId, project, phases, onPhasesChange, onCreatePendingPhase }: ProjectDetailProps) {
   const [activeSubPage, setActiveSubPage] = useState<SubPageKey>("overview")
   const [collapsed, setCollapsed] = useState(false)
   const isNewProject = projectId.startsWith("new-project-")
@@ -133,7 +136,15 @@ export function ProjectDetail({ projectId, project }: ProjectDetailProps) {
       {/* Main Content */}
       <div className="flex-1 overflow-hidden">
         {activeSubPage === "workflow" ? (
-          <Workflow onSelectPhase={setCurrentPhase} isNewProject={isNewProject} />
+          <Workflow 
+            onSelectPhase={setCurrentPhase} 
+            isNewProject={isNewProject}
+            projectId={projectId}
+            projectName={project?.name || ""}
+            phases={phases}
+            onPhasesChange={onPhasesChange}
+            onCreatePendingPhase={onCreatePendingPhase}
+          />
         ) : activeSubPage === "hypotheses" ? (
           <HypothesisChecklist isNewProject={isNewProject} project={project} />
         ) : activeSubPage === "terms" ? (

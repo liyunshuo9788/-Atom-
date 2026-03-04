@@ -29,13 +29,13 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { cn } from "@/lib/utils"
 
 /* ─── Types ──────────────────────────────────── */
-interface PhaseLog {
+export interface PhaseLog {
   action: string
   date: string
   author: string
 }
 
-interface Phase {
+export interface Phase {
   id: string
   groupLabel: string
   name: string
@@ -49,6 +49,19 @@ interface Phase {
   startDate: string
   endDate?: string
   logs: PhaseLog[]
+}
+
+export interface PendingPhase {
+  id: string
+  projectId: string
+  projectName: string
+  phase: Omit<Phase, "id">
+  changeId: string
+  changeName: string
+  changeType: "next-setup" | "next-duration" | "enter-duration" | "first-setup"
+  initiator: { id: string; name: string; initials: string }
+  initiatedAt: string
+  reviewers: { id: string; name: string; initials: string }[]
 }
 
 type SidebarType = 
@@ -275,6 +288,11 @@ const sidebarConfigs: Record<Exclude<SidebarType, null | "ai-chat">, { title: st
 interface WorkflowProps {
   onSelectPhase?: (phaseName: string) => void
   isNewProject?: boolean
+  projectId?: string
+  projectName?: string
+  phases?: Phase[]
+  onPhasesChange?: (phases: Phase[]) => void
+  onCreatePendingPhase?: (pending: PendingPhase) => void
 }
 
 /* ─── New Project Phase Template ─────────────── */
@@ -298,14 +316,24 @@ function createNewPhase(phaseNumber: number, isSetup: boolean): Phase {
 }
 
 /* ─── Component ──────────────────────────────── */
-export function Workflow({ onSelectPhase, isNewProject = false }: WorkflowProps) {
+export function Workflow({ 
+  onSelectPhase, 
+  isNewProject = false,
+  projectId = "",
+  projectName = "",
+  phases,
+  onPhasesChange,
+  onCreatePendingPhase,
+}: WorkflowProps) {
   const scrollRef = useRef<HTMLDivElement>(null)
 
-  // For new projects, manage phases locally
-  const [projectPhases, setProjectPhases] = useState<Phase[]>(isNewProject ? [] : PHASES)
-  const [currentSetupPhase, setCurrentSetupPhase] = useState(isNewProject ? 0 : 3)
-  const [currentDurationPhase, setCurrentDurationPhase] = useState(isNewProject ? 0 : 4)
-  const [isInDuration, setIsInDuration] = useState(!isNewProject)
+  // Use props phases if provided, otherwise use default PHASES for existing projects
+  const projectPhases = phases ?? (isNewProject ? [] : PHASES)
+  
+  // Calculate current phase numbers from phases
+  const currentSetupPhase = projectPhases.filter(p => p.groupLabel === "设立期").length
+  const currentDurationPhase = projectPhases.filter(p => p.groupLabel === "存续期").length
+  const isInDuration = currentDurationPhase > 0
 
   // Default to the latest active or last completed phase
   const defaultPhase = (() => {
@@ -321,62 +349,90 @@ export function Workflow({ onSelectPhase, isNewProject = false }: WorkflowProps)
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([])
   const [chatInput, setChatInput] = useState("")
 
-  // Handle starting the first phase for new projects
+  // Handle starting the first phase for new projects - creates pending request
   function handleStartFirstPhase() {
     const newPhase = createNewPhase(1, true)
-    setProjectPhases([newPhase])
-    setSelectedPhase(newPhase.id)
-    setCurrentSetupPhase(1)
-    onSelectPhase?.(newPhase.fullLabel)
+    const pendingPhase: PendingPhase = {
+      id: `pending-phase-${Date.now()}`,
+      projectId,
+      projectName,
+      phase: newPhase,
+      changeId: `CR-P-${Date.now().toString().slice(-6)}`,
+      changeName: `启动${newPhase.fullLabel}`,
+      changeType: "first-setup",
+      initiator: { id: "zhangwei", name: "张伟", initials: "张伟" },
+      initiatedAt: new Date().toISOString().split("T")[0],
+      reviewers: [
+        { id: "zhangwei", name: "张伟", initials: "张伟" },
+        { id: "lisi", name: "李四", initials: "李四" },
+      ],
+    }
+    onCreatePendingPhase?.(pendingPhase)
   }
 
-  // Handle starting next phase
+  // Handle starting next setup phase - creates pending request
   function handleStartNextSetupPhase() {
     const nextPhaseNum = currentSetupPhase + 1
-    if (nextPhaseNum > 3) return // Max 3 setup phases
-
-    // Mark current phase as completed
-    const updatedPhases = projectPhases.map((p) =>
-      p.id === `setup-${currentSetupPhase}` ? { ...p, status: "completed" as const, endDate: new Date().toISOString().split("T")[0] } : p
-    )
-    
     const newPhase = createNewPhase(nextPhaseNum, true)
-    setProjectPhases([...updatedPhases, newPhase])
-    setSelectedPhase(newPhase.id)
-    setCurrentSetupPhase(nextPhaseNum)
-    onSelectPhase?.(newPhase.fullLabel)
+    const pendingPhase: PendingPhase = {
+      id: `pending-phase-${Date.now()}`,
+      projectId,
+      projectName,
+      phase: newPhase,
+      changeId: `CR-P-${Date.now().toString().slice(-6)}`,
+      changeName: `启动${newPhase.fullLabel}`,
+      changeType: "next-setup",
+      initiator: { id: "zhangwei", name: "张伟", initials: "张伟" },
+      initiatedAt: new Date().toISOString().split("T")[0],
+      reviewers: [
+        { id: "zhangwei", name: "张伟", initials: "张伟" },
+        { id: "lisi", name: "李四", initials: "李四" },
+      ],
+    }
+    onCreatePendingPhase?.(pendingPhase)
   }
 
-  // Handle entering duration period
+  // Handle entering duration period - creates pending request
   function handleEnterDuration() {
-    // Mark current setup phase as completed
-    const updatedPhases = projectPhases.map((p) =>
-      p.id === `setup-${currentSetupPhase}` ? { ...p, status: "completed" as const, endDate: new Date().toISOString().split("T")[0] } : p
-    )
-    
     const newPhase = createNewPhase(1, false)
-    setProjectPhases([...updatedPhases, newPhase])
-    setSelectedPhase(newPhase.id)
-    setCurrentDurationPhase(1)
-    setIsInDuration(true)
-    onSelectPhase?.(newPhase.fullLabel)
+    const pendingPhase: PendingPhase = {
+      id: `pending-phase-${Date.now()}`,
+      projectId,
+      projectName,
+      phase: newPhase,
+      changeId: `CR-P-${Date.now().toString().slice(-6)}`,
+      changeName: `进入存续期 - ${newPhase.fullLabel}`,
+      changeType: "enter-duration",
+      initiator: { id: "zhangwei", name: "张伟", initials: "张伟" },
+      initiatedAt: new Date().toISOString().split("T")[0],
+      reviewers: [
+        { id: "zhangwei", name: "张伟", initials: "张伟" },
+        { id: "lisi", name: "李四", initials: "李四" },
+      ],
+    }
+    onCreatePendingPhase?.(pendingPhase)
   }
 
-  // Handle starting next duration phase
+  // Handle starting next duration phase - creates pending request
   function handleStartNextDurationPhase() {
     const nextPhaseNum = currentDurationPhase + 1
-    if (nextPhaseNum > 4) return // Max 4 duration phases
-
-    // Mark current phase as completed
-    const updatedPhases = projectPhases.map((p) =>
-      p.id === `duration-${currentDurationPhase}` ? { ...p, status: "completed" as const, endDate: new Date().toISOString().split("T")[0] } : p
-    )
-    
     const newPhase = createNewPhase(nextPhaseNum, false)
-    setProjectPhases([...updatedPhases, newPhase])
-    setSelectedPhase(newPhase.id)
-    setCurrentDurationPhase(nextPhaseNum)
-    onSelectPhase?.(newPhase.fullLabel)
+    const pendingPhase: PendingPhase = {
+      id: `pending-phase-${Date.now()}`,
+      projectId,
+      projectName,
+      phase: newPhase,
+      changeId: `CR-P-${Date.now().toString().slice(-6)}`,
+      changeName: `启动${newPhase.fullLabel}`,
+      changeType: "next-duration",
+      initiator: { id: "zhangwei", name: "张伟", initials: "张伟" },
+      initiatedAt: new Date().toISOString().split("T")[0],
+      reviewers: [
+        { id: "zhangwei", name: "张伟", initials: "张伟" },
+        { id: "lisi", name: "李四", initials: "李四" },
+      ],
+    }
+    onCreatePendingPhase?.(pendingPhase)
   }
 
   // Notify parent of initial phase on mount
@@ -493,8 +549,8 @@ export function Workflow({ onSelectPhase, isNewProject = false }: WorkflowProps)
               </p>
             </div>
             <div className="flex items-center gap-3">
-              {/* Show different buttons based on project state */}
-              {isNewProject && !isInDuration && currentSetupPhase > 0 && currentSetupPhase < 3 && (
+              {/* Show different buttons based on project state - no phase limits */}
+              {isNewProject && !isInDuration && currentSetupPhase > 0 && (
                 <>
                   <button
                     onClick={handleStartNextSetupPhase}
@@ -512,16 +568,7 @@ export function Workflow({ onSelectPhase, isNewProject = false }: WorkflowProps)
                   </button>
                 </>
               )}
-              {isNewProject && !isInDuration && currentSetupPhase >= 3 && (
-                <button
-                  onClick={handleEnterDuration}
-                  className="inline-flex items-center gap-2 rounded-lg bg-[#10B981] px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#059669]"
-                >
-                  <ArrowRight className="h-4 w-4" />
-                  进入存续期
-                </button>
-              )}
-              {isNewProject && isInDuration && currentDurationPhase < 4 && (
+              {isNewProject && isInDuration && (
                 <button
                   onClick={handleStartNextDurationPhase}
                   className="inline-flex items-center gap-2 rounded-lg bg-[#2563EB] px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#1D4ED8]"

@@ -8,6 +8,7 @@ import { ProjectDetail } from "@/components/pages/project-detail"
 import { StrategyDetail } from "@/components/pages/strategy-detail"
 import { ChangeRequests } from "@/components/pages/change-requests"
 import { Login } from "@/components/pages/login"
+import type { Phase, PendingPhase } from "@/components/pages/workflow"
 
 type ViewState =
   | { type: "login" }
@@ -23,6 +24,9 @@ export default function Page() {
   const [pendingStrategies, setPendingStrategies] = useState<PendingStrategy[]>([])
   const [projects, setProjects] = useState<Project[]>(initialProjects)
   const [pendingProjects, setPendingProjects] = useState<PendingProject[]>([])
+  // Workflow phases state per project - keyed by projectId
+  const [projectPhases, setProjectPhases] = useState<Record<string, Phase[]>>({})
+  const [pendingPhases, setPendingPhases] = useState<PendingPhase[]>([])
 
   const activeNav: TopNavKey | null =
     view.type === "projects" || view.type === "project-detail"
@@ -99,6 +103,59 @@ export default function Page() {
     setPendingProjects(pendingProjects.filter((p) => p.id !== id))
   }
 
+  // Workflow phase change request handlers
+  function handleCreatePendingPhase(pending: PendingPhase) {
+    setPendingPhases([pending, ...pendingPhases])
+    setView({ type: "change-requests" })
+  }
+
+  function handleApprovePhase(id: string) {
+    const pending = pendingPhases.find((p) => p.id === id)
+    if (pending) {
+      const { projectId, phase, changeType } = pending
+      const currentPhases = projectPhases[projectId] || []
+      
+      // Mark previous active phase as completed if exists
+      const updatedPhases = currentPhases.map((p) =>
+        p.status === "active" 
+          ? { ...p, status: "completed" as const, endDate: new Date().toISOString().split("T")[0] } 
+          : p
+      )
+      
+      // Add new phase with generated id
+      const newPhase: Phase = {
+        id: `${phase.groupLabel === "设立期" ? "setup" : "duration"}-${Date.now()}`,
+        ...phase,
+      }
+      
+      setProjectPhases({
+        ...projectPhases,
+        [projectId]: [...updatedPhases, newPhase],
+      })
+      setPendingPhases(pendingPhases.filter((p) => p.id !== id))
+      
+      // Navigate back to project detail
+      setView({ type: "project-detail", projectId })
+    }
+  }
+
+  function handleRejectPhase(id: string) {
+    setPendingPhases(pendingPhases.filter((p) => p.id !== id))
+  }
+
+  // Helper to get phases for a project
+  function getPhasesForProject(projectId: string): Phase[] {
+    return projectPhases[projectId] || []
+  }
+
+  // Helper to update phases for a project
+  function updatePhasesForProject(projectId: string, phases: Phase[]) {
+    setProjectPhases({
+      ...projectPhases,
+      [projectId]: phases,
+    })
+  }
+
   if (view.type === "login") {
     return <Login onLogin={handleLogin} />
   }
@@ -128,16 +185,22 @@ export default function Page() {
           <ChangeRequests
             pendingStrategies={pendingStrategies}
             pendingProjects={pendingProjects}
+            pendingPhases={pendingPhases}
             onApproveStrategy={handleApproveStrategy}
             onRejectStrategy={handleRejectStrategy}
             onApproveProject={handleApproveProject}
             onRejectProject={handleRejectProject}
+            onApprovePhase={handleApprovePhase}
+            onRejectPhase={handleRejectPhase}
           />
         )}
         {view.type === "project-detail" && (
           <ProjectDetail 
             projectId={view.projectId}
             project={projects.find((p) => p.id === view.projectId)}
+            phases={getPhasesForProject(view.projectId)}
+            onPhasesChange={(phases) => updatePhasesForProject(view.projectId, phases)}
+            onCreatePendingPhase={handleCreatePendingPhase}
           />
         )}
         {view.type === "strategy-detail" && (

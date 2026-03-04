@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { GitPullRequest, Search, Check, X, Eye, Clock, Briefcase, FolderKanban } from "lucide-react"
+import { GitPullRequest, Search, Check, X, Eye, Clock, Briefcase, FolderKanban, GitBranch } from "lucide-react"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import {
@@ -14,37 +14,46 @@ import {
 import { cn } from "@/lib/utils"
 import type { PendingStrategy } from "./strategies-grid"
 import type { PendingProject } from "./projects-grid"
+import type { PendingPhase } from "./workflow"
 
 type PendingRequest = 
   | { type: "strategy"; data: PendingStrategy }
   | { type: "project"; data: PendingProject }
+  | { type: "phase"; data: PendingPhase }
 
 interface ChangeRequestsProps {
   pendingStrategies: PendingStrategy[]
   pendingProjects: PendingProject[]
+  pendingPhases: PendingPhase[]
   onApproveStrategy: (id: string) => void
   onRejectStrategy: (id: string) => void
   onApproveProject: (id: string) => void
   onRejectProject: (id: string) => void
+  onApprovePhase: (id: string) => void
+  onRejectPhase: (id: string) => void
 }
 
 export function ChangeRequests({ 
   pendingStrategies, 
   pendingProjects,
+  pendingPhases,
   onApproveStrategy, 
   onRejectStrategy,
   onApproveProject,
   onRejectProject,
+  onApprovePhase,
+  onRejectPhase,
 }: ChangeRequestsProps) {
   const [searchQuery, setSearchQuery] = useState("")
   const [detailOpen, setDetailOpen] = useState(false)
   const [selectedRequest, setSelectedRequest] = useState<PendingRequest | null>(null)
-  const [filterType, setFilterType] = useState<"all" | "strategy" | "project">("all")
+  const [filterType, setFilterType] = useState<"all" | "strategy" | "project" | "phase">("all")
 
   // Combine all requests
   const allRequests: PendingRequest[] = [
     ...pendingStrategies.map((s) => ({ type: "strategy" as const, data: s })),
     ...pendingProjects.map((p) => ({ type: "project" as const, data: p })),
+    ...pendingPhases.map((p) => ({ type: "phase" as const, data: p })),
   ].sort((a, b) => new Date(b.data.initiatedAt).getTime() - new Date(a.data.initiatedAt).getTime())
 
   const filteredRequests = allRequests.filter((r) => {
@@ -58,6 +67,7 @@ export function ChangeRequests({
   const totalCount = allRequests.length
   const strategyCount = pendingStrategies.length
   const projectCount = pendingProjects.length
+  const phaseCount = pendingPhases.length
 
   function handleViewDetail(request: PendingRequest) {
     setSelectedRequest(request)
@@ -67,16 +77,20 @@ export function ChangeRequests({
   function handleApprove(request: PendingRequest) {
     if (request.type === "strategy") {
       onApproveStrategy(request.data.id)
-    } else {
+    } else if (request.type === "project") {
       onApproveProject(request.data.id)
+    } else {
+      onApprovePhase(request.data.id)
     }
   }
 
   function handleReject(request: PendingRequest) {
     if (request.type === "strategy") {
       onRejectStrategy(request.data.id)
-    } else {
+    } else if (request.type === "project") {
       onRejectProject(request.data.id)
+    } else {
+      onRejectPhase(request.data.id)
     }
   }
 
@@ -163,6 +177,24 @@ export function ChangeRequests({
               {projectCount}
             </span>
           </button>
+          <button
+            onClick={() => setFilterType("phase")}
+            className={cn(
+              "flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors",
+              filterType === "phase"
+                ? "bg-[#7C3AED] text-white"
+                : "bg-white text-[#6B7280] border border-[#E5E7EB] hover:bg-[#F9FAFB]"
+            )}
+          >
+            <GitBranch className="h-4 w-4" />
+            工作流
+            <span className={cn(
+              "rounded-full px-2 py-0.5 text-xs",
+              filterType === "phase" ? "bg-white/20" : "bg-[#F3F4F6]"
+            )}>
+              {phaseCount}
+            </span>
+          </button>
         </div>
 
         {/* Requests List */}
@@ -200,9 +232,11 @@ export function ChangeRequests({
                       "text-[10px]",
                       request.type === "strategy" 
                         ? "bg-blue-50 text-blue-700 border-blue-200"
-                        : "bg-emerald-50 text-emerald-700 border-emerald-200"
+                        : request.type === "project"
+                          ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                          : "bg-violet-50 text-violet-700 border-violet-200"
                     )}>
-                      {request.type === "strategy" ? "策略" : "项目"}
+                      {request.type === "strategy" ? "策略" : request.type === "project" ? "项目" : "工作流"}
                     </Badge>
                   </div>
 
@@ -218,7 +252,9 @@ export function ChangeRequests({
                     <p className="text-xs text-[#6B7280] truncate">
                       {request.type === "strategy" 
                         ? `策略类型: ${(request.data as PendingStrategy).strategy.type}`
-                        : `策略模板: ${(request.data as PendingProject).project.strategyName || "无"}`
+                        : request.type === "project"
+                          ? `策略模板: ${(request.data as PendingProject).project.strategyName || "无"}`
+                          : `项目: ${(request.data as PendingPhase).projectName}`
                       }
                     </p>
                   </div>
