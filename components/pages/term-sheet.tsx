@@ -315,8 +315,8 @@ export function TermSheet({ isNewProject = false, project }: TermSheetProps) {
     console.log("[v0] Delete term:", id)
   }
 
-  // For new projects without AI基础设施 strategy, show empty state
-  if (isNewProject && project?.strategyId !== "1") {
+  // For new projects without a strategy template, show empty state
+  if (isNewProject && !project?.strategyId) {
     return (
       <div className="flex h-full items-center justify-center bg-[#F9FAFB]">
         <div className="text-center max-w-md px-6">
@@ -325,10 +325,7 @@ export function TermSheet({ isNewProject = false, project }: TermSheetProps) {
           </div>
           <h3 className="text-lg font-semibold text-[#111827] mb-2">暂无条款清单</h3>
           <p className="text-sm text-[#6B7280] mb-6 leading-relaxed">
-            {project?.strategyName 
-              ? `该项目基于「${project.strategyName}」策略模板创建，条款清单将从策略模板中继承。`
-              : "这是一个新创建的项目，还没有添加任何条款。点击下方按钮开始创建您的第一个投资条款。"
-            }
+            这是一个新创建的项目，还没有添加任何条款。点击下方按钮开始创建您的第一个投资条款。
           </p>
           <button className="inline-flex items-center gap-2 rounded-lg bg-[#2563EB] px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#1D4ED8]">
             <Plus className="h-4 w-4" />
@@ -370,7 +367,7 @@ export function TermSheet({ isNewProject = false, project }: TermSheetProps) {
             <div className="flex items-center gap-6 text-sm text-[#6B7280]">
               <span>创建人: {selectedDetail.creator.name}</span>
               <span>创建时间: {selectedDetail.createdAt}</span>
-              <span>更新时间: {selectedDetail.updatedAt}</span>
+              <span>���新时间: {selectedDetail.updatedAt}</span>
             </div>
           </div>
 
@@ -432,6 +429,25 @@ export function TermSheet({ isNewProject = false, project }: TermSheetProps) {
   return (
     <div className="h-full overflow-auto bg-[#F9FAFB]">
       <div className="mx-auto max-w-7xl px-6 py-6">
+        {/* Strategy template banner for new projects */}
+        {isNewProject && project?.strategyName && (
+          <div className="mb-4 rounded-lg bg-[#EFF6FF] border border-[#BFDBFE] p-4">
+            <div className="flex items-center gap-2">
+              <div className="h-8 w-8 rounded-lg bg-[#2563EB] flex items-center justify-center">
+                <FileText className="h-4 w-4 text-white" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-[#1E40AF]">
+                  基于「{project.strategyName}」策略模板
+                </p>
+                <p className="text-xs text-[#3B82F6]">
+                  以下条款清单继承自所选策略模板，您可以根据项目实际情况进行调整
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div>

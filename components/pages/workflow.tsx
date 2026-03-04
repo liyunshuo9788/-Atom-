@@ -277,35 +277,122 @@ interface WorkflowProps {
   isNewProject?: boolean
 }
 
+/* ─── New Project Phase Template ─────────────── */
+function createNewPhase(phaseNumber: number, isSetup: boolean): Phase {
+  const groupLabel = isSetup ? "设立期" : "存续期"
+  const today = new Date().toISOString().split("T")[0]
+  return {
+    id: `${isSetup ? "setup" : "duration"}-${phaseNumber}`,
+    groupLabel,
+    name: `${groupLabel} - 阶段${phaseNumber}`,
+    fullLabel: `${groupLabel} - 阶段${phaseNumber}`,
+    assignee: "张伟",
+    assigneeAvatar: "张",
+    hypothesesCount: 0,
+    termsCount: 0,
+    materialsCount: 0,
+    status: "active",
+    startDate: today,
+    logs: [],
+  }
+}
+
 /* ─── Component ──────────────────────────────── */
 export function Workflow({ onSelectPhase, isNewProject = false }: WorkflowProps) {
   const scrollRef = useRef<HTMLDivElement>(null)
 
+  // For new projects, manage phases locally
+  const [projectPhases, setProjectPhases] = useState<Phase[]>(isNewProject ? [] : PHASES)
+  const [currentSetupPhase, setCurrentSetupPhase] = useState(isNewProject ? 0 : 3)
+  const [currentDurationPhase, setCurrentDurationPhase] = useState(isNewProject ? 0 : 4)
+  const [isInDuration, setIsInDuration] = useState(!isNewProject)
+
   // Default to the latest active or last completed phase
   const defaultPhase = (() => {
-    const active = PHASES.find((p) => p.status === "active")
+    if (projectPhases.length === 0) return null
+    const active = projectPhases.find((p) => p.status === "active")
     if (active) return active.id
-    const completed = PHASES.filter((p) => p.status === "completed")
-    return completed.length > 0 ? completed[completed.length - 1].id : PHASES[0].id
+    const completed = projectPhases.filter((p) => p.status === "completed")
+    return completed.length > 0 ? completed[completed.length - 1].id : projectPhases[0].id
   })()
 
-  const [selectedPhase, setSelectedPhase] = useState(defaultPhase)
+  const [selectedPhase, setSelectedPhase] = useState<string | null>(defaultPhase)
   const [activeSidebar, setActiveSidebar] = useState<SidebarType>(null)
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([])
   const [chatInput, setChatInput] = useState("")
 
+  // Handle starting the first phase for new projects
+  function handleStartFirstPhase() {
+    const newPhase = createNewPhase(1, true)
+    setProjectPhases([newPhase])
+    setSelectedPhase(newPhase.id)
+    setCurrentSetupPhase(1)
+    onSelectPhase?.(newPhase.fullLabel)
+  }
+
+  // Handle starting next phase
+  function handleStartNextSetupPhase() {
+    const nextPhaseNum = currentSetupPhase + 1
+    if (nextPhaseNum > 3) return // Max 3 setup phases
+
+    // Mark current phase as completed
+    const updatedPhases = projectPhases.map((p) =>
+      p.id === `setup-${currentSetupPhase}` ? { ...p, status: "completed" as const, endDate: new Date().toISOString().split("T")[0] } : p
+    )
+    
+    const newPhase = createNewPhase(nextPhaseNum, true)
+    setProjectPhases([...updatedPhases, newPhase])
+    setSelectedPhase(newPhase.id)
+    setCurrentSetupPhase(nextPhaseNum)
+    onSelectPhase?.(newPhase.fullLabel)
+  }
+
+  // Handle entering duration period
+  function handleEnterDuration() {
+    // Mark current setup phase as completed
+    const updatedPhases = projectPhases.map((p) =>
+      p.id === `setup-${currentSetupPhase}` ? { ...p, status: "completed" as const, endDate: new Date().toISOString().split("T")[0] } : p
+    )
+    
+    const newPhase = createNewPhase(1, false)
+    setProjectPhases([...updatedPhases, newPhase])
+    setSelectedPhase(newPhase.id)
+    setCurrentDurationPhase(1)
+    setIsInDuration(true)
+    onSelectPhase?.(newPhase.fullLabel)
+  }
+
+  // Handle starting next duration phase
+  function handleStartNextDurationPhase() {
+    const nextPhaseNum = currentDurationPhase + 1
+    if (nextPhaseNum > 4) return // Max 4 duration phases
+
+    // Mark current phase as completed
+    const updatedPhases = projectPhases.map((p) =>
+      p.id === `duration-${currentDurationPhase}` ? { ...p, status: "completed" as const, endDate: new Date().toISOString().split("T")[0] } : p
+    )
+    
+    const newPhase = createNewPhase(nextPhaseNum, false)
+    setProjectPhases([...updatedPhases, newPhase])
+    setSelectedPhase(newPhase.id)
+    setCurrentDurationPhase(nextPhaseNum)
+    onSelectPhase?.(newPhase.fullLabel)
+  }
+
   // Notify parent of initial phase on mount
   useEffect(() => {
-    const phase = PHASES.find((p) => p.id === defaultPhase)
-    if (phase && onSelectPhase) {
-      onSelectPhase(phase.fullLabel)
+    if (defaultPhase) {
+      const phase = projectPhases.find((p) => p.id === defaultPhase)
+      if (phase && onSelectPhase) {
+        onSelectPhase(phase.fullLabel)
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   // Scroll to selected phase card on mount
   useEffect(() => {
-    if (scrollRef.current && !activeSidebar) {
+    if (scrollRef.current && !activeSidebar && defaultPhase) {
       const card = scrollRef.current.querySelector(`[data-phase="${defaultPhase}"]`)
       if (card) {
         card.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" })
@@ -362,14 +449,14 @@ export function Workflow({ onSelectPhase, isNewProject = false }: WorkflowProps)
     }, 1000)
   }
 
-  const currentPhase = PHASES.find((p) => p.id === selectedPhase)
-  const isSetupPhase = currentPhase?.groupLabel === "\u8BBE\u7ACB\u671F"
+  const currentPhase = projectPhases.find((p) => p.id === selectedPhase)
+  const isSetupPhase = currentPhase?.groupLabel === "设立期"
 
   // Group phases for rendering group headers
   let lastGroup = ""
 
-  // Show empty state for new projects
-  if (isNewProject) {
+  // Show empty state for new projects with no phases started
+  if (isNewProject && projectPhases.length === 0) {
     return (
       <div className="flex h-full items-center justify-center bg-[#F9FAFB]">
         <div className="text-center max-w-md px-6">
@@ -380,7 +467,10 @@ export function Workflow({ onSelectPhase, isNewProject = false }: WorkflowProps)
           <p className="text-sm text-[#6B7280] mb-6 leading-relaxed">
             这是一个新创建的项目，工作流尚未启动。点击下方按钮启动项目的第一个阶段。
           </p>
-          <button className="inline-flex items-center gap-2 rounded-lg bg-[#2563EB] px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#1D4ED8]">
+          <button 
+            onClick={handleStartFirstPhase}
+            className="inline-flex items-center gap-2 rounded-lg bg-[#2563EB] px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#1D4ED8]"
+          >
             <Plus className="h-4 w-4" />
             启动设立期 - 阶段1
           </button>
@@ -397,18 +487,59 @@ export function Workflow({ onSelectPhase, isNewProject = false }: WorkflowProps)
         <div className="shrink-0 border-b border-[#E5E7EB] bg-white px-8 py-5">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-[#111827]">{"\u5DE5\u4F5C\u6D41"}</h1>
+              <h1 className="text-2xl font-bold text-[#111827]">工作流</h1>
               <p className="mt-1 text-sm text-[#6B7280]">
-                {"\u9879\u76EE\u751F\u547D\u5468\u671F\u7BA1\u7406 - \u70B9\u51FB\u9636\u6BB5\u5361\u7247\u5207\u6362\u7248\u672C"}
+                项目生命周期管理 - 点击阶段卡片切换版本
               </p>
             </div>
-            <button
-              onClick={handleStartNextPhase}
-              className="inline-flex items-center gap-2 rounded-lg bg-[#2563EB] px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#1D4ED8]"
-            >
-              <Plus className="h-4 w-4" />
-              {"\u542F\u52A8\u4E0B\u4E00\u9636\u6BB5"}
-            </button>
+            <div className="flex items-center gap-3">
+              {/* Show different buttons based on project state */}
+              {isNewProject && !isInDuration && currentSetupPhase > 0 && currentSetupPhase < 3 && (
+                <>
+                  <button
+                    onClick={handleStartNextSetupPhase}
+                    className="inline-flex items-center gap-2 rounded-lg bg-[#2563EB] px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#1D4ED8]"
+                  >
+                    <Plus className="h-4 w-4" />
+                    启动下一阶段
+                  </button>
+                  <button
+                    onClick={handleEnterDuration}
+                    className="inline-flex items-center gap-2 rounded-lg border-2 border-[#10B981] bg-white px-4 py-2.5 text-sm font-medium text-[#10B981] transition-colors hover:bg-[#ECFDF5]"
+                  >
+                    <ArrowRight className="h-4 w-4" />
+                    进入存续期
+                  </button>
+                </>
+              )}
+              {isNewProject && !isInDuration && currentSetupPhase >= 3 && (
+                <button
+                  onClick={handleEnterDuration}
+                  className="inline-flex items-center gap-2 rounded-lg bg-[#10B981] px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#059669]"
+                >
+                  <ArrowRight className="h-4 w-4" />
+                  进入存续期
+                </button>
+              )}
+              {isNewProject && isInDuration && currentDurationPhase < 4 && (
+                <button
+                  onClick={handleStartNextDurationPhase}
+                  className="inline-flex items-center gap-2 rounded-lg bg-[#2563EB] px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#1D4ED8]"
+                >
+                  <Plus className="h-4 w-4" />
+                  启动下一阶段
+                </button>
+              )}
+              {!isNewProject && (
+                <button
+                  onClick={handleStartNextPhase}
+                  className="inline-flex items-center gap-2 rounded-lg bg-[#2563EB] px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#1D4ED8]"
+                >
+                  <Plus className="h-4 w-4" />
+                  启动下一阶段
+                </button>
+              )}
+            </div>
           </div>
         </div>
 
@@ -424,13 +555,13 @@ export function Workflow({ onSelectPhase, isNewProject = false }: WorkflowProps)
           // Full timeline view
           <div ref={scrollRef} className="flex-1 overflow-x-auto overflow-y-hidden">
             <div className="flex items-start gap-4 p-6 min-w-max h-full">
-              {PHASES.map((phase, idx) => {
+              {projectPhases.map((phase, idx) => {
                 const isSelected = selectedPhase === phase.id
                 const sc = statusConfig[phase.status]
                 const showGroupHeader = phase.groupLabel !== lastGroup
                 lastGroup = phase.groupLabel
-                const isLastInGroup = idx < PHASES.length - 1 ? PHASES[idx + 1].groupLabel !== phase.groupLabel : true
-                const isSetup = phase.groupLabel === "\u8BBE\u7ACB\u671F"
+                const isLastInGroup = idx < projectPhases.length - 1 ? projectPhases[idx + 1].groupLabel !== phase.groupLabel : true
+                const isSetup = phase.groupLabel === "设立期"
 
                 return (
                   <div key={phase.id} className="flex items-start shrink-0">
