@@ -190,20 +190,6 @@ const PHASES: Phase[] = [
       { action: "\u63D0\u4EA4\u8FD0\u8425\u6570\u636E\u66F4\u65B0", date: "2024-11-01", author: "\u674E\u56DB" },
     ],
   },
-  {
-    id: "duration-5",
-    groupLabel: "\u5B58\u7EED\u671F",
-    name: "\u5B58\u7EED\u671F - \u9636\u6BB55",
-    fullLabel: "\u5B58\u7EED\u671F - \u9636\u6BB55",
-    assignee: "",
-    assigneeAvatar: "",
-    hypothesesCount: 0,
-    termsCount: 0,
-    materialsCount: 0,
-    status: "upcoming",
-    startDate: "",
-    logs: [],
-  },
 ]
 
 const statusConfig = {
@@ -535,31 +521,29 @@ export function Workflow({ onSelectPhase }: WorkflowProps) {
 
                       {/* Action Buttons - Only shown for selected phase */}
                       {isSelected && phase.status !== "upcoming" && (
-                        <div className="mt-3 space-y-2">
-                          {/* Phase-specific buttons */}
-                          <div className="flex flex-wrap gap-1.5">
-                            {isSetup ? (
-                              <>
-                                <ActionButton icon={Lightbulb} label="\u5047\u8BBE\u6539\u8FDB\u5EFA\u8BAE" onClick={() => handleOpenSidebar("hypothesis-suggestions")} />
-                                <ActionButton icon={FileText} label="\u6761\u6B3E\u6784\u5EFA\u5EFA\u8BAE" onClick={() => handleOpenSidebar("term-suggestions")} />
-                                <ActionButton icon={FolderSearch} label="\u6750\u6599\u6536\u96C6\u5EFA\u8BAE" onClick={() => handleOpenSidebar("material-suggestions")} />
-                                <ActionButton icon={Brain} label="AI\u8C03\u7814\u6750\u6599" onClick={() => handleOpenSidebar("ai-research")} />
-                              </>
-                            ) : (
-                              <>
-                                <ActionButton icon={ClipboardList} label="\u8DDF\u8E2A\u60C5\u51B5\u6C47\u603B" onClick={() => handleOpenSidebar("tracking-summary")} />
-                                <ActionButton icon={FolderSearch} label="\u6750\u6599\u6536\u96C6\u5EFA\u8BAE" onClick={() => handleOpenSidebar("material-suggestions")} />
-                                <ActionButton icon={Brain} label="AI\u8C03\u7814\u6750\u6599" onClick={() => handleOpenSidebar("ai-research")} />
-                              </>
-                            )}
-                          </div>
+                        <div className="mt-3 w-[260px] space-y-1.5">
+                          {/* Phase-specific buttons - vertical layout */}
+                          {isSetup ? (
+                            <>
+                              <ActionButton icon={Lightbulb} label="假设改进建议" onClick={() => handleOpenSidebar("hypothesis-suggestions")} />
+                              <ActionButton icon={FileText} label="条款构建建议" onClick={() => handleOpenSidebar("term-suggestions")} />
+                              <ActionButton icon={FolderSearch} label="材料收集建议" onClick={() => handleOpenSidebar("material-suggestions")} />
+                              <ActionButton icon={Brain} label="AI调研材料" onClick={() => handleOpenSidebar("ai-research")} />
+                            </>
+                          ) : (
+                            <>
+                              <ActionButton icon={ClipboardList} label="跟踪情况汇总" onClick={() => handleOpenSidebar("tracking-summary")} />
+                              <ActionButton icon={FolderSearch} label="材料收集建议" onClick={() => handleOpenSidebar("material-suggestions")} />
+                              <ActionButton icon={Brain} label="AI调研材料" onClick={() => handleOpenSidebar("ai-research")} />
+                            </>
+                          )}
                           {/* AI Chat Button */}
                           <button
                             onClick={() => handleOpenSidebar("ai-chat")}
                             className="w-full flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-violet-500 to-purple-600 px-3 py-2 text-xs font-medium text-white transition-all hover:from-violet-600 hover:to-purple-700"
                           >
                             <MessageSquare className="h-3.5 w-3.5" />
-                            {"AI\u667A\u80FD\u95EE\u7B54"}
+                            AI智能问答
                           </button>
                         </div>
                       )}
@@ -711,9 +695,9 @@ function ActionButton({ icon: Icon, label, onClick }: { icon: typeof Lightbulb; 
         e.stopPropagation()
         onClick()
       }}
-      className="flex items-center gap-1 rounded-md bg-white border border-[#E5E7EB] px-2 py-1 text-[10px] font-medium text-[#374151] transition-colors hover:bg-[#F3F4F6] hover:border-[#D1D5DB]"
+      className="w-full flex items-center gap-2 rounded-lg bg-white border border-[#E5E7EB] px-3 py-2 text-xs font-medium text-[#374151] transition-colors hover:bg-[#F3F4F6] hover:border-[#D1D5DB]"
     >
-      <Icon className="h-3 w-3" />
+      <Icon className="h-3.5 w-3.5 text-[#6B7280]" />
       {label}
     </button>
   )
