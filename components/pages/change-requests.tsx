@@ -204,7 +204,6 @@ export function ChangeRequests({
               <GitPullRequest className="h-8 w-8 text-[#9CA3AF]" />
             </div>
             <h3 className="text-lg font-semibold text-[#111827]">暂无待审核请求</h3>
-            <p className="mt-1 text-sm text-[#6B7280]">所有变更请求已处理完毕</p>
           </div>
         ) : (
           <div className="rounded-xl border border-[#E5E7EB] bg-white overflow-hidden">
