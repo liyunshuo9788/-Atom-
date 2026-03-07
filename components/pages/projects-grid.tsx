@@ -193,7 +193,6 @@ export function ProjectsGrid({ projects, strategies, onProjectsChange, onSelectP
   const [newLogo, setNewLogo] = useState("")
   const [newValuation, setNewValuation] = useState("")
   const [selectedRound, setSelectedRound] = useState("A轮")
-  const [selectedStatus, setSelectedStatus] = useState(statusOptions[0])
   const [selectedOwnerId, setSelectedOwnerId] = useState("zhangwei")
   const [selectedStrategyId, setSelectedStrategyId] = useState("")
   const [newTags, setNewTags] = useState("")
@@ -215,8 +214,8 @@ export function ProjectsGrid({ projects, strategies, onProjectsChange, onSelectP
       logo: newLogo.trim() || newName.trim().charAt(0),
       description: newDescription.trim() || "暂无项目简介",
       tags: newTags.split(",").map((t) => t.trim()).filter(Boolean),
-      status: selectedStatus.value,
-      statusColor: selectedStatus.color,
+      status: statusOptions[0].value,
+      statusColor: statusOptions[0].color,
       valuation: newValuation.trim() || "待定",
       round: selectedRound,
       owner,
@@ -249,7 +248,6 @@ export function ProjectsGrid({ projects, strategies, onProjectsChange, onSelectP
     setNewLogo("")
     setNewValuation("")
     setSelectedRound("A轮")
-    setSelectedStatus(statusOptions[0])
     setSelectedOwnerId("zhangwei")
     setSelectedStrategyId("")
     setNewTags("")
@@ -505,27 +503,7 @@ export function ProjectsGrid({ projects, strategies, onProjectsChange, onSelectP
               </div>
             </div>
 
-            {/* Status Selection */}
-            <div className="space-y-2">
-              <Label className="text-sm font-medium text-[#374151]">项目状态</Label>
-              <div className="flex gap-2">
-                {statusOptions.map((status) => (
-                  <button
-                    key={status.value}
-                    type="button"
-                    onClick={() => setSelectedStatus(status)}
-                    className={cn(
-                      "flex-1 rounded-lg border px-3 py-2.5 text-sm font-medium transition-all",
-                      selectedStatus.value === status.value
-                        ? "border-[#2563EB] bg-[#2563EB]/5 text-[#2563EB]"
-                        : "border-[#E5E7EB] bg-white text-[#6B7280] hover:border-[#D1D5DB]"
-                    )}
-                  >
-                    {status.value}
-                  </button>
-                ))}
-              </div>
-            </div>
+
           </div>
 
           {/* Actions */}
