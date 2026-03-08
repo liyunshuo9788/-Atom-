@@ -81,11 +81,11 @@ interface ChatMessage {
 const PHASES: Phase[] = [
   {
     id: "setup-1",
-    groupLabel: "\u8BBE\u7ACB\u671F",
-    name: "\u8BBE\u7ACB\u671F - \u9636\u6BB51",
-    fullLabel: "\u8BBE\u7ACB\u671F - \u9636\u6BB51",
-    assignee: "\u5F20\u4F1F",
-    assigneeAvatar: "\u5F20",
+    groupLabel: "设立期",
+    name: "设立期 - 阶段1",
+    fullLabel: "设立期 - 阶段1",
+    assignee: "张伟",
+    assigneeAvatar: "张",
     hypothesesCount: 5,
     termsCount: 3,
     materialsCount: 8,
@@ -93,17 +93,17 @@ const PHASES: Phase[] = [
     startDate: "2024-01-05",
     endDate: "2024-01-20",
     logs: [
-      { action: "\u4E0A\u4F20\u7ADE\u54C1\u5206\u6790\u62A5\u544A", date: "2024-01-12", author: "\u674E\u56DB" },
-      { action: "\u5B8C\u6210\u9636\u6BB5\u5BA1\u6838", date: "2024-01-20", author: "\u738B\u4E94" },
+      { action: "上传竞品分析报告", date: "2024-01-12", author: "李四" },
+      { action: "完成阶段审核", date: "2024-01-20", author: "王五" },
     ],
   },
   {
     id: "setup-2",
-    groupLabel: "\u8BBE\u7ACB\u671F",
-    name: "\u8BBE\u7ACB\u671F - \u9636\u6BB52",
-    fullLabel: "\u8BBE\u7ACB\u671F - \u9636\u6BB52",
-    assignee: "\u674E\u56DB",
-    assigneeAvatar: "\u674E",
+    groupLabel: "设立期",
+    name: "设立期 - 阶段2",
+    fullLabel: "设立期 - 阶段2",
+    assignee: "李四",
+    assigneeAvatar: "李",
     hypothesesCount: 8,
     termsCount: 5,
     materialsCount: 12,
@@ -111,17 +111,17 @@ const PHASES: Phase[] = [
     startDate: "2024-01-21",
     endDate: "2024-02-15",
     logs: [
-      { action: "\u66F4\u65B0\u5047\u8BBE\u9A8C\u8BC1\u72B6\u6001", date: "2024-02-10", author: "\u5F20\u4F1F" },
-      { action: "\u5B8C\u6210\u9636\u6BB5\u5BA1\u6838", date: "2024-02-15", author: "\u738B\u4E94" },
+      { action: "更新假设验证状态", date: "2024-02-10", author: "张伟" },
+      { action: "完成阶段审核", date: "2024-02-15", author: "王五" },
     ],
   },
   {
     id: "setup-3",
-    groupLabel: "\u8BBE\u7ACB\u671F",
-    name: "\u8BBE\u7ACB\u671F - \u9636\u6BB53",
-    fullLabel: "\u8BBE\u7ACB\u671F - \u9636\u6BB53",
-    assignee: "\u5F20\u4F1F",
-    assigneeAvatar: "\u5F20",
+    groupLabel: "设立期",
+    name: "设立期 - 阶段3",
+    fullLabel: "设立期 - 阶段3",
+    assignee: "张伟",
+    assigneeAvatar: "张",
     hypothesesCount: 10,
     termsCount: 8,
     materialsCount: 15,
@@ -129,17 +129,17 @@ const PHASES: Phase[] = [
     startDate: "2024-02-16",
     endDate: "2024-03-10",
     logs: [
-      { action: "\u63D0\u4EA4IC\u5BA1\u6838\u6750\u6599", date: "2024-03-01", author: "\u674E\u56DB" },
-      { action: "\u5B8C\u6210\u8BBE\u7ACB\u671F\u6700\u7EC8\u5BA1\u6838", date: "2024-03-10", author: "\u9648\u603B" },
+      { action: "提交IC审核材料", date: "2024-03-01", author: "李四" },
+      { action: "完成设立期最终审核", date: "2024-03-10", author: "陈总" },
     ],
   },
   {
     id: "duration-1",
-    groupLabel: "\u5B58\u7EED\u671F",
-    name: "\u5B58\u7EED\u671F - \u9636\u6BB51",
-    fullLabel: "\u5B58\u7EED\u671F - \u9636\u6BB51",
-    assignee: "\u738B\u82B3",
-    assigneeAvatar: "\u738B",
+    groupLabel: "存续期",
+    name: "存续期 - 阶段1",
+    fullLabel: "存续期 - 阶段1",
+    assignee: "王芳",
+    assigneeAvatar: "王",
     hypothesesCount: 10,
     termsCount: 8,
     materialsCount: 18,
@@ -147,17 +147,17 @@ const PHASES: Phase[] = [
     startDate: "2024-03-11",
     endDate: "2024-04-15",
     logs: [
-      { action: "\u7B2C\u4E00\u6B21\u6295\u540E\u8DDF\u8E2A\u62A5\u544A", date: "2024-04-01", author: "\u738B\u82B3" },
-      { action: "\u5B8C\u6210\u9636\u6BB5\u5BA1\u6838", date: "2024-04-15", author: "\u5F20\u4F1F" },
+      { action: "第一次投后跟踪报告", date: "2024-04-01", author: "王芳" },
+      { action: "完成阶段审核", date: "2024-04-15", author: "张伟" },
     ],
   },
   {
     id: "duration-2",
-    groupLabel: "\u5B58\u7EED\u671F",
-    name: "\u5B58\u7EED\u671F - \u9636\u6BB52",
-    fullLabel: "\u5B58\u7EED\u671F - \u9636\u6BB52",
-    assignee: "\u674E\u56DB",
-    assigneeAvatar: "\u674E",
+    groupLabel: "存续期",
+    name: "存续期 - 阶段2",
+    fullLabel: "存续期 - 阶段2",
+    assignee: "李四",
+    assigneeAvatar: "李",
     hypothesesCount: 12,
     termsCount: 8,
     materialsCount: 22,
@@ -165,17 +165,17 @@ const PHASES: Phase[] = [
     startDate: "2024-04-16",
     endDate: "2024-06-20",
     logs: [
-      { action: "\u63D0\u4EA4Q2\u8FD0\u8425\u6570\u636E", date: "2024-06-10", author: "\u738B\u82B3" },
-      { action: "\u5B8C\u6210\u9636\u6BB5\u5BA1\u6838", date: "2024-06-20", author: "\u5F20\u4F1F" },
+      { action: "提交Q2运营数据", date: "2024-06-10", author: "王芳" },
+      { action: "完成阶段审核", date: "2024-06-20", author: "张伟" },
     ],
   },
   {
     id: "duration-3",
-    groupLabel: "\u5B58\u7EED\u671F",
-    name: "\u5B58\u7EED\u671F - \u9636\u6BB53",
-    fullLabel: "\u5B58\u7EED\u671F - \u9636\u6BB53",
-    assignee: "\u5F20\u4F1F",
-    assigneeAvatar: "\u5F20",
+    groupLabel: "存续期",
+    name: "存续期 - 阶段3",
+    fullLabel: "存续期 - 阶段3",
+    assignee: "张伟",
+    assigneeAvatar: "张",
     hypothesesCount: 12,
     termsCount: 9,
     materialsCount: 25,
@@ -183,46 +183,46 @@ const PHASES: Phase[] = [
     startDate: "2024-06-21",
     endDate: "2024-09-15",
     logs: [
-      { action: "\u63D0\u4EA4Q3\u8BF4\u4F53\u62A5\u544A", date: "2024-09-05", author: "\u674E\u56DB" },
-      { action: "\u5B8C\u6210\u9636\u6BB5\u5BA1\u6838", date: "2024-09-15", author: "\u9648\u603B" },
+      { action: "提交Q3说体报告", date: "2024-09-05", author: "李四" },
+      { action: "完成阶段审核", date: "2024-09-15", author: "陈总" },
     ],
   },
   {
     id: "duration-4",
-    groupLabel: "\u5B58\u7EED\u671F",
-    name: "\u5B58\u7EED\u671F - \u9636\u6BB54",
-    fullLabel: "\u5B58\u7EED\u671F - \u9636\u6BB54",
-    assignee: "\u738B\u82B3",
-    assigneeAvatar: "\u738B",
+    groupLabel: "存续期",
+    name: "存续期 - 阶段4",
+    fullLabel: "存续期 - 阶段4",
+    assignee: "王芳",
+    assigneeAvatar: "王",
     hypothesesCount: 13,
     termsCount: 9,
     materialsCount: 28,
     status: "active",
     startDate: "2024-09-16",
     logs: [
-      { action: "\u66F4\u65B0\u6761\u6B3E\u5BA1\u8BAE\u72B6\u6001", date: "2024-10-05", author: "\u5F20\u4F1F" },
-      { action: "\u63D0\u4EA4\u8FD0\u8425\u6570\u636E\u66F4\u65B0", date: "2024-11-01", author: "\u674E\u56DB" },
+      { action: "更新条款审议状态", date: "2024-10-05", author: "张伟" },
+      { action: "提交运营数据更新", date: "2024-11-01", author: "李四" },
     ],
   },
 ]
 
 const statusConfig = {
   completed: {
-    label: "\u5DF2\u5B8C\u6210",
+    label: "已完成",
     dotCls: "bg-emerald-500",
     badgeCls: "bg-emerald-50 text-emerald-700 border-emerald-200",
     borderCls: "border-emerald-200",
     bgCls: "bg-emerald-50/30",
   },
   active: {
-    label: "\u8FDB\u884C\u4E2D",
+    label: "进行中",
     dotCls: "bg-[#2563EB]",
     badgeCls: "bg-blue-50 text-blue-700 border-blue-200",
     borderCls: "border-[#2563EB]",
     bgCls: "bg-blue-50/30",
   },
   upcoming: {
-    label: "\u5F85\u542F\u52A8",
+    label: "待启动",
     dotCls: "bg-[#D1D5DB]",
     badgeCls: "bg-gray-50 text-gray-500 border-gray-200",
     borderCls: "border-[#E5E7EB]",
@@ -233,53 +233,53 @@ const statusConfig = {
 // Sidebar content configs
 const sidebarConfigs: Record<Exclude<SidebarType, null | "ai-chat">, { title: string; icon: typeof Lightbulb; description: string; items: { title: string; content: string }[] }> = {
   "hypothesis-suggestions": {
-    title: "\u5047\u8BBE\u6539\u8FDB\u5EFA\u8BAE",
+    title: "假设改进建议",
     icon: Lightbulb,
-    description: "\u57FA\u4E8E\u5F53\u524D\u9636\u6BB5\u7684\u5047\u8BBE\u6E05\u5355\uFF0C\u7CFB\u7EDF\u667A\u80FD\u751F\u6210\u4EE5\u4E0B\u6539\u8FDB\u5EFA\u8BAE",
+    description: "基于当前阶段的假设清单，系统智能生成以下改进建议",
     items: [
-      { title: "\u8865\u5145\u6280\u672F\u58C1\u5792\u5047\u8BBE", content: "\u5EFA\u8BAE\u589E\u52A0\u5173\u4E8E\u6838\u5FC3\u6280\u672F\u4E13\u5229\u548C\u7814\u53D1\u56E2\u961F\u7A33\u5B9A\u6027\u7684\u5047\u8BBE\uFF0C\u4EE5\u66F4\u5168\u9762\u8BC4\u4F30\u6280\u672F\u58C1\u5792\u3002" },
-      { title: "\u7EC6\u5316\u5E02\u573A\u89C4\u6A21\u5047\u8BBE", content: "\u5F53\u524D\u5E02\u573ATAM\u5047\u8BBE\u8FC7\u4E8E\u7B3C\u7EDF\uFF0C\u5EFA\u8BAE\u62C6\u5206\u4E3A\u5206\u5730\u533A\u3001\u5206\u884C\u4E1A\u7684\u7EC6\u5206\u5E02\u573A\u5047\u8BBE\u3002" },
-      { title: "\u6DFB\u52A0\u7ADE\u4E89\u683C\u5C40\u5047\u8BBE", content: "\u5EFA\u8BAE\u589E\u52A0\u5173\u4E8E\u4E3B\u8981\u7ADE\u4E89\u5BF9\u624B\u53CA\u5E02\u573A\u4EFD\u989D\u53D8\u5316\u7684\u5047\u8BBE\u3002" },
+      { title: "补充技术壁垒假设", content: "建议增加关于核心技术专利和研发团队稳定性的假设，以更全面评估技术壁垒。" },
+      { title: "细化市场规模假设", content: "当前市场TAM假设过于笼统，建议拆分为分地区、分行业的细分市场假设。" },
+      { title: "添加竞争格局假设", content: "建议增加关于主要竞争对手及市场份额变化的假设。" },
     ],
   },
   "term-suggestions": {
-    title: "\u6761\u6B3E\u6784\u5EFA\u5EFA\u8BAE",
+    title: "条款构建建议",
     icon: FileText,
-    description: "\u57FA\u4E8E\u884C\u4E1A\u6807\u51C6\u548C\u5F53\u524D\u9636\u6BB5\u7279\u70B9\uFF0C\u7CFB\u7EDF\u63A8\u8350\u4EE5\u4E0B\u6761\u6B3E\u6784\u5EFA\u5EFA\u8BAE",
+    description: "基于行业标准和当前阶段特点，系统推荐以下条款构建建议",
     items: [
-      { title: "\u52A0\u5F3A\u53CD\u7A00\u91CA\u4FDD\u62A4", content: "\u5EFA\u8BAE\u91C7\u7528\u52A0\u6743\u5E73\u5747\u53CD\u7A00\u91CA\u6761\u6B3E\uFF0C\u5E76\u660E\u786E\u89E6\u53D1\u6761\u4EF6\u548C\u8C03\u6574\u673A\u5236\u3002" },
-      { title: "\u4F18\u5316\u6E05\u7B97\u4F18\u5148\u6743", content: "\u5EFA\u8BAE\u91C7\u75281x Non-Participating\u7ED3\u6784\uFF0C\u5E73\u8861\u6295\u8D44\u4EBA\u4FDD\u62A4\u548C\u521B\u59CB\u4EBA\u6FC0\u52B1\u3002" },
-      { title: "\u5B8C\u5584\u4FE1\u606F\u6743\u6761\u6B3E", content: "\u5EFA\u8BAE\u589E\u52A0\u5B9A\u671F\u8D22\u52A1\u62A5\u544A\u3001\u91CD\u5927\u4E8B\u9879\u901A\u77E5\u7B49\u4FE1\u606F\u6743\u6761\u6B3E\u3002" },
+      { title: "加强反稀释保护", content: "建议采用加权平均反稀释条款，并明确触发条件和调整机制。" },
+      { title: "优化清算优先权", content: "建议采用1x Non-Participating结构，平衡投资人保护和创始人激励。" },
+      { title: "完善信息权条款", content: "建议增加定期财务报告、重大事项通知等信息权条款。" },
     ],
   },
   "material-suggestions": {
-    title: "\u6750\u6599\u6536\u96C6\u5EFA\u8BAE",
+    title: "材料收集建议",
     icon: FolderSearch,
-    description: "\u6839\u636E\u5F53\u524D\u9636\u6BB5\u9700\u6C42\uFF0C\u7CFB\u7EDF\u63A8\u8350\u6536\u96C6\u4EE5\u4E0B\u6750\u6599",
+    description: "根据当前阶段需求，系统推荐收集以下材料",
     items: [
-      { title: "\u8865\u5145\u6280\u672F\u6587\u6863", content: "\u5EFA\u8BAE\u6536\u96C6\u6280\u672F\u67B6\u6784\u56FE\u3001API\u6587\u6863\u3001\u7CFB\u7EDF\u8BBE\u8BA1\u8BF4\u660E\u4E66\u7B49\u6280\u672F\u8D44\u6599\u3002" },
-      { title: "\u8865\u5145\u5BA2\u6237\u6848\u4F8B", content: "\u5EFA\u8BAE\u6536\u96C63-5\u4E2A\u6807\u6746\u5BA2\u6237\u7684\u4F7F\u7528\u6848\u4F8B\u548C\u53CD\u9988\u62A5\u544A\u3002" },
-      { title: "\u8865\u5145\u7ADE\u54C1\u5206\u6790", content: "\u5EFA\u8BAE\u6536\u96C6\u4E3B\u8981\u7ADE\u4E89\u5BF9\u624B\u7684\u4EA7\u54C1\u5BF9\u6BD4\u5206\u6790\u62A5\u544A\u3002" },
+      { title: "补充技术文档", content: "建议收集技术架构图、API文档、系统设计说明书等技术资料。" },
+      { title: "补充客户案例", content: "建议收集3-5个标杆客户的使用案例和反馈报告。" },
+      { title: "补充竞品分析", content: "建议收集主要竞争对手的产品对比分析报告。" },
     ],
   },
   "ai-research": {
-    title: "AI\u8C03\u7814\u6750\u6599",
+    title: "AI调研材料",
     icon: Brain,
-    description: "AI\u667A\u80FD\u751F\u6210\u7684\u8C03\u7814\u6750\u6599\u548C\u5206\u6790\u62A5\u544A",
+    description: "AI智能生成的调研材料和分析报告",
     items: [
-      { title: "\u884C\u4E1A\u8D8B\u52BF\u5206\u6790\u62A5\u544A", content: "\u57FA\u4E8E\u6700\u65B0\u5E02\u573A\u6570\u636E\uFF0CAI\u751F\u6210\u7684\u884C\u4E1A\u53D1\u5C55\u8D8B\u52BF\u5206\u6790\u3002" },
-      { title: "\u7ADE\u4E89\u683C\u5C40\u5730\u56FE", content: "AI\u7ED8\u5236\u7684\u7ADE\u4E89\u5BF9\u624B\u5206\u5E03\u3001\u5E02\u573A\u4EFD\u989D\u3001\u6838\u5FC3\u4F18\u52BF\u5BF9\u6BD4\u3002" },
-      { title: "\u6280\u672F\u6F14\u8FDB\u8DEF\u7EBF\u56FE", content: "AI\u5206\u6790\u7684\u6280\u672F\u53D1\u5C55\u8DEF\u7EBF\u548C\u672A\u6765\u8D8B\u52BF\u9884\u6D4B\u3002" },
+      { title: "行业趋势分析报告", content: "基于最新市场数据，AI生成的行业发展趋势分析。" },
+      { title: "竞争格局地图", content: "AI绘制的竞争对手分布、市场份额、核心优势对比。" },
+      { title: "技术演进路线图", content: "AI分析的技术发展路线和未来趋势预测。" },
     ],
   },
   "tracking-summary": {
-    title: "\u8DDF\u8E2A\u60C5\u51B5\u6C47\u603B",
+    title: "跟踪情况汇总",
     icon: ClipboardList,
-    description: "\u5F53\u524D\u9636\u6BB5\u7684\u6295\u540E\u8DDF\u8E2A\u60C5\u51B5\u6C47\u603B",
+    description: "当前阶段的投后跟踪情况汇总",
     items: [
-      { title: "\u8FD0\u8425\u6307\u6807\u8DDF\u8E2A", content: "MAU\u540C\u6BD4\u589E\u957F35%\uFF0C\u8425\u6536\u540C\u6BD4\u589E\u957F42%\uFF0C\u5BA2\u6237\u7559\u5B58\u7387\u4FDD\u6301\u572885%\u4EE5\u4E0A\u3002" },
-      { title: "\u5047\u8BBE\u9A8C\u8BC1\u8FDB\u5EA6", content: "12\u4E2A\u5047\u8BBE\u4E2D\uFF0C9\u4E2A\u5DF2\u9A8C\u8BC1\u6210\u7ACB\uFF0C2\u4E2A\u5F85\u51B3\u8BAE\uFF0C1\u4E2A\u4E0D\u6210\u7ACB\u3002" },
-      { title: "\u91CD\u5927\u4E8B\u9879\u8BB0\u5F55", content: "\u672C\u9636\u6BB5\u5B8C\u6210B\u8F6E\u878D\u8D44\uFF0C\u4F30\u503C\u63D0\u534740%\uFF0C\u56E2\u961F\u6269\u5F2030\u4EBA\u3002" },
+      { title: "运营指标跟踪", content: "MAU同比增长35%，营收同比增长42%，客户留存率保持85%以上。" },
+      { title: "假设验证进度", content: "12个假设中，9个已验证成立，2个待决议，1个不成立。" },
+      { title: "重大事项记录", content: "本阶段完成B轮融资，估值提升40%，团队扩充30人。" },
     ],
   },
 }
@@ -478,7 +478,7 @@ export function Workflow({
     setActiveSidebar(type)
     if (type === "ai-chat") {
       setChatMessages([
-        { role: "assistant", content: "\u60A8\u597D\uFF01\u6211\u662F\u60A8\u7684AI\u667A\u80FD\u52A9\u624B\uFF0C\u53EF\u4EE5\u57FA\u4E8E\u5F53\u524D\u9636\u6BB5\u7684\u4FE1\u606F\u56DE\u7B54\u60A8\u7684\u95EE\u9898\uFF0C\u5E2E\u52A9\u60A8\u751F\u6210\u6240\u9700\u7684\u6750\u6599\u3002\u8BF7\u95EE\u6709\u4EC0\u4E48\u53EF\u4EE5\u5E2E\u60A8\uFF1F" }
+        { role: "assistant", content: "您好！我是您的AI智能助手，可以基于当前阶段的信息回答您的问题，帮助您生成所需的材料。请问有什么可以帮您？" }
       ])
     }
   }
@@ -499,7 +499,7 @@ export function Workflow({
     setTimeout(() => {
       const aiResponse: ChatMessage = {
         role: "assistant",
-        content: "\u8C22\u8C22\u60A8\u7684\u63D0\u95EE\u3002\u57FA\u4E8E\u5F53\u524D\u9636\u6BB5\u7684\u6570\u636E\uFF0C\u6211\u6B63\u5728\u4E3A\u60A8\u751F\u6210\u76F8\u5173\u5206\u6790...\n\n\u6839\u636E\u60A8\u7684\u9700\u6C42\uFF0C\u6211\u5EFA\u8BAE\u60A8\u53EF\u4EE5\u4ECE\u4EE5\u4E0B\u51E0\u4E2A\u65B9\u9762\u8FDB\u884C\u8003\u8651\uFF1A\n1. \u5B8C\u5584\u5F53\u524D\u5047\u8BBE\u7684\u8BBA\u636E\u652F\u6301\n2. \u6536\u96C6\u66F4\u591A\u5BA2\u6237\u53CD\u9988\u6570\u636E\n3. \u8865\u5145\u7ADE\u54C1\u5206\u6790\u6750\u6599\n\n\u5982\u9700\u8FDB\u4E00\u6B65\u5E2E\u52A9\uFF0C\u8BF7\u968F\u65F6\u544A\u8BC9\u6211\u3002"
+        content: "谢谢您的提问。基于当前阶段的数据，我正在为您生成相关分析...\n\n根据您的需求，我建议您可以从以下几个方面进行考虑：\n1. 完善当前假设的论证支持\n2. 收集更多客户反馈数据\n3. 补充竞品分析材料\n\n如需进一步帮助，请随时告诉我。"
       }
       setChatMessages((prev) => [...prev, aiResponse])
     }, 1000)

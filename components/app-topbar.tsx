@@ -8,6 +8,7 @@ import {
   LogOut,
   User,
   Settings,
+  LayoutDashboard,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
@@ -19,7 +20,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 
-export type TopNavKey = "projects" | "strategies" | "change-requests"
+export type TopNavKey = "dashboard" | "projects" | "strategies" | "change-requests"
 
 interface AppTopbarProps {
   activeNav: TopNavKey | null
@@ -39,8 +40,20 @@ export function AppTopbar({ activeNav, onNavigate }: AppTopbarProps) {
         </span>
       </button>
 
-      {/* Main Navigation: 项目列表 & 策略列表 */}
+      {/* Main Navigation */}
       <nav className="flex items-center gap-1">
+        <button
+          onClick={() => onNavigate("dashboard")}
+          className={cn(
+            "flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors",
+            activeNav === "dashboard"
+              ? "bg-[#2563EB] text-white"
+              : "text-[#94A3B8] hover:bg-[#1E293B] hover:text-[#CBD5E1]"
+          )}
+        >
+          <LayoutDashboard className="h-4 w-4" />
+          数据看板
+        </button>
         <button
           onClick={() => onNavigate("projects")}
           className={cn(

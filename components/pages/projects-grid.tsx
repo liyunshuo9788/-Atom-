@@ -30,9 +30,8 @@ const investmentRounds = ["Pre-A", "A轮", "B轮", "C轮", "D轮", "战略投资
 
 // Project status options
 const statusOptions = [
-  { value: "尽调中", color: "bg-emerald-50 text-emerald-700 border-emerald-200" },
-  { value: "评估中", color: "bg-amber-50 text-amber-700 border-amber-200" },
-  { value: "已投资", color: "bg-blue-50 text-blue-700 border-blue-200" },
+  { value: "设立期", color: "bg-blue-50 text-blue-700 border-blue-200" },
+  { value: "存续期", color: "bg-emerald-50 text-emerald-700 border-emerald-200" },
 ]
 
 export interface Project {
@@ -68,9 +67,8 @@ export const initialProjects: Project[] = [
     logo: "M",
     description: "通用人工智能科技公司，专注于大模型研发",
     tags: ["AI", "B轮"],
-    status: "尽调中",
-    statusColor: "bg-emerald-50 text-emerald-700 border-emerald-200",
-    valuation: "10亿 USD",
+    status: "设立期",
+    statusColor: "bg-blue-50 text-blue-700 border-blue-200",
     round: "B轮",
     owner: { id: "zhangwei", name: "张伟", initials: "张伟" },
     strategyId: "1",
@@ -83,9 +81,8 @@ export const initialProjects: Project[] = [
     logo: "月",
     description: "新一代AI搜索与对话平台",
     tags: ["AI", "A轮"],
-    status: "已投资",
-    statusColor: "bg-blue-50 text-blue-700 border-blue-200",
-    valuation: "25亿 USD",
+    status: "存续期",
+    statusColor: "bg-emerald-50 text-emerald-700 border-emerald-200",
     round: "A轮",
     owner: { id: "lisi", name: "李四", initials: "李四" },
     strategyId: "2",
@@ -98,9 +95,8 @@ export const initialProjects: Project[] = [
     logo: "智",
     description: "认知大模型技术与应用开发",
     tags: ["AI", "C轮"],
-    status: "评估中",
-    statusColor: "bg-amber-50 text-amber-700 border-amber-200",
-    valuation: "30亿 USD",
+    status: "设立期",
+    statusColor: "bg-blue-50 text-blue-700 border-blue-200",
     round: "C轮",
     owner: { id: "wangfang", name: "王芳", initials: "王芳" },
     strategyId: "1",
@@ -113,9 +109,8 @@ export const initialProjects: Project[] = [
     logo: "百",
     description: "大语言模型研发与应用",
     tags: ["AI", "B轮"],
-    status: "已投资",
-    statusColor: "bg-blue-50 text-blue-700 border-blue-200",
-    valuation: "12亿 USD",
+    status: "存续期",
+    statusColor: "bg-emerald-50 text-emerald-700 border-emerald-200",
     round: "B轮",
     owner: { id: "zhangwei", name: "张伟", initials: "张伟" },
     strategyId: "1",
@@ -128,9 +123,8 @@ export const initialProjects: Project[] = [
     logo: "零",
     description: "通用AI助理与多模态模型",
     tags: ["AI", "A轮"],
-    status: "尽调中",
-    statusColor: "bg-emerald-50 text-emerald-700 border-emerald-200",
-    valuation: "8亿 USD",
+    status: "设立期",
+    statusColor: "bg-blue-50 text-blue-700 border-blue-200",
     round: "A轮",
     owner: { id: "lisi", name: "李四", initials: "李四" },
     strategyId: "2",
@@ -143,9 +137,8 @@ export const initialProjects: Project[] = [
     logo: "阶",
     description: "多模态大模型与智能体平台",
     tags: ["AI", "Pre-A"],
-    status: "评估中",
-    statusColor: "bg-amber-50 text-amber-700 border-amber-200",
-    valuation: "5亿 USD",
+    status: "设立期",
+    statusColor: "bg-blue-50 text-blue-700 border-blue-200",
     round: "Pre-A",
     owner: { id: "zhaoqiang", name: "赵强", initials: "赵强" },
     strategyId: "2",
@@ -158,9 +151,8 @@ export const initialProjects: Project[] = [
     logo: "深",
     description: "AI for Science，分子模拟与药物设计",
     tags: ["AI+科学", "B轮"],
-    status: "已投资",
-    statusColor: "bg-blue-50 text-blue-700 border-blue-200",
-    valuation: "15亿 USD",
+    status: "存续期",
+    statusColor: "bg-emerald-50 text-emerald-700 border-emerald-200",
     round: "B轮",
     owner: { id: "chenzong", name: "陈总", initials: "陈总" },
     strategyId: "4",
@@ -173,9 +165,8 @@ export const initialProjects: Project[] = [
     logo: "衬",
     description: "AI驱动的电商与消费品创新",
     tags: ["AI+消费", "A轮"],
-    status: "评估中",
-    statusColor: "bg-amber-50 text-amber-700 border-amber-200",
-    valuation: "3亿 USD",
+    status: "设立期",
+    statusColor: "bg-blue-50 text-blue-700 border-blue-200",
     round: "A轮",
     owner: { id: "wangfang", name: "王芳", initials: "王芳" },
     strategyId: "6",
@@ -202,7 +193,6 @@ export function ProjectsGrid({ projects, strategies, onProjectsChange, onSelectP
   const [newLogo, setNewLogo] = useState("")
   const [newValuation, setNewValuation] = useState("")
   const [selectedRound, setSelectedRound] = useState("A轮")
-  const [selectedStatus, setSelectedStatus] = useState(statusOptions[0])
   const [selectedOwnerId, setSelectedOwnerId] = useState("zhangwei")
   const [selectedStrategyId, setSelectedStrategyId] = useState("")
   const [newTags, setNewTags] = useState("")
@@ -224,8 +214,8 @@ export function ProjectsGrid({ projects, strategies, onProjectsChange, onSelectP
       logo: newLogo.trim() || newName.trim().charAt(0),
       description: newDescription.trim() || "暂无项目简介",
       tags: newTags.split(",").map((t) => t.trim()).filter(Boolean),
-      status: selectedStatus.value,
-      statusColor: selectedStatus.color,
+      status: statusOptions[0].value,
+      statusColor: statusOptions[0].color,
       valuation: newValuation.trim() || "待定",
       round: selectedRound,
       owner,
@@ -258,7 +248,6 @@ export function ProjectsGrid({ projects, strategies, onProjectsChange, onSelectP
     setNewLogo("")
     setNewValuation("")
     setSelectedRound("A轮")
-    setSelectedStatus(statusOptions[0])
     setSelectedOwnerId("zhangwei")
     setSelectedStrategyId("")
     setNewTags("")
@@ -514,27 +503,7 @@ export function ProjectsGrid({ projects, strategies, onProjectsChange, onSelectP
               </div>
             </div>
 
-            {/* Status Selection */}
-            <div className="space-y-2">
-              <Label className="text-sm font-medium text-[#374151]">项目状态</Label>
-              <div className="flex gap-2">
-                {statusOptions.map((status) => (
-                  <button
-                    key={status.value}
-                    type="button"
-                    onClick={() => setSelectedStatus(status)}
-                    className={cn(
-                      "flex-1 rounded-lg border px-3 py-2.5 text-sm font-medium transition-all",
-                      selectedStatus.value === status.value
-                        ? "border-[#2563EB] bg-[#2563EB]/5 text-[#2563EB]"
-                        : "border-[#E5E7EB] bg-white text-[#6B7280] hover:border-[#D1D5DB]"
-                    )}
-                  >
-                    {status.value}
-                  </button>
-                ))}
-              </div>
-            </div>
+
           </div>
 
           {/* Actions */}

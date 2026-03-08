@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { AppTopbar, type TopNavKey } from "@/components/app-topbar"
+import { Dashboard } from "@/components/pages/dashboard"
 import { ProjectsGrid, type Project, type PendingProject, initialProjects } from "@/components/pages/projects-grid"
 import { StrategiesGrid, type Strategy, type PendingStrategy, initialStrategies } from "@/components/pages/strategies-grid"
 import { ProjectDetail } from "@/components/pages/project-detail"
@@ -12,6 +13,7 @@ import type { Phase, PendingPhase } from "@/components/pages/workflow"
 
 type ViewState =
   | { type: "login" }
+  | { type: "dashboard" }
   | { type: "projects" }
   | { type: "strategies" }
   | { type: "change-requests" }
@@ -29,20 +31,24 @@ export default function Page() {
   const [pendingPhases, setPendingPhases] = useState<PendingPhase[]>([])
 
   const activeNav: TopNavKey | null =
-    view.type === "projects" || view.type === "project-detail"
-      ? "projects"
-      : view.type === "strategies" || view.type === "strategy-detail"
-        ? "strategies"
-        : view.type === "change-requests"
-          ? "change-requests"
-          : null
+    view.type === "dashboard"
+      ? "dashboard"
+      : view.type === "projects" || view.type === "project-detail"
+        ? "projects"
+        : view.type === "strategies" || view.type === "strategy-detail"
+          ? "strategies"
+          : view.type === "change-requests"
+            ? "change-requests"
+            : null
 
   function handleLogin() {
-    setView({ type: "projects" })
+    setView({ type: "dashboard" })
   }
 
   function handleTopNav(nav: TopNavKey) {
-    if (nav === "projects") {
+    if (nav === "dashboard") {
+      setView({ type: "dashboard" })
+    } else if (nav === "projects") {
       setView({ type: "projects" })
     } else if (nav === "strategies") {
       setView({ type: "strategies" })
@@ -164,6 +170,7 @@ export default function Page() {
     <div className="flex h-screen flex-col overflow-hidden bg-background">
       <AppTopbar activeNav={activeNav} onNavigate={handleTopNav} />
       <main className="flex-1 overflow-hidden">
+        {view.type === "dashboard" && <Dashboard />}
         {view.type === "projects" && (
           <ProjectsGrid 
             projects={projects}

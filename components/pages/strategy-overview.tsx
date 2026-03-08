@@ -1,34 +1,105 @@
 "use client"
 
+import { useState } from "react"
 import {
   Cpu,
   TrendingUp,
   Calendar,
-  Users,
   DollarSign,
   Target,
   ArrowUpRight,
   Inbox,
+  Plus,
+  Sparkles,
+  Loader2,
+  Lightbulb,
+  FileText,
+  FolderOpen,
+  ChevronRight,
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { type Strategy } from "@/components/pages/strategies-grid"
 
+// AI推荐内容 - 围绕AI基础大模型
+const aiRecommendedHypotheses = [
+  {
+    id: "h1",
+    title: "大模型推理成本下降假设",
+    content: "假设未来18个月内，大模型推理成本将下降60%以上，主要驱动因素包括：模型量化技术成熟、推理芯片性能提升、以及MoE架构普及带来的计算效率提升。",
+    category: "技术趋势",
+  },
+  {
+    id: "h2", 
+    title: "多模态融合市场假设",
+    content: "假设多模态大模型（文本+图像+视频+音频）将在2025年成为主流，预计占据AI应用市场60%以上份额，核心驱动力来自企业对统一AI能力的需求。",
+    category: "市场规模",
+  },
+  {
+    id: "h3",
+    title: "开源模型生态竞争假设",
+    content: "假设开源大模型将持续缩小与闭源模型的性能差距，在特定垂直领域甚至实现超越，这将重塑行业竞争格局并降低企业AI部署门槛。",
+    category: "竞争格局",
+  },
+]
+
+const aiRecommendedTerms = [
+  {
+    id: "t1",
+    title: "技术里程碑对赌条款",
+    content: "约定目标公司需在投资后12个月内完成自研大模型发布，模型参数规模不低于100B，在公开评测集上达到行业前三水平，否则触发估值调整机制。",
+    category: "里程碑",
+  },
+  {
+    id: "t2",
+    title: "算力成本锁定条款",
+    content: "要求目标公司与主要云服务商签订不少于24个月的算力采购协议，锁定GPU租赁价格，确保训练成本可控，并在条款中约定成本超支时的处理机制。",
+    category: "成本控制",
+  },
+  {
+    id: "t3",
+    title: "核心团队绑定条款",
+    content: "关键技术人员（CTO、首席科学家、核心算法负责人）需签订不少于4年的服务协议，离职需提前6个月通知并完成知识交接，违约金不低于年薪的200%。",
+    category: "团队稳定",
+  },
+]
+
+const aiRecommendedMaterials = [
+  {
+    id: "m1",
+    title: "模型评测报告",
+    content: "收集目标公司大模型在主流评测基准（MMLU、HumanEval、GSM8K等）上的表现数据，与GPT-4、Claude等头部模型进行横向对比分析。",
+    category: "技术评估",
+  },
+  {
+    id: "m2",
+    title: "算力资源规划书",
+    content: "获取目标公司未来24个月的算力需求规划，包括GPU集群规模、云服务商选择、自建机房计划、以及预计的算力成本支出明细。",
+    category: "资源规划",
+  },
+  {
+    id: "m3",
+    title: "商业化落地案例",
+    content: "收集目标公司已签约的标杆客户案例，包括合同金额、部署方式、客户反馈、续约情况等，重点关注AI能力的实际商业价值转化。",
+    category: "商业验证",
+  },
+]
+
 // Default strategy info for existing strategies (fallback)
 const defaultStrategyInfo = {
-  name: "AI\u57FA\u7840\u8BBE\u65BD",
-  type: "\u4E3B\u9898\u7B56\u7565",
+  name: "AI基础设施",
+  type: "主题策略",
   typeColor: "bg-blue-50 text-blue-700 border-blue-200",
   description:
-    "\u805A\u7126AI\u7B97\u529B\u3001\u6A21\u578B\u8BAD\u7EC3\u6846\u67B6\u548C\u57FA\u7840\u8F6F\u4EF6\u751F\u6001\u6295\u8D44\u3002\u672C\u7B56\u7565\u56F4\u7ED5\u4EBA\u5DE5\u667A\u80FD\u4EA7\u4E1A\u7684\u5E95\u5C42\u57FA\u7840\u8BBE\u65BD\u8FDB\u884C\u5E03\u5C40\uFF0C\u6DB5\u76D6GPU/TPU\u7B97\u529B\u82AF\u7247\u3001\u5206\u5E03\u5F0F\u8BAD\u7EC3\u6846\u67B6\u3001\u6A21\u578B\u63A8\u7406\u4F18\u5316\u3001\u6570\u636E\u6807\u6CE8\u5E73\u53F0\u3001MLOps\u5DE5\u5177\u94FE\u7B49\u6838\u5FC3\u9886\u57DF\uFF0C\u65E8\u5728\u6355\u6349AI\u4EA7\u4E1A\u7206\u53D1\u671F\u7684\u5E95\u5C42\u4EF7\u503C\u3002",
+    "聚焦AI算力、模型训练框架和基础软件生态投资。本策略围绕人工智能产业的底层基础设施进行布局，涵盖GPU/TPU算力芯片、分布式训练框架、模型推理优化、数据标注平台、MLOps工具链等核心领域，旨在捕捉AI产业爆发期的底层价值。",
   createdAt: "2023-06-15",
   updatedAt: "2024-01-20",
-  manager: "\u5F20\u4F1F",
-  status: "\u6D3B\u8DC3",
+  manager: "张伟",
+  status: "活跃",
   projectCount: 12,
-  totalInvest: "8.5\u4EBF",
+  totalInvest: "8.5亿",
   returnRate: "+32%",
-  avgValuation: "15\u4EBF",
+  avgValuation: "15亿",
 }
 
 const appliedProjects = [
@@ -37,71 +108,107 @@ const appliedProjects = [
     name: "MiniMax",
     logo: "M",
     logoBg: "bg-[#1F2937]",
-    round: "B\u8F6E",
-    status: "\u5C3D\u8C03\u4E2D",
+    round: "B轮",
+    status: "尽调中",
     statusColor: "bg-blue-50 text-blue-700 border-blue-200",
-    valuation: "10\u4EBF USD",
-    investAmount: "5000\u4E07 USD",
+    valuation: "10亿 USD",
+    investAmount: "5000万 USD",
   },
   {
     id: "2",
-    name: "\u667A\u8C31AI",
-    logo: "\u667A",
+    name: "智谱AI",
+    logo: "智",
     logoBg: "bg-violet-600",
-    round: "A\u8F6E",
-    status: "\u5DF2\u6295\u8D44",
+    round: "A轮",
+    status: "已投资",
     statusColor: "bg-emerald-50 text-emerald-700 border-emerald-200",
-    valuation: "8\u4EBF USD",
-    investAmount: "3000\u4E07 USD",
+    valuation: "8亿 USD",
+    investAmount: "3000万 USD",
   },
   {
     id: "3",
-    name: "\u58C1\u4EDE\u79D1\u6280",
-    logo: "\u58C1",
+    name: "壁仞科技",
+    logo: "壁",
     logoBg: "bg-rose-600",
-    round: "C\u8F6E",
-    status: "\u5DF2\u6295\u8D44",
+    round: "C轮",
+    status: "已投资",
     statusColor: "bg-emerald-50 text-emerald-700 border-emerald-200",
-    valuation: "25\u4EBF USD",
-    investAmount: "1\u4EBF USD",
+    valuation: "25亿 USD",
+    investAmount: "1亿 USD",
   },
   {
     id: "4",
-    name: "\u6469\u5C14\u7EBF\u7A0B",
-    logo: "\u6469",
+    name: "摩尔线程",
+    logo: "摩",
     logoBg: "bg-amber-600",
-    round: "B\u8F6E",
-    status: "\u89C2\u5BDF\u4E2D",
+    round: "B轮",
+    status: "观察中",
     statusColor: "bg-gray-50 text-gray-600 border-gray-200",
-    valuation: "12\u4EBF USD",
+    valuation: "12亿 USD",
     investAmount: "-",
   },
   {
     id: "5",
-    name: "\u71E7\u539F\u79D1\u6280",
-    logo: "\u71E7",
+    name: "烧原科技",
+    logo: "烧",
     logoBg: "bg-cyan-600",
-    round: "C\u8F6E",
-    status: "\u5DF2\u6295\u8D44",
+    round: "C轮",
+    status: "已投资",
     statusColor: "bg-emerald-50 text-emerald-700 border-emerald-200",
-    valuation: "18\u4EBF USD",
-    investAmount: "8000\u4E07 USD",
+    valuation: "18亿 USD",
+    investAmount: "8000万 USD",
   },
 ]
 
 const investFocus = [
-  { label: "GPU/TPU\u7B97\u529B\u82AF\u7247", weight: "\u9AD8" },
-  { label: "\u5206\u5E03\u5F0F\u8BAD\u7EC3\u6846\u67B6", weight: "\u9AD8" },
-  { label: "\u6A21\u578B\u63A8\u7406\u4F18\u5316", weight: "\u4E2D" },
-  { label: "\u6570\u636E\u6807\u6CE8\u5E73\u53F0", weight: "\u4E2D" },
-  { label: "MLOps\u5DE5\u5177\u94FE", weight: "\u4F4E" },
+  { label: "GPU/TPU算力芯片", weight: "高" },
+  { label: "分布式训练框架", weight: "高" },
+  { label: "模型推理优化", weight: "中" },
+  { label: "数据标注平台", weight: "中" },
+  { label: "MLOps工具链", weight: "低" },
 ]
 
 interface StrategyOverviewProps {
   strategy?: Strategy
+  onNavigateToHypotheses?: (prefillData?: { title: string; content: string; category: string }) => void
+  onNavigateToTerms?: (prefillData?: { title: string; content: string; category: string }) => void
 }
 
-export function StrategyOverview({ strategy }: StrategyOverviewProps) {
+export function StrategyOverview({ strategy, onNavigateToHypotheses, onNavigateToTerms }: StrategyOverviewProps) {
+  // AI推荐生成状态
+  const [hypothesesGenerated, setHypothesesGenerated] = useState(false)
+  const [hypothesesLoading, setHypothesesLoading] = useState(false)
+  const [termsGenerated, setTermsGenerated] = useState(false)
+  const [termsLoading, setTermsLoading] = useState(false)
+  const [materialsGenerated, setMaterialsGenerated] = useState(false)
+  const [materialsLoading, setMaterialsLoading] = useState(false)
+
+  // 生成推荐假设
+  const handleGenerateHypotheses = () => {
+    setHypothesesLoading(true)
+    setTimeout(() => {
+      setHypothesesLoading(false)
+      setHypothesesGenerated(true)
+    }, 1500)
+  }
+
+  // 生成推荐条款
+  const handleGenerateTerms = () => {
+    setTermsLoading(true)
+    setTimeout(() => {
+      setTermsLoading(false)
+      setTermsGenerated(true)
+    }, 1500)
+  }
+
+  // 生成推荐材料
+  const handleGenerateMaterials = () => {
+    setMaterialsLoading(true)
+    setTimeout(() => {
+      setMaterialsLoading(false)
+      setMaterialsGenerated(true)
+    }, 1500)
+  }
   // If strategy is provided (new strategy), use its data
   // Otherwise use default strategy info
   const isNewStrategy = strategy && strategy.id.startsWith("new-")
@@ -113,8 +220,8 @@ export function StrategyOverview({ strategy }: StrategyOverviewProps) {
     description: strategy.description,
     createdAt: strategy.createdAt,
     updatedAt: strategy.createdAt, // Same as createdAt for new strategies
-    manager: strategy.owner.name,
-    status: isNewStrategy ? "\u65B0\u5EFA" : "\u6D3B\u8DC3",
+    manager: "\u5f20\u4f1f",
+    status: isNewStrategy ? "新建" : "活跃",
     projectCount: strategy.projectCount,
     totalInvest: strategy.totalInvest,
     returnRate: strategy.returnRate,
@@ -130,14 +237,6 @@ export function StrategyOverview({ strategy }: StrategyOverviewProps) {
   return (
     <div className="h-full overflow-auto bg-[#F3F4F6]">
       <div className="mx-auto max-w-5xl px-8 py-8 space-y-6">
-        {/* Header */}
-        <div>
-          <h1 className="text-2xl font-bold text-[#111827]">{"\u7B56\u7565\u6982\u89C8"}</h1>
-          <p className="mt-1 text-sm text-[#6B7280]">
-            {info.name} - {info.type}
-          </p>
-        </div>
-
         {/* Strategy Info Card */}
         <div className="rounded-xl border border-[#E5E7EB] bg-white p-6">
           <div className="flex items-start gap-4">
@@ -152,9 +251,6 @@ export function StrategyOverview({ strategy }: StrategyOverviewProps) {
                 <Badge className={`${info.typeColor} hover:bg-blue-50`}>
                   {info.type}
                 </Badge>
-                <Badge className={isNewStrategy ? "bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-50" : "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-50"}>
-                  {info.status}
-                </Badge>
               </div>
               <p className="mt-2 text-sm leading-relaxed text-[#6B7280]">
                 {info.description}
@@ -162,13 +258,11 @@ export function StrategyOverview({ strategy }: StrategyOverviewProps) {
               <div className="mt-3 flex items-center gap-4 text-xs text-[#9CA3AF]">
                 <span className="flex items-center gap-1">
                   <Calendar className="h-3.5 w-3.5" />
-                  {"\u521B\u5EFA: "}
-                  {info.createdAt}
+                  创建: {info.createdAt}
                 </span>
                 <span className="flex items-center gap-1">
                   <Calendar className="h-3.5 w-3.5" />
-                  {"\u66F4\u65B0: "}
-                  {info.updatedAt}
+                  更新: {info.updatedAt}
                 </span>
                 <span className="flex items-center gap-1.5">
                   <Avatar className="h-4 w-4">
@@ -176,8 +270,7 @@ export function StrategyOverview({ strategy }: StrategyOverviewProps) {
                       {info.manager.slice(0, 1)}
                     </AvatarFallback>
                   </Avatar>
-                  {"\u8D1F\u8D23\u4EBA: "}
-                  {info.manager}
+                  负责人: {info.manager}
                 </span>
               </div>
             </div>
@@ -230,14 +323,18 @@ export function StrategyOverview({ strategy }: StrategyOverviewProps) {
 
         {/* Investment Focus */}
         <div className="rounded-xl border border-[#E5E7EB] bg-white p-6">
-          <h3 className="text-base font-semibold text-[#111827] mb-4">
-            {"\u6295\u8D44\u91CD\u70B9\u9886\u57DF"}
-          </h3>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-base font-semibold text-[#111827]">投资重点领域</h3>
+            <button className="flex items-center gap-1.5 rounded-lg border border-[#E5E7EB] bg-white px-3 py-1.5 text-xs font-medium text-[#374151] transition-colors hover:bg-[#F9FAFB]">
+              <Plus className="h-3.5 w-3.5" />
+              添加领域
+            </button>
+          </div>
           {isNewStrategy ? (
             <div className="flex flex-col items-center justify-center py-8 text-[#9CA3AF]">
               <Inbox className="h-10 w-10 mb-2" />
-              <p className="text-sm">{"\u6682\u65E0\u6295\u8D44\u91CD\u70B9\u9886\u57DF"}</p>
-              <p className="text-xs mt-1">{"\u8BF7\u5728\u5047\u8BBE\u6E05\u5355\u4E2D\u6DFB\u52A0\u6295\u8D44\u91CD\u70B9"}</p>
+              <p className="text-sm">暂无投资重点领域</p>
+              <p className="text-xs mt-1">请在假设清单中添加投资重点</p>
             </div>
           ) : (
             <div className="space-y-3">
@@ -249,15 +346,14 @@ export function StrategyOverview({ strategy }: StrategyOverviewProps) {
                   <span className="text-sm text-[#374151]">{item.label}</span>
                   <Badge
                     className={
-                      item.weight === "\u9AD8"
+                      item.weight === "高"
                         ? "bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-50"
-                        : item.weight === "\u4E2D"
+                        : item.weight === "中"
                           ? "bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-50"
                           : "bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-50"
                     }
                   >
-                    {"\u4F18\u5148\u7EA7: "}
-                    {item.weight}
+                    优先级: {item.weight}
                   </Badge>
                 </div>
               ))}
@@ -265,23 +361,176 @@ export function StrategyOverview({ strategy }: StrategyOverviewProps) {
           )}
         </div>
 
+        {/* AI推荐卡片区域 */}
+        <div className="grid grid-cols-3 gap-4">
+          {/* 推荐假设 */}
+          <div className="rounded-xl border border-[#E5E7EB] bg-white p-5">
+            <div className="flex items-center gap-2 mb-4">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-50">
+                <Lightbulb className="h-4 w-4 text-amber-600" />
+              </div>
+              <h3 className="text-sm font-semibold text-[#111827]">推荐假设</h3>
+            </div>
+            
+            {!hypothesesGenerated && !hypothesesLoading ? (
+              <div className="flex flex-col items-center justify-center py-6 text-[#9CA3AF]">
+                <Sparkles className="h-8 w-8 mb-2 text-[#D1D5DB]" />
+                <p className="text-xs text-center mb-3">AI将基于策略特点生成投资假设建议</p>
+                <button
+                  onClick={handleGenerateHypotheses}
+                  className="flex items-center gap-1.5 rounded-lg bg-[#2563EB] px-4 py-2 text-xs font-medium text-white transition-colors hover:bg-[#1D4ED8]"
+                >
+                  <Sparkles className="h-3.5 w-3.5" />
+                  生成推荐
+                </button>
+              </div>
+            ) : hypothesesLoading ? (
+              <div className="flex flex-col items-center justify-center py-8">
+                <Loader2 className="h-8 w-8 animate-spin text-[#2563EB] mb-2" />
+                <p className="text-xs text-[#6B7280]">AI正在分析策略特点...</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <p className="text-xs text-[#6B7280] bg-blue-50 rounded-lg p-2 border border-blue-100">
+                  基于AI基础大模型赛道分析，建议关注以下投资假设：
+                </p>
+                {aiRecommendedHypotheses.map((item) => (
+                  <div key={item.id} className="rounded-lg border border-[#E5E7EB] p-3 bg-[#F9FAFB]">
+                    <div className="flex items-start justify-between gap-2 mb-1">
+                      <span className="text-xs font-medium text-[#111827]">{item.title}</span>
+                      <Badge className="bg-gray-50 text-gray-600 border-gray-200 text-[10px] px-1.5 py-0">
+                        {item.category}
+                      </Badge>
+                    </div>
+                    <p className="text-[11px] text-[#6B7280] leading-relaxed line-clamp-2 mb-2">{item.content}</p>
+                    <button
+                      onClick={() => onNavigateToHypotheses?.({ title: item.title, content: item.content, category: item.category })}
+                      className="flex items-center gap-1 text-[11px] text-[#2563EB] font-medium hover:text-[#1D4ED8]"
+                    >
+                      创建此假设
+                      <ChevronRight className="h-3 w-3" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* 推荐条款 */}
+          <div className="rounded-xl border border-[#E5E7EB] bg-white p-5">
+            <div className="flex items-center gap-2 mb-4">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-50">
+                <FileText className="h-4 w-4 text-violet-600" />
+              </div>
+              <h3 className="text-sm font-semibold text-[#111827]">推荐条款</h3>
+            </div>
+            
+            {!termsGenerated && !termsLoading ? (
+              <div className="flex flex-col items-center justify-center py-6 text-[#9CA3AF]">
+                <Sparkles className="h-8 w-8 mb-2 text-[#D1D5DB]" />
+                <p className="text-xs text-center mb-3">AI将基于策略特点生成条款建议</p>
+                <button
+                  onClick={handleGenerateTerms}
+                  className="flex items-center gap-1.5 rounded-lg bg-[#2563EB] px-4 py-2 text-xs font-medium text-white transition-colors hover:bg-[#1D4ED8]"
+                >
+                  <Sparkles className="h-3.5 w-3.5" />
+                  生成推荐
+                </button>
+              </div>
+            ) : termsLoading ? (
+              <div className="flex flex-col items-center justify-center py-8">
+                <Loader2 className="h-8 w-8 animate-spin text-[#2563EB] mb-2" />
+                <p className="text-xs text-[#6B7280]">AI正在分析投资条款...</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <p className="text-xs text-[#6B7280] bg-violet-50 rounded-lg p-2 border border-violet-100">
+                  针对大模型投资的特殊风险，建议设置以下条款：
+                </p>
+                {aiRecommendedTerms.map((item) => (
+                  <div key={item.id} className="rounded-lg border border-[#E5E7EB] p-3 bg-[#F9FAFB]">
+                    <div className="flex items-start justify-between gap-2 mb-1">
+                      <span className="text-xs font-medium text-[#111827]">{item.title}</span>
+                      <Badge className="bg-gray-50 text-gray-600 border-gray-200 text-[10px] px-1.5 py-0">
+                        {item.category}
+                      </Badge>
+                    </div>
+                    <p className="text-[11px] text-[#6B7280] leading-relaxed line-clamp-2 mb-2">{item.content}</p>
+                    <button
+                      onClick={() => onNavigateToTerms?.({ title: item.title, content: item.content, category: item.category })}
+                      className="flex items-center gap-1 text-[11px] text-[#2563EB] font-medium hover:text-[#1D4ED8]"
+                    >
+                      创建此条款
+                      <ChevronRight className="h-3 w-3" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* 推荐项目材料 */}
+          <div className="rounded-xl border border-[#E5E7EB] bg-white p-5">
+            <div className="flex items-center gap-2 mb-4">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-50">
+                <FolderOpen className="h-4 w-4 text-emerald-600" />
+              </div>
+              <h3 className="text-sm font-semibold text-[#111827]">推荐项目材料</h3>
+            </div>
+            
+            {!materialsGenerated && !materialsLoading ? (
+              <div className="flex flex-col items-center justify-center py-6 text-[#9CA3AF]">
+                <Sparkles className="h-8 w-8 mb-2 text-[#D1D5DB]" />
+                <p className="text-xs text-center mb-3">AI将推荐需收集的尽调材料</p>
+                <button
+                  onClick={handleGenerateMaterials}
+                  className="flex items-center gap-1.5 rounded-lg bg-[#2563EB] px-4 py-2 text-xs font-medium text-white transition-colors hover:bg-[#1D4ED8]"
+                >
+                  <Sparkles className="h-3.5 w-3.5" />
+                  生成推荐
+                </button>
+              </div>
+            ) : materialsLoading ? (
+              <div className="flex flex-col items-center justify-center py-8">
+                <Loader2 className="h-8 w-8 animate-spin text-[#2563EB] mb-2" />
+                <p className="text-xs text-[#6B7280]">AI正在分析尽调需求...</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <p className="text-xs text-[#6B7280] bg-emerald-50 rounded-lg p-2 border border-emerald-100">
+                  大模型项目尽调建议重点收集以下材料：
+                </p>
+                {aiRecommendedMaterials.map((item) => (
+                  <div key={item.id} className="rounded-lg border border-[#E5E7EB] p-3 bg-[#F9FAFB]">
+                    <div className="flex items-start justify-between gap-2 mb-1">
+                      <span className="text-xs font-medium text-[#111827]">{item.title}</span>
+                      <Badge className="bg-gray-50 text-gray-600 border-gray-200 text-[10px] px-1.5 py-0">
+                        {item.category}
+                      </Badge>
+                    </div>
+                    <p className="text-[11px] text-[#6B7280] leading-relaxed line-clamp-2 mb-2">{item.content}</p>
+                    <button className="flex items-center gap-1 text-[11px] text-[#2563EB] font-medium hover:text-[#1D4ED8]">
+                      上传此材料
+                      <ChevronRight className="h-3 w-3" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
         {/* Applied Projects */}
         <div className="rounded-xl border border-[#E5E7EB] bg-white p-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-base font-semibold text-[#111827]">
-              {"\u5DF2\u5E94\u7528\u9879\u76EE"}
-            </h3>
-            <span className="text-xs text-[#9CA3AF]">
-              {"\u5171 "}
-              {isNewStrategy ? 0 : appliedProjects.length}
-              {" \u4E2A\u9879\u76EE"}
-            </span>
+            <h3 className="text-base font-semibold text-[#111827]">已应用项目</h3>
+            <span className="text-xs text-[#9CA3AF]">共 {isNewStrategy ? 0 : appliedProjects.length} 个项目</span>
           </div>
           {isNewStrategy ? (
             <div className="flex flex-col items-center justify-center py-8 text-[#9CA3AF]">
               <Inbox className="h-10 w-10 mb-2" />
-              <p className="text-sm">{"\u6682\u65E0\u5173\u8054\u9879\u76EE"}</p>
-              <p className="text-xs mt-1">{"\u5F85\u5C06\u7B56\u7565\u5E94\u7528\u5230\u9879\u76EE\u4E2D"}</p>
+              <p className="text-sm">暂无关联项目</p>
+              <p className="text-xs mt-1">待将策略应用到项目中</p>
             </div>
           ) : (
             <div className="space-y-3">

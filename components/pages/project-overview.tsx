@@ -4,7 +4,7 @@ import {
   DollarSign,
   TrendingUp,
   ShieldAlert,
-  Vote,
+
   Upload,
   CheckCircle2,
   FileText,
@@ -42,14 +42,6 @@ const defaultMetrics = [
     icon: ShieldAlert,
     trend: "2/10",
     trendUp: false,
-  },
-  {
-    label: "IC 投票进度",
-    value: "4/6",
-    unit: "票",
-    icon: Vote,
-    trend: "进行中",
-    trendUp: true,
   },
 ]
 
@@ -134,14 +126,6 @@ export function ProjectOverview({ project, isNewProject = false }: ProjectOvervi
         unit: "",
         icon: ShieldAlert,
         trend: "-",
-        trendUp: false,
-      },
-      {
-        label: "IC 投票进度",
-        value: "0/6",
-        unit: "票",
-        icon: Vote,
-        trend: "待启动",
         trendUp: false,
       },
     ]
@@ -307,8 +291,8 @@ export function ProjectOverview({ project, isNewProject = false }: ProjectOvervi
               <Badge className="bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-50">
                 B轮
               </Badge>
-              <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-50">
-                尽调中
+              <Badge className="bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-50">
+                设立期
               </Badge>
             </div>
           </div>
@@ -351,7 +335,7 @@ export function ProjectOverview({ project, isNewProject = false }: ProjectOvervi
               </div>
               <div>
                 <p className="text-xs text-[#6B7280]">项目状态</p>
-                <p className="text-sm font-medium text-[#111827]">尽调中</p>
+                <p className="text-sm font-medium text-[#111827]">设立期</p>
               </div>
             </div>
           </div>
@@ -390,16 +374,6 @@ export function ProjectOverview({ project, isNewProject = false }: ProjectOvervi
               </div>
             )
           })}
-        </div>
-
-        {/* IC Vote Progress */}
-        <div className="rounded-xl border border-[#E5E7EB] bg-white p-6">
-          <h3 className="mb-3 text-base font-semibold text-[#111827]">IC 投票进度</h3>
-          <Progress value={67} className="h-2" />
-          <div className="mt-2 flex justify-between text-xs text-[#6B7280]">
-            <span>已通过 4 票</span>
-            <span>需要 6 票</span>
-          </div>
         </div>
 
         {/* Timeline */}

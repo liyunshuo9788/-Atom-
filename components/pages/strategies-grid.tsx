@@ -16,18 +16,17 @@ import { cn } from "@/lib/utils"
 
 // Available owners
 const availableOwners = [
-  { id: "zhangwei", name: "\u5F20\u4F1F", initials: "\u5F20\u4F1F" },
-  { id: "lisi", name: "\u674E\u56DB", initials: "\u674E\u56DB" },
-  { id: "wangfang", name: "\u738B\u82B3", initials: "\u738B\u82B3" },
-  { id: "zhaoqiang", name: "\u8D75\u5F3A", initials: "\u8D75\u5F3A" },
-  { id: "chenzong", name: "\u9648\u603B", initials: "\u9648\u603B" },
+  { id: "zhangwei", name: "张伟", initials: "张伟" },
+  { id: "lisi", name: "李四", initials: "李四" },
+  { id: "wangfang", name: "王芳", initials: "王芳" },
+  { id: "zhaoqiang", name: "赵强", initials: "赵强" },
+  { id: "chenzong", name: "陈总", initials: "陈总" },
 ]
 
 // Strategy type configurations
 const strategyTypeConfig = {
-  "\u4E3B\u9898\u7B56\u7565": { color: "bg-blue-50 text-blue-700 border-blue-200", iconBg: "bg-blue-100 text-blue-600" },
-  "\u8D5B\u9053\u7B56\u7565": { color: "bg-violet-50 text-violet-700 border-violet-200", iconBg: "bg-violet-100 text-violet-600" },
-  "\u884C\u4E1A\u7B56\u7565": { color: "bg-emerald-50 text-emerald-700 border-emerald-200", iconBg: "bg-emerald-100 text-emerald-600" },
+  "主题策略": { color: "bg-blue-50 text-blue-700 border-blue-200", iconBg: "bg-blue-100 text-blue-600" },
+  "赛道策略": { color: "bg-violet-50 text-violet-700 border-violet-200", iconBg: "bg-violet-100 text-violet-600" },
 }
 
 // Available icons for selection
@@ -44,7 +43,7 @@ const availableIcons = [
 export interface Strategy {
   id: string
   name: string
-  type: string
+  type: "主题策略" | "赛道策略"
   typeColor: string
   icon: typeof Cpu
   iconBg: string
@@ -54,6 +53,8 @@ export interface Strategy {
   returnRate: string
   owner: { id: string; name: string; initials: string }
   createdAt: string
+  parentStrategyId?: string // 赛道策略挂靠的主题策略ID
+  parentStrategyName?: string // 赛道策略挂靠的主题策略名称
 }
 
 export interface PendingStrategy {
@@ -69,87 +70,137 @@ export interface PendingStrategy {
 export const initialStrategies: Strategy[] = [
   {
     id: "1",
-    name: "AI\u57FA\u7840\u8BBE\u65BD",
-    type: "\u4E3B\u9898\u7B56\u7565",
+    name: "AI基础设施",
+    type: "主题策略",
     typeColor: "bg-blue-50 text-blue-700 border-blue-200",
     icon: Cpu,
     iconBg: "bg-blue-100 text-blue-600",
-    description: "\u805A\u7126AI\u7B97\u529B\u3001\u6A21\u578B\u8BAD\u7EC3\u6846\u67B6\u548C\u57FA\u7840\u8F6F\u4EF6\u751F\u6001\u6295\u8D44",
+    description: "聚焦AI算力、模型训练框架和基础软件生态投资",
     projectCount: 12,
-    totalInvest: "8.5\u4EBF",
+    totalInvest: "8.5亿",
     returnRate: "+32%",
-    owner: { id: "zhangwei", name: "\u5F20\u4F1F", initials: "\u5F20\u4F1F" },
+    owner: { id: "zhangwei", name: "张伟", initials: "张伟" },
     createdAt: "2023-06-15",
   },
   {
     id: "2",
-    name: "\u5927\u6A21\u578B\u5E94\u7528",
-    type: "\u8D5B\u9053\u7B56\u7565",
+    name: "大模型应用",
+    type: "赛道策略",
     typeColor: "bg-violet-50 text-violet-700 border-violet-200",
     icon: Target,
     iconBg: "bg-violet-100 text-violet-600",
-    description: "\u5173\u6CE8\u5927\u8BED\u8A00\u6A21\u578B\u7684\u4F01\u4E1A\u7EA7\u548C\u6D88\u8D39\u7EA7\u5E94\u7528\u843D\u5730\u573A\u666F",
+    description: "关注大语言模型的企业级和消费级应用落地场景",
     projectCount: 8,
-    totalInvest: "5.2\u4EBF",
+    totalInvest: "5.2亿",
     returnRate: "+18%",
-    owner: { id: "lisi", name: "\u674E\u56DB", initials: "\u674E\u56DB" },
+    owner: { id: "lisi", name: "李四", initials: "李四" },
     createdAt: "2023-07-20",
+    parentStrategyId: "1",
+    parentStrategyName: "AI基础设施",
+  },
+  {
+    id: "7",
+    name: "企业数字化",
+    type: "主题策略",
+    typeColor: "bg-blue-50 text-blue-700 border-blue-200",
+    icon: Building2,
+    iconBg: "bg-emerald-100 text-emerald-600",
+    description: "聚焦企业数字化转型、智能化升级和业务流程优化",
+    projectCount: 15,
+    totalInvest: "12亿",
+    returnRate: "+25%",
+    owner: { id: "wangfang", name: "王芳", initials: "王芳" },
+    createdAt: "2023-02-20",
   },
   {
     id: "3",
-    name: "\u4F01\u4E1A\u670D\u52A1SaaS",
-    type: "\u884C\u4E1A\u7B56\u7565",
-    typeColor: "bg-emerald-50 text-emerald-700 border-emerald-200",
-    icon: Building2,
+    name: "企业服务SaaS",
+    type: "赛道策略",
+    typeColor: "bg-violet-50 text-violet-700 border-violet-200",
+    icon: Target,
     iconBg: "bg-emerald-100 text-emerald-600",
-    description: "\u8986\u76D6CRM\u3001ERP\u3001\u534F\u540C\u529E\u516C\u7B49\u4F01\u4E1A\u6570\u5B57\u5316\u8F6C\u578B\u8D5B\u9053",
+    description: "覆盖CRM、ERP、协同办公等企业数字化转型赛道",
     projectCount: 15,
-    totalInvest: "12\u4EBF",
+    totalInvest: "12亿",
     returnRate: "+25%",
-    owner: { id: "wangfang", name: "\u738B\u82B3", initials: "\u738B\u82B3" },
+    owner: { id: "wangfang", name: "王芳", initials: "王芳" },
     createdAt: "2023-03-10",
+    parentStrategyId: "7",
+    parentStrategyName: "企业数字化",
   },
   {
     id: "4",
-    name: "\u751F\u7269\u79D1\u6280",
-    type: "\u4E3B\u9898\u7B56\u7565",
+    name: "生物科技",
+    type: "主题策略",
     typeColor: "bg-blue-50 text-blue-700 border-blue-200",
     icon: Zap,
     iconBg: "bg-rose-100 text-rose-600",
-    description: "\u5E03\u5C40AI\u5236\u836F\u3001\u57FA\u56E0\u6CBB\u7597\u548C\u7CBE\u51C6\u533B\u7597\u7B49\u524D\u6CBF\u9886\u57DF",
+    description: "布局AI制药、基因治疗和精准医疗等前沿领域",
     projectCount: 6,
-    totalInvest: "4.8\u4EBF",
+    totalInvest: "4.8亿",
     returnRate: "+12%",
-    owner: { id: "zhaoqiang", name: "\u8D75\u5F3A", initials: "\u8D75\u5F3A" },
+    owner: { id: "zhaoqiang", name: "赵强", initials: "赵强" },
     createdAt: "2023-09-05",
   },
   {
-    id: "5",
-    name: "\u65B0\u80FD\u6E90\u6C7D\u8F66",
-    type: "\u8D5B\u9053\u7B56\u7565",
-    typeColor: "bg-violet-50 text-violet-700 border-violet-200",
+    id: "8",
+    name: "清洁能源",
+    type: "主题策略",
+    typeColor: "bg-blue-50 text-blue-700 border-blue-200",
     icon: Leaf,
     iconBg: "bg-lime-100 text-lime-600",
-    description: "\u667A\u80FD\u9A7E\u9A76\u3001\u52A8\u529B\u7535\u6C60\u548C\u5145\u7535\u57FA\u7840\u8BBE\u65BD\u5168\u4EA7\u4E1A\u94FE\u6295\u8D44",
+    description: "聚焦新能源、储能技术和绿色低碳产业投资",
     projectCount: 10,
-    totalInvest: "18\u4EBF",
+    totalInvest: "18亿",
     returnRate: "+28%",
-    owner: { id: "lisi", name: "\u674E\u56DB", initials: "\u674E\u56DB" },
+    owner: { id: "lisi", name: "李四", initials: "李四" },
+    createdAt: "2023-04-10",
+  },
+  {
+    id: "5",
+    name: "新能源汽车",
+    type: "赛道策略",
+    typeColor: "bg-violet-50 text-violet-700 border-violet-200",
+    icon: Zap,
+    iconBg: "bg-lime-100 text-lime-600",
+    description: "智能驾驶、动力电池和充电基础设施全产业链投资",
+    projectCount: 10,
+    totalInvest: "18亿",
+    returnRate: "+28%",
+    owner: { id: "lisi", name: "李四", initials: "李四" },
     createdAt: "2023-05-18",
+    parentStrategyId: "8",
+    parentStrategyName: "清洁能源",
+  },
+  {
+    id: "9",
+    name: "国际贸易",
+    type: "主题策略",
+    typeColor: "bg-blue-50 text-blue-700 border-blue-200",
+    icon: TrendingUp,
+    iconBg: "bg-amber-100 text-amber-600",
+    description: "聚焦跨境贸易、全球供应链和国际化业务拓展",
+    projectCount: 9,
+    totalInvest: "6.3亿",
+    returnRate: "+22%",
+    owner: { id: "chenzong", name: "陈总", initials: "陈总" },
+    createdAt: "2023-07-15",
   },
   {
     id: "6",
-    name: "\u51FA\u6D77\u7535\u5546",
-    type: "\u884C\u4E1A\u7B56\u7565",
-    typeColor: "bg-emerald-50 text-emerald-700 border-emerald-200",
-    icon: TrendingUp,
+    name: "出海电商",
+    type: "赛道策略",
+    typeColor: "bg-violet-50 text-violet-700 border-violet-200",
+    icon: Target,
     iconBg: "bg-amber-100 text-amber-600",
-    description: "\u8DE8\u5883\u7535\u5546\u5E73\u53F0\u3001\u54C1\u724C\u51FA\u6D77\u548C\u4F9B\u5E94\u94FE\u670D\u52A1\u751F\u6001",
+    description: "跨境电商平台、品牌出海和供应链服务生态",
     projectCount: 9,
-    totalInvest: "6.3\u4EBF",
+    totalInvest: "6.3亿",
     returnRate: "+22%",
-    owner: { id: "chenzong", name: "\u9648\u603B", initials: "\u9648\u603B" },
+    owner: { id: "chenzong", name: "陈总", initials: "陈总" },
     createdAt: "2023-08-25",
+    parentStrategyId: "9",
+    parentStrategyName: "国际贸易",
   },
 ]
 
@@ -167,9 +218,13 @@ export function StrategiesGrid({ strategies, onStrategiesChange, onSelectStrateg
   // Form state
   const [newName, setNewName] = useState("")
   const [newDescription, setNewDescription] = useState("")
-  const [newType, setNewType] = useState<string>("\u4E3B\u9898\u7B56\u7565")
+  const [newType, setNewType] = useState<"主题策略" | "赛道策略">("主题策略")
   const [selectedIconIndex, setSelectedIconIndex] = useState(0)
   const [selectedOwnerId, setSelectedOwnerId] = useState("zhangwei")
+  const [selectedParentStrategyId, setSelectedParentStrategyId] = useState<string>("")
+
+  // Get theme strategies for parent selection
+  const themeStrategies = strategies.filter((s) => s.type === "主题策略")
 
   const filteredStrategies = strategies.filter(
     (s) =>
@@ -179,10 +234,13 @@ export function StrategiesGrid({ strategies, onStrategiesChange, onSelectStrateg
 
   function handleCreate() {
     if (!newName.trim()) return
+    // 赛道策略必须选择挂靠的主题策略
+    if (newType === "赛道策略" && !selectedParentStrategyId) return
 
-    const typeConfig = strategyTypeConfig[newType as keyof typeof strategyTypeConfig]
+    const typeConfig = strategyTypeConfig[newType]
     const iconConfig = availableIcons[selectedIconIndex]
     const owner = availableOwners.find((o) => o.id === selectedOwnerId) || availableOwners[0]
+    const parentStrategy = themeStrategies.find((s) => s.id === selectedParentStrategyId)
 
     const newStrategy: Omit<Strategy, "id"> = {
       name: newName.trim(),
@@ -190,24 +248,27 @@ export function StrategiesGrid({ strategies, onStrategiesChange, onSelectStrateg
       typeColor: typeConfig.color,
       icon: iconConfig.icon,
       iconBg: iconConfig.bg,
-      description: newDescription.trim() || "\u6682\u65E0\u7B56\u7565\u7B80\u4ECB",
+      description: newDescription.trim() || "暂无策略简介",
       projectCount: 0,
       totalInvest: "0",
       returnRate: "+0%",
       owner,
       createdAt: new Date().toISOString().split("T")[0],
+      ...(newType === "赛道策略" && parentStrategy
+        ? { parentStrategyId: parentStrategy.id, parentStrategyName: parentStrategy.name }
+        : {}),
     }
 
     const pendingRequest: PendingStrategy = {
       id: `pending-${Date.now()}`,
       strategy: newStrategy,
       changeId: `CR-${Date.now().toString().slice(-6)}`,
-      changeName: `\u65B0\u5EFA\u7B56\u7565: ${newName.trim()}`,
-      initiator: { id: "zhangwei", name: "\u5F20\u4F1F", initials: "\u5F20\u4F1F" },
+      changeName: `新创策略: ${newName.trim()}`,
+      initiator: { id: "zhangwei", name: "张伟", initials: "张伟" },
       initiatedAt: new Date().toISOString().split("T")[0],
       reviewers: [
-        { id: "zhangwei", name: "\u5F20\u4F1F", initials: "\u5F20\u4F1F" },
-        { id: "lisi", name: "\u674E\u56DB", initials: "\u674E\u56DB" },
+        { id: "zhangwei", name: "张伟", initials: "张伟" },
+        { id: "lisi", name: "李四", initials: "李四" },
       ],
     }
 
@@ -219,9 +280,10 @@ export function StrategiesGrid({ strategies, onStrategiesChange, onSelectStrateg
   function resetForm() {
     setNewName("")
     setNewDescription("")
-    setNewType("\u4E3B\u9898\u7B56\u7565")
+    setNewType("主题策略")
     setSelectedIconIndex(0)
     setSelectedOwnerId("zhangwei")
+    setSelectedParentStrategyId("")
   }
 
   return (
@@ -234,10 +296,8 @@ export function StrategiesGrid({ strategies, onStrategiesChange, onSelectStrateg
               <Briefcase className="h-5 w-5" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-[#111827]">{"\u7B56\u7565\u5217\u8868"}</h1>
-              <p className="text-sm text-[#6B7280]">
-                {"\u5171 "}{strategies.length}{" \u4E2A\u6295\u8D44\u7B56\u7565"}
-              </p>
+              <h1 className="text-2xl font-bold text-[#111827]">策略列表</h1>
+              <p className="text-sm text-[#6B7280]">共 {strategies.length} 个投资策略</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
@@ -245,7 +305,7 @@ export function StrategiesGrid({ strategies, onStrategiesChange, onSelectStrateg
               <Search className="h-4 w-4 text-[#9CA3AF]" />
               <input
                 type="text"
-                placeholder={"\u641C\u7D22\u7B56\u7565..."}
+                placeholder="搜索策略..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-48 bg-transparent text-sm text-[#374151] outline-none placeholder:text-[#9CA3AF]"
@@ -256,7 +316,7 @@ export function StrategiesGrid({ strategies, onStrategiesChange, onSelectStrateg
               className="flex items-center gap-1.5 rounded-lg bg-[#2563EB] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[#1D4ED8]"
             >
               <Plus className="h-4 w-4" />
-              {"\u65B0\u5EFA\u7B56\u7565"}
+              新创策略
             </button>
           </div>
         </div>
@@ -289,6 +349,13 @@ export function StrategiesGrid({ strategies, onStrategiesChange, onSelectStrateg
                 <h3 className="text-base font-semibold text-[#111827] mb-1">
                   {strategy.name}
                 </h3>
+                {strategy.type === "赛道策略" && strategy.parentStrategyName && (
+                  <div className="mb-2">
+                    <span className="inline-flex items-center rounded-md bg-blue-50 border border-blue-200 px-2 py-0.5 text-[11px] font-medium text-blue-700">
+                      挂靠主题：{strategy.parentStrategyName}
+                    </span>
+                  </div>
+                )}
                 <p className="text-xs text-[#6B7280] mb-3 leading-relaxed">
                   {strategy.description}
                 </p>
@@ -306,19 +373,19 @@ export function StrategiesGrid({ strategies, onStrategiesChange, onSelectStrateg
                 {/* Stats Row */}
                 <div className="mt-auto grid grid-cols-3 gap-3 rounded-lg bg-[#F9FAFB] p-3">
                   <div>
-                    <p className="text-[11px] text-[#9CA3AF]">{"\u9879\u76EE\u6570"}</p>
+                    <p className="text-[11px] text-[#9CA3AF]">项目数</p>
                     <p className="text-sm font-semibold text-[#111827]">
                       {strategy.projectCount}
                     </p>
                   </div>
                   <div>
-                    <p className="text-[11px] text-[#9CA3AF]">{"\u603B\u6295\u8D44\u989D"}</p>
+                    <p className="text-[11px] text-[#9CA3AF]">总投资额</p>
                     <p className="text-sm font-semibold text-[#111827]">
                       {strategy.totalInvest}
                     </p>
                   </div>
                   <div>
-                    <p className="text-[11px] text-[#9CA3AF]">{"\u6536\u76CA\u7387"}</p>
+                    <p className="text-[11px] text-[#9CA3AF]">收益率</p>
                     <p className="text-sm font-semibold text-emerald-600">
                       {strategy.returnRate}
                     </p>
@@ -334,16 +401,16 @@ export function StrategiesGrid({ strategies, onStrategiesChange, onSelectStrateg
       <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
-            <DialogTitle className="text-lg font-semibold text-[#111827]">{"\u65B0\u5EFA\u7B56\u7565"}</DialogTitle>
+            <DialogTitle className="text-lg font-semibold text-[#111827]">新创策略</DialogTitle>
             <DialogDescription className="text-sm text-[#6B7280]">
-              {"\u521B\u5EFA\u4E00\u4E2A\u65B0\u7684\u6295\u8D44\u7B56\u7565\uFF0C\u7528\u4E8E\u7BA1\u7406\u548C\u8DDF\u8E2A\u7279\u5B9A\u9886\u57DF\u7684\u6295\u8D44\u9879\u76EE"}
+              创建一个新的投资策略，用于管理和跟踪特定领域的投资项目
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-5 py-4">
             {/* Logo Selection */}
             <div className="space-y-2">
-              <Label className="text-sm font-medium text-[#374151]">{"\u7B56\u7565Logo"}</Label>
+              <Label className="text-sm font-medium text-[#374151]">策略Logo</Label>
               <div className="flex flex-wrap gap-2">
                 {availableIcons.map((item, index) => {
                   const IconComponent = item.icon
@@ -370,13 +437,13 @@ export function StrategiesGrid({ strategies, onStrategiesChange, onSelectStrateg
             {/* Name */}
             <div className="space-y-2">
               <Label htmlFor="strategy-name" className="text-sm font-medium text-[#374151]">
-                {"\u7B56\u7565\u540D\u79F0"}
+                策略名称
               </Label>
               <Input
                 id="strategy-name"
                 value={newName}
                 onChange={(e) => setNewName(e.target.value)}
-                placeholder={"\u8F93\u5165\u7B56\u7565\u540D\u79F0"}
+                placeholder="输入策略名称"
                 className="h-10"
               />
             </div>
@@ -384,13 +451,13 @@ export function StrategiesGrid({ strategies, onStrategiesChange, onSelectStrateg
             {/* Description */}
             <div className="space-y-2">
               <Label htmlFor="strategy-desc" className="text-sm font-medium text-[#374151]">
-                {"\u7B56\u7565\u7B80\u4ECB"}
+                策略简介
               </Label>
               <textarea
                 id="strategy-desc"
                 value={newDescription}
                 onChange={(e) => setNewDescription(e.target.value)}
-                placeholder={"\u8F93\u5165\u7B56\u7565\u7B80\u4ECB..."}
+                placeholder="输入策略简介..."
                 rows={3}
                 className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 resize-none"
               />
@@ -398,7 +465,7 @@ export function StrategiesGrid({ strategies, onStrategiesChange, onSelectStrateg
 
             {/* Owner Selection */}
             <div className="space-y-2">
-              <Label className="text-sm font-medium text-[#374151]">{"\u8D1F\u8D23\u4EBA"}</Label>
+              <Label className="text-sm font-medium text-[#374151]">负责人</Label>
               <div className="flex flex-wrap gap-2">
                 {availableOwners.map((owner) => (
                   <button
@@ -425,13 +492,18 @@ export function StrategiesGrid({ strategies, onStrategiesChange, onSelectStrateg
 
             {/* Type Selection */}
             <div className="space-y-2">
-              <Label className="text-sm font-medium text-[#374151]">{"\u7B56\u7565\u7C7B\u578B"}</Label>
+              <Label className="text-sm font-medium text-[#374151]">策略类型</Label>
               <div className="flex gap-2">
-                {Object.keys(strategyTypeConfig).map((type) => (
+                {(Object.keys(strategyTypeConfig) as Array<"主题策略" | "赛道策略">).map((type) => (
                   <button
                     key={type}
                     type="button"
-                    onClick={() => setNewType(type)}
+                    onClick={() => {
+                      setNewType(type)
+                      if (type === "主题策略") {
+                        setSelectedParentStrategyId("")
+                      }
+                    }}
                     className={cn(
                       "flex-1 rounded-lg border px-3 py-2.5 text-sm font-medium transition-all",
                       newType === type
@@ -444,6 +516,47 @@ export function StrategiesGrid({ strategies, onStrategiesChange, onSelectStrateg
                 ))}
               </div>
             </div>
+
+            {/* Parent Strategy Selection (only for 赛道策略) */}
+            {newType === "赛道策略" && (
+              <div className="space-y-2">
+                <Label className="text-sm font-medium text-[#374151]">
+                  挂靠主题策略 <span className="text-red-500">*</span>
+                </Label>
+                {themeStrategies.length === 0 ? (
+                  <p className="text-sm text-[#9CA3AF] p-3 bg-[#F9FAFB] rounded-lg">
+                    暂无可挂靠的主题策略，请先创建主题策略
+                  </p>
+                ) : (
+                  <div className="flex flex-wrap gap-2">
+                    {themeStrategies.map((strategy) => {
+                      const Icon = strategy.icon
+                      return (
+                        <button
+                          key={strategy.id}
+                          type="button"
+                          onClick={() => setSelectedParentStrategyId(strategy.id)}
+                          className={cn(
+                            "flex items-center gap-2 rounded-lg border px-3 py-2 text-sm transition-all",
+                            selectedParentStrategyId === strategy.id
+                              ? "border-[#2563EB] bg-[#2563EB]/5 text-[#2563EB]"
+                              : "border-[#E5E7EB] bg-white text-[#6B7280] hover:border-[#D1D5DB]"
+                          )}
+                        >
+                          <div className={cn("flex h-6 w-6 items-center justify-center rounded-md", strategy.iconBg)}>
+                            <Icon className="h-3.5 w-3.5" />
+                          </div>
+                          {strategy.name}
+                        </button>
+                      )
+                    })}
+                  </div>
+                )}
+                <p className="text-xs text-[#9CA3AF]">
+                  赛道策略将继承所选主题策略的假设清单和条款清单
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Footer */}
@@ -456,15 +569,15 @@ export function StrategiesGrid({ strategies, onStrategiesChange, onSelectStrateg
               }}
               className="rounded-lg border border-[#E5E7EB] bg-white px-4 py-2 text-sm font-medium text-[#374151] transition-colors hover:bg-[#F9FAFB]"
             >
-              {"\u53D6\u6D88"}
+              取消
             </button>
             <button
               type="button"
               onClick={handleCreate}
-              disabled={!newName.trim()}
+              disabled={!newName.trim() || (newType === "赛道策略" && !selectedParentStrategyId)}
               className="rounded-lg bg-[#2563EB] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[#1D4ED8] disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {"\u521B\u5EFA"}
+              创建
             </button>
           </div>
         </DialogContent>
