@@ -41,19 +41,19 @@ export function Login({ onLogin }: LoginProps) {
     setError("")
 
     if (!username.trim()) {
-      setError("\u8BF7\u8F93\u5165\u7528\u6237\u540D")
+      setError("请输入用户名")
       return
     }
     if (!password.trim()) {
-      setError("\u8BF7\u8F93\u5165\u5BC6\u7801")
+      setError("请输入密码")
       return
     }
     if (!captchaInput.trim()) {
-      setError("\u8BF7\u8F93\u5165\u9A8C\u8BC1\u7801")
+      setError("请输入验证码")
       return
     }
     if (captchaInput.toUpperCase() !== captchaCode) {
-      setError("\u9A8C\u8BC1\u7801\u9519\u8BEF")
+      setError("验证码错误")
       refreshCaptcha()
       return
     }
@@ -81,7 +81,7 @@ export function Login({ onLogin }: LoginProps) {
             <span className="text-2xl font-bold text-white italic">A</span>
           </div>
           <h1 className="text-2xl font-bold text-white">AtomCAP</h1>
-          <p className="text-sm text-[#94A3B8] mt-1">PE/VC{"\u6295\u8D44\u51B3\u7B56\u7BA1\u7406\u7CFB\u7EDF"}</p>
+          <p className="text-sm text-[#94A3B8] mt-1">PE/VC投资决策管理系统</p>
         </div>
 
         {/* Form Card */}
@@ -89,14 +89,14 @@ export function Login({ onLogin }: LoginProps) {
           <form onSubmit={handleSubmit} className="space-y-5">
             {/* Username */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-[#E2E8F0]">{"\u7528\u6237\u540D"}</label>
+              <label className="text-sm font-medium text-[#E2E8F0]">用户名</label>
               <div className="relative">
                 <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#64748B]" />
                 <Input
                   type="text"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  placeholder={"\u8BF7\u8F93\u5165\u7528\u6237\u540D"}
+                  placeholder="请输入用户名"
                   className="pl-10 h-11 bg-[#0F172A] border-[#334155] text-white placeholder:text-[#64748B] focus:border-[#2563EB] focus:ring-[#2563EB]/20"
                 />
               </div>
@@ -104,14 +104,14 @@ export function Login({ onLogin }: LoginProps) {
 
             {/* Password */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-[#E2E8F0]">{"\u5BC6\u7801"}</label>
+              <label className="text-sm font-medium text-[#E2E8F0]">密码</label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#64748B]" />
                 <Input
                   type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder={"\u8BF7\u8F93\u5165\u5BC6\u7801"}
+                  placeholder="请输入密码"
                   className="pl-10 pr-10 h-11 bg-[#0F172A] border-[#334155] text-white placeholder:text-[#64748B] focus:border-[#2563EB] focus:ring-[#2563EB]/20"
                 />
                 <button
@@ -126,7 +126,7 @@ export function Login({ onLogin }: LoginProps) {
 
             {/* Captcha */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-[#E2E8F0]">{"\u9A8C\u8BC1\u7801"}</label>
+              <label className="text-sm font-medium text-[#E2E8F0]">验证码</label>
               <div className="flex gap-3">
                 <div className="relative flex-1">
                   <ShieldCheck className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#64748B]" />
@@ -134,7 +134,7 @@ export function Login({ onLogin }: LoginProps) {
                     type="text"
                     value={captchaInput}
                     onChange={(e) => setCaptchaInput(e.target.value)}
-                    placeholder={"\u8BF7\u8F93\u5165\u9A8C\u8BC1\u7801"}
+                    placeholder="请输入验证码"
                     maxLength={4}
                     className="pl-10 h-11 bg-[#0F172A] border-[#334155] text-white placeholder:text-[#64748B] focus:border-[#2563EB] focus:ring-[#2563EB]/20 uppercase"
                   />
@@ -149,7 +149,7 @@ export function Login({ onLogin }: LoginProps) {
                     type="button"
                     onClick={refreshCaptcha}
                     className="flex h-11 w-11 items-center justify-center rounded-lg border border-[#334155] bg-[#0F172A] text-[#64748B] hover:text-[#94A3B8] hover:border-[#475569] transition-colors"
-                    title={"\u5237\u65B0\u9A8C\u8BC1\u7801"}
+                    title="刷新验证码"
                   >
                     <RefreshCw className="h-4 w-4" />
                   </button>
@@ -177,10 +177,10 @@ export function Login({ onLogin }: LoginProps) {
               {isLoading ? (
                 <span className="flex items-center justify-center gap-2">
                   <RefreshCw className="h-4 w-4 animate-spin" />
-                  {"\u767B\u5F55\u4E2D..."}
+                  登录中...
                 </span>
               ) : (
-                "\u767B\u5F55"
+                "登录"
               )}
             </button>
           </form>
@@ -188,17 +188,14 @@ export function Login({ onLogin }: LoginProps) {
           {/* Footer */}
           <div className="mt-6 pt-6 border-t border-[#334155]">
             <p className="text-center text-xs text-[#64748B]">
-              {"\u9996\u6B21\u4F7F\u7528\uFF1F"}{" "}
-              <button type="button" className="text-[#2563EB] hover:text-[#60A5FA] transition-colors">
-                {"\u8054\u7CFB\u7BA1\u7406\u5458\u83B7\u53D6\u8D26\u53F7"}
-              </button>
+              首次使用？ <button type="button" className="text-[#2563EB] hover:text-[#60A5FA] transition-colors">联系管理员获取账号</button>
             </p>
           </div>
         </div>
 
         {/* Copyright */}
         <p className="text-center text-xs text-[#64748B] mt-6">
-          {"\u00A9 2024 AtomCAP. All rights reserved."}
+          © 2024 AtomCAP. All rights reserved.
         </p>
       </div>
     </div>
