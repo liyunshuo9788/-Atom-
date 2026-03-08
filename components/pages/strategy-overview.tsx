@@ -130,30 +130,6 @@ export function StrategyOverview({ strategy }: StrategyOverviewProps) {
   return (
     <div className="h-full overflow-auto bg-[#F3F4F6]">
       <div className="mx-auto max-w-5xl px-8 py-8 space-y-6">
-        {/* Header */}
-            <div>
-              <span className="text-sm text-[#6B7280]">项目数</span>
-              <p className="text-2xl font-bold text-[#111827]">{info.projectCount}</p>
-              <p className="mt-1 text-xs text-[#9CA3AF]">个已关联项目</p>
-            </div>
-            <div>
-              <span className="text-sm text-[#6B7280]">总投资额</span>
-              <p className="text-2xl font-bold text-[#111827]">{info.totalInvest}</p>
-              <p className="mt-1 text-xs text-[#9CA3AF]">USD</p>
-            </div>
-            <div>
-              <span className="text-sm text-[#6B7280]">收益率</span>
-              <p className={`text-2xl font-bold ${info.returnRate === "+0%" ? "text-[#9CA3AF]" : "text-emerald-600"}`}>
-                {info.returnRate}
-              </p>
-              <p className="mt-1 text-xs text-[#9CA3AF]">综合回报</p>
-            </div>
-            <div>
-              <span className="text-sm text-[#6B7280]">平均估值</span>
-              <p className="text-2xl font-bold text-[#111827]">{info.avgValuation}</p>
-              <p className="mt-1 text-xs text-[#9CA3AF]">USD</p>
-            </div>
-
         {/* Strategy Info Card */}
         <div className="rounded-xl border border-[#E5E7EB] bg-white p-6">
           <div className="flex items-start gap-4">
