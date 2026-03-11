@@ -35,7 +35,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { cn } from "@/lib/utils"
-import { Trash2, Upload, Link2 } from "lucide-react"
+import { Trash2, Upload, Link2, Pencil } from "lucide-react"
 
 /* ─── Types ──────────────────────────────────── */
 export interface PhaseLog {
@@ -99,16 +99,13 @@ interface ThinkingStep {
   status: "waiting" | "active" | "completed"
 }
 
-// Generated hypothesis suggestion with linked items
-export interface GeneratedSuggestion {
+// Specific hypothesis within a suggestion
+export interface SuggestionHypothesis {
   id: string
-  title: string
   direction: string
   category: string
-  content: string
-  linkedHypotheses: { id: string; name: string }[]
-  linkedTerms: { id: string; name: string }[]
-  linkedMaterials: { id: string; name: string }[]
+  name: string
+  isExisting: boolean // true = modify existing, false = create new
   // Pre-filled value points and risk points for creation
   valuePoints: {
     id: string
@@ -122,6 +119,17 @@ export interface GeneratedSuggestion {
     evidenceDescription: string
     analysisContent: string
   }[]
+}
+
+// Generated hypothesis suggestion with linked items
+export interface GeneratedSuggestion {
+  id: string
+  title: string
+  content: string
+  linkedTerms: { id: string; name: string }[]
+  linkedMaterials: { id: string; name: string }[]
+  // Multiple specific hypotheses under this suggestion
+  hypotheses: SuggestionHypothesis[]
 }
 
 // Project hypothesis creation form data
@@ -637,17 +645,17 @@ export function Workflow({
     setGeneratedSuggestions([])
   }
   
-  function handleCreateFromSuggestion(suggestion: GeneratedSuggestion) {
-    // Pre-fill form with suggestion data
+  function handleCreateFromHypothesis(hypothesis: SuggestionHypothesis) {
+    // Pre-fill form with hypothesis data
     setFormData({
-      direction: suggestion.direction,
-      category: suggestion.category,
-      name: suggestion.title,
-      valuePoints: suggestion.valuePoints.map((vp) => ({
+      direction: hypothesis.direction,
+      category: hypothesis.category,
+      name: hypothesis.name,
+      valuePoints: hypothesis.valuePoints.map((vp) => ({
         ...vp,
         evidenceMaterialIds: [],
       })),
-      riskPoints: suggestion.riskPoints.map((rp) => ({
+      riskPoints: hypothesis.riskPoints.map((rp) => ({
         ...rp,
         evidenceMaterialIds: [],
       })),
@@ -791,13 +799,7 @@ export function Workflow({
             {
               id: "gs1",
               title: "补充技术壁垒假设",
-              direction: "技术攻关",
-              category: "技术壁垒",
               content: "当前假设清单缺少对核心技术壁垒的系统性论证。建议增加关于专利布局、技术团队稳定性、技术迭代能力等方面的假设，以更全面评估投资标的的技术竞争力。",
-              linkedHypotheses: [
-                { id: "h1", name: "大模型推理成本下降假设" },
-                { id: "h2", name: "技术团队核心成员稳定性假设" },
-              ],
               linkedTerms: [
                 { id: "t1", name: "知识产权归属条款" },
                 { id: "t2", name: "核心团队锁定条款" },
@@ -806,23 +808,52 @@ export function Workflow({
                 { id: "m1", name: "专利清单及技术白皮书" },
                 { id: "m2", name: "核心团队履历及期权安排" },
               ],
-              valuePoints: [
-                { id: "vp1", title: "专利布局完善", evidenceDescription: "公司在核心技术领域拥有20+项专利", analysisContent: "专利覆盖核心算法、模型架构和数据处理流程，形成完整的技术护城河。" },
-                { id: "vp2", title: "技术团队稳定", evidenceDescription: "核心技术人员平均在职时间超过3年", analysisContent: "团队稳定性有助于技术积累和持续创新。" },
-              ],
-              riskPoints: [
-                { id: "rp1", title: "技术迭代风险", evidenceDescription: "AI领域技术更新速度快", analysisContent: "需持续关注竞品技术动态，评估公司技术迭代能力。" },
+              hypotheses: [
+                {
+                  id: "sh1-1",
+                  direction: "技术攻关",
+                  category: "技术壁垒",
+                  name: "专利布局完善性假设",
+                  isExisting: false,
+                  valuePoints: [
+                    { id: "vp1", title: "专利布局完善", evidenceDescription: "公司在核心技术领域拥有20+项专利", analysisContent: "专利覆盖核心算法、模型架构和数据处理流程，形成完整的技术护城河。" },
+                  ],
+                  riskPoints: [
+                    { id: "rp1", title: "专利维护成本", evidenceDescription: "专利维护需要持续投入", analysisContent: "需评估专利维护成本对运营的影响。" },
+                  ],
+                },
+                {
+                  id: "sh1-2",
+                  direction: "技术攻关",
+                  category: "团队稳定性",
+                  name: "技术团队核心成员稳定性假设",
+                  isExisting: true,
+                  valuePoints: [
+                    { id: "vp2", title: "技术团队稳定", evidenceDescription: "核心技术人员平均在职时间超过3年", analysisContent: "团队稳定性有助于技术积累和持续创新。" },
+                  ],
+                  riskPoints: [
+                    { id: "rp2", title: "人才流失风险", evidenceDescription: "AI行业人才竞争激烈", analysisContent: "需关注核心人员激励机制和竞业限制条款。" },
+                  ],
+                },
+                {
+                  id: "sh1-3",
+                  direction: "技术攻关",
+                  category: "技术迭代",
+                  name: "技术迭代能力假设",
+                  isExisting: false,
+                  valuePoints: [
+                    { id: "vp3", title: "迭代速度快", evidenceDescription: "产品更新周期短于行业平均", analysisContent: "快速迭代能力体现团队执行力和技术实力。" },
+                  ],
+                  riskPoints: [
+                    { id: "rp3", title: "技术迭代风险", evidenceDescription: "AI领域技术更新速度快", analysisContent: "需持续关注竞品技术动态，评估公司技术迭代能力。" },
+                  ],
+                },
               ],
             },
             {
               id: "gs2",
               title: "细化市场规模假设",
-              direction: "市场判断",
-              category: "市场规模",
               content: "现有TAM/SAM/SOM假设过于笼统，建议从地区维度、行业维度、客户规模维度进行拆分，形成更精细的市场规模假设矩阵。",
-              linkedHypotheses: [
-                { id: "h3", name: "多模态融合市场假设" },
-              ],
               linkedTerms: [
                 { id: "t3", name: "市场拓展里程碑条款" },
               ],
@@ -830,22 +861,39 @@ export function Workflow({
                 { id: "m3", name: "行业研究报告_2024Q4" },
                 { id: "m4", name: "竞品市场份额分析" },
               ],
-              valuePoints: [
-                { id: "vp3", title: "市场增长潜力大", evidenceDescription: "AI基础设施市场年复合增长率超30%", analysisContent: "市场处于快速增长期，先发优势明显。" },
-              ],
-              riskPoints: [
-                { id: "rp2", title: "市场竞争加剧", evidenceDescription: "行业玩家数量持续增加", analysisContent: "需评估公司差异化竞争能力。" },
+              hypotheses: [
+                {
+                  id: "sh2-1",
+                  direction: "市场判断",
+                  category: "市场规模",
+                  name: "国内市场TAM假设",
+                  isExisting: false,
+                  valuePoints: [
+                    { id: "vp4", title: "市场增长潜力大", evidenceDescription: "AI基础设施市场年复合增长率超30%", analysisContent: "市场处于快速增长期，先发优势明显。" },
+                  ],
+                  riskPoints: [
+                    { id: "rp4", title: "市场竞争加剧", evidenceDescription: "行业玩家数量持续增加", analysisContent: "需评估公司差异化竞争能力。" },
+                  ],
+                },
+                {
+                  id: "sh2-2",
+                  direction: "市场判断",
+                  category: "市场渗透",
+                  name: "多模态融合市场假设",
+                  isExisting: true,
+                  valuePoints: [
+                    { id: "vp5", title: "多模态需求增长", evidenceDescription: "企业对多模态AI解决方案需求上升", analysisContent: "多模态融合是行业趋势，市场空间广阔。" },
+                  ],
+                  riskPoints: [
+                    { id: "rp5", title: "技术门槛高", evidenceDescription: "多模态技术整合难度大", analysisContent: "需评估技术实现能力和竞争格局。" },
+                  ],
+                },
               ],
             },
             {
               id: "gs3",
               title: "添加商业模式可持续性假设",
-              direction: "商业模式",
-              category: "盈利能力",
               content: "建议增加关于商业模式可持续性的假设，包括CAC/LTV比值假设、毛利率演变假设、规模效应假设等。",
-              linkedHypotheses: [
-                { id: "h4", name: "开源模型生态竞争假设" },
-              ],
               linkedTerms: [
                 { id: "t4", name: "财务信息披露条款" },
                 { id: "t5", name: "反稀释保护条款" },
@@ -854,40 +902,78 @@ export function Workflow({
                 { id: "m5", name: "财务预测模型" },
                 { id: "m6", name: "单位经济模型分析" },
               ],
-              valuePoints: [
-                { id: "vp4", title: "单位经济模型健康", evidenceDescription: "LTV/CAC比值大于3", analysisContent: "客户获取成本合理，具备规模化盈利基础。" },
-              ],
-              riskPoints: [
-                { id: "rp3", title: "毛利率承压", evidenceDescription: "算力成本占比高", analysisContent: "需关注算力成本下降对毛利率的影响。" },
+              hypotheses: [
+                {
+                  id: "sh3-1",
+                  direction: "商业模式",
+                  category: "盈利能力",
+                  name: "单位经济模型假设",
+                  isExisting: false,
+                  valuePoints: [
+                    { id: "vp6", title: "单位经济模型健康", evidenceDescription: "LTV/CAC比值大于3", analysisContent: "客户获取成本合理，具备规模化盈利基础。" },
+                  ],
+                  riskPoints: [
+                    { id: "rp6", title: "获客成本上升", evidenceDescription: "市场竞争导致获客成本上升", analysisContent: "需关注获客成本变化趋势。" },
+                  ],
+                },
+                {
+                  id: "sh3-2",
+                  direction: "商业模式",
+                  category: "成本结构",
+                  name: "毛利率演变假设",
+                  isExisting: false,
+                  valuePoints: [
+                    { id: "vp7", title: "规模效应显现", evidenceDescription: "收入增长带动毛利率提升", analysisContent: "规模扩大后边际成本下降。" },
+                  ],
+                  riskPoints: [
+                    { id: "rp7", title: "毛利率承压", evidenceDescription: "算力成本占比高", analysisContent: "需关注算力成本下降对毛利率的影响。" },
+                  ],
+                },
               ],
             },
             {
               id: "gs4",
               title: "补充团队执行力假设",
-              direction: "团队能力",
-              category: "执行力评估",
               content: "建议增加对管理团队执行力的系统性评估假设，包括关键里程碑达成率、战略调整能力、组织扩张能力等维度。",
-              linkedHypotheses: [],
               linkedTerms: [
                 { id: "t6", name: "创始人锁定条款" },
               ],
               linkedMaterials: [
                 { id: "m7", name: "尽职调查报告" },
               ],
-              valuePoints: [
-                { id: "vp5", title: "里程碑达成率高", evidenceDescription: "过往融资轮次里程碑达成率超85%", analysisContent: "团队具备良好的目标管理和执行能力。" },
-              ],
-              riskPoints: [
-                { id: "rp4", title: "组织扩张风险", evidenceDescription: "团队规模计划快速增长", analysisContent: "需评估组织管理能力是否匹配扩张速度。" },
+              hypotheses: [
+                {
+                  id: "sh4-1",
+                  direction: "团队能力",
+                  category: "执行力评估",
+                  name: "里程碑达成率假设",
+                  isExisting: false,
+                  valuePoints: [
+                    { id: "vp8", title: "里程碑达成率高", evidenceDescription: "过往融资轮次里程碑达成率超85%", analysisContent: "团队具备良好的目标管理和执行能力。" },
+                  ],
+                  riskPoints: [
+                    { id: "rp8", title: "外部环境变化", evidenceDescription: "宏观环境可能影响里程碑达成", analysisContent: "需评估外部因素对执行的影响。" },
+                  ],
+                },
+                {
+                  id: "sh4-2",
+                  direction: "团队能力",
+                  category: "组织管理",
+                  name: "组织扩张能力假设",
+                  isExisting: false,
+                  valuePoints: [
+                    { id: "vp9", title: "管理经验丰富", evidenceDescription: "核心管理层有大厂背景", analysisContent: "具备大规模团队管理经验。" },
+                  ],
+                  riskPoints: [
+                    { id: "rp9", title: "组织扩张风险", evidenceDescription: "团队规模计划快速增长", analysisContent: "需评估组织管理能力是否匹配扩张速度。" },
+                  ],
+                },
               ],
             },
             {
               id: "gs5",
               title: "增加退出路径假设",
-              direction: "退出策略",
-              category: "退出可行性",
               content: "建议补充关于退出路径可行性的假设，包括IPO可能性评估、并购退出场景分析、回购条款触发条件等。",
-              linkedHypotheses: [],
               linkedTerms: [
                 { id: "t7", name: "回购条款" },
                 { id: "t8", name: "领售权条款" },
@@ -895,11 +981,33 @@ export function Workflow({
               linkedMaterials: [
                 { id: "m8", name: "商业计划书" },
               ],
-              valuePoints: [
-                { id: "vp6", title: "IPO预期明确", evidenceDescription: "公司已启动上市辅导", analysisContent: "退出路径清晰，时间节点相对确定。" },
-              ],
-              riskPoints: [
-                { id: "rp5", title: "市场窗口不确定", evidenceDescription: "IPO市场波动较大", analysisContent: "需关注资本市场环境变化对上市计划的影响。" },
+              hypotheses: [
+                {
+                  id: "sh5-1",
+                  direction: "退出策略",
+                  category: "退出可行性",
+                  name: "IPO退出可行性假设",
+                  isExisting: false,
+                  valuePoints: [
+                    { id: "vp10", title: "IPO预期明确", evidenceDescription: "公司已启动上市辅导", analysisContent: "退出路径清晰，时间节点相对确定。" },
+                  ],
+                  riskPoints: [
+                    { id: "rp10", title: "市场窗口不确定", evidenceDescription: "IPO市场波动较大", analysisContent: "需关注资本市场环境变化对上市计划的影响。" },
+                  ],
+                },
+                {
+                  id: "sh5-2",
+                  direction: "退出策略",
+                  category: "并购退出",
+                  name: "并购退出场景假设",
+                  isExisting: false,
+                  valuePoints: [
+                    { id: "vp11", title: "战略价值高", evidenceDescription: "技术资产对大厂有吸引力", analysisContent: "具备被并购的战略价值。" },
+                  ],
+                  riskPoints: [
+                    { id: "rp11", title: "估值分歧", evidenceDescription: "并购估值可能低于预期", analysisContent: "需评估并购退出的估值合理性。" },
+                  ],
+                },
               ],
             },
           ]
@@ -1066,40 +1174,13 @@ export function Workflow({
                           {idx + 1}
                         </div>
                         <div className="flex-1">
-                          <div className="flex items-start justify-between gap-4 mb-2">
-                            <h3 className="text-base font-semibold text-[#111827]">{suggestion.title}</h3>
-                            <div className="flex items-center gap-2">
-                              <Badge className="bg-blue-50 text-blue-700 border-blue-200 text-[10px]">
-                                {suggestion.direction}
-                              </Badge>
-                              <Badge className="bg-gray-50 text-gray-600 border-gray-200 text-[10px]">
-                                {suggestion.category}
-                              </Badge>
-                            </div>
-                          </div>
+                          <h3 className="text-base font-semibold text-[#111827] mb-2">{suggestion.title}</h3>
                           <p className="text-sm text-[#6B7280] leading-relaxed">{suggestion.content}</p>
                         </div>
                       </div>
                       
                       {/* Linked Items */}
                       <div className="ml-12 space-y-3 pt-4 border-t border-[#F3F4F6]">
-                        {/* Linked Hypotheses */}
-                        {suggestion.linkedHypotheses.length > 0 && (
-                          <div className="flex items-start gap-2">
-                            <div className="flex items-center gap-1.5 shrink-0 text-xs text-[#6B7280]">
-                              <Lightbulb className="h-3.5 w-3.5 text-amber-500" />
-                              <span>关联假设:</span>
-                            </div>
-                            <div className="flex flex-wrap gap-1.5">
-                              {suggestion.linkedHypotheses.map((h) => (
-                                <Badge key={h.id} className="bg-amber-50 text-amber-700 border-amber-200 text-[10px] font-normal cursor-pointer hover:bg-amber-100">
-                                  {h.name}
-                                </Badge>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                        
                         {/* Linked Terms */}
                         {suggestion.linkedTerms.length > 0 && (
                           <div className="flex items-start gap-2">
@@ -1134,15 +1215,49 @@ export function Workflow({
                           </div>
                         )}
                         
-                        {/* Create Hypothesis Button */}
+                        {/* Hypotheses List */}
                         <div className="pt-3 border-t border-[#F3F4F6]">
-                          <button
-                            onClick={() => handleCreateFromSuggestion(suggestion)}
-                            className="inline-flex items-center gap-2 rounded-lg bg-amber-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-amber-600"
-                          >
-                            <Plus className="h-4 w-4" />
-                            创建该假设
-                          </button>
+                          <div className="flex items-center gap-2 mb-3">
+                            <Lightbulb className="h-4 w-4 text-amber-500" />
+                            <span className="text-sm font-medium text-[#374151]">建议假设 ({suggestion.hypotheses.length})</span>
+                          </div>
+                          <div className="space-y-2">
+                            {suggestion.hypotheses.map((hypothesis) => (
+                              <div 
+                                key={hypothesis.id}
+                                className="flex items-center justify-between gap-4 rounded-lg border border-[#E5E7EB] bg-[#F9FAFB] p-3"
+                              >
+                                <div className="flex items-center gap-3 flex-1 min-w-0">
+                                  <Badge className="bg-blue-50 text-blue-700 border-blue-200 text-[10px] shrink-0">
+                                    {hypothesis.direction}
+                                  </Badge>
+                                  <Badge className="bg-gray-50 text-gray-600 border-gray-200 text-[10px] shrink-0">
+                                    {hypothesis.category}
+                                  </Badge>
+                                  <span className="text-sm text-[#374151] truncate">{hypothesis.name}</span>
+                                </div>
+                                {hypothesis.isExisting ? (
+                                  <button
+                                    onClick={() => {
+                                      // TODO: Implement modify existing hypothesis logic
+                                    }}
+                                    className="inline-flex items-center gap-1.5 rounded-md border border-[#E5E7EB] bg-white px-3 py-1.5 text-xs font-medium text-[#374151] transition-colors hover:bg-[#F3F4F6] shrink-0"
+                                  >
+                                    <Pencil className="h-3 w-3" />
+                                    修改该假设
+                                  </button>
+                                ) : (
+                                  <button
+                                    onClick={() => handleCreateFromHypothesis(hypothesis)}
+                                    className="inline-flex items-center gap-1.5 rounded-md bg-amber-500 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-amber-600 shrink-0"
+                                  >
+                                    <Plus className="h-3 w-3" />
+                                    创建该假设
+                                  </button>
+                                )}
+                              </div>
+                            ))}
+                          </div>
                         </div>
                       </div>
                     </div>
