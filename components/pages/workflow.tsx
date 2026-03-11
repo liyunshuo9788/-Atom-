@@ -24,9 +24,17 @@ import {
 } from "lucide-react"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import { cn } from "@/lib/utils"
+import { Trash2, Upload, Link2 } from "lucide-react"
 
 /* ─── Types ──────────────────────────────────── */
 export interface PhaseLog {
@@ -94,10 +102,67 @@ interface ThinkingStep {
 interface GeneratedSuggestion {
   id: string
   title: string
+  direction: string
+  category: string
   content: string
   linkedHypotheses: { id: string; name: string }[]
   linkedTerms: { id: string; name: string }[]
   linkedMaterials: { id: string; name: string }[]
+  // Pre-filled value points and risk points for creation
+  valuePoints: {
+    id: string
+    title: string
+    evidenceDescription: string
+    analysisContent: string
+  }[]
+  riskPoints: {
+    id: string
+    title: string
+    evidenceDescription: string
+    analysisContent: string
+  }[]
+}
+
+// Project hypothesis creation form data
+export interface ProjectHypothesisFormData {
+  direction: string
+  category: string
+  name: string
+  valuePoints: {
+    id: string
+    title: string
+    evidenceDescription: string
+    evidenceMaterialIds: string[]
+    analysisContent: string
+  }[]
+  riskPoints: {
+    id: string
+    title: string
+    evidenceDescription: string
+    evidenceMaterialIds: string[]
+    analysisContent: string
+  }[]
+}
+
+// Pending project hypothesis change request
+export interface PendingProjectHypothesis {
+  id: string
+  projectId: string
+  projectName: string
+  hypothesis: ProjectHypothesisFormData
+  changeId: string
+  changeName: string
+  changeType: "create"
+  initiator: { id: string; name: string; initials: string }
+  initiatedAt: string
+  reviewers: { id: string; name: string; initials: string }[]
+}
+
+// Available project materials for selection
+interface ProjectMaterialOption {
+  id: string
+  name: string
+  format: string
 }
 
 const PHASES: Phase[] = [
@@ -315,6 +380,7 @@ interface WorkflowProps {
   phases?: Phase[]
   onPhasesChange?: (phases: Phase[]) => void
   onCreatePendingPhase?: (pending: PendingPhase) => void
+  onCreatePendingProjectHypothesis?: (pending: PendingProjectHypothesis) => void
   hypothesesCount?: number
   termsCount?: number
   materialsCount?: number
@@ -349,6 +415,7 @@ export function Workflow({
   phases,
   onPhasesChange,
   onCreatePendingPhase,
+  onCreatePendingProjectHypothesis,
   hypothesesCount,
   termsCount,
   materialsCount,
@@ -383,6 +450,28 @@ export function Workflow({
   const [generationComplete, setGenerationComplete] = useState(false)
   const [thinkingSteps, setThinkingSteps] = useState<ThinkingStep[]>([])
   const [generatedSuggestions, setGeneratedSuggestions] = useState<GeneratedSuggestion[]>([])
+  
+  // Hypothesis creation dialog state
+  const [showCreateDialog, setShowCreateDialog] = useState(false)
+  const [formData, setFormData] = useState<ProjectHypothesisFormData>({
+    direction: "",
+    category: "",
+    name: "",
+    valuePoints: [],
+    riskPoints: [],
+  })
+  
+  // Mock available project materials
+  const availableMaterials: ProjectMaterialOption[] = [
+    { id: "m1", name: "专利清单及技术白皮书", format: "PDF" },
+    { id: "m2", name: "核心团队履历及期权安排", format: "PDF" },
+    { id: "m3", name: "行业研究报告_2024Q4", format: "PDF" },
+    { id: "m4", name: "竞品市场份额分析", format: "XLSX" },
+    { id: "m5", name: "财务预测模型", format: "XLSX" },
+    { id: "m6", name: "单位经济模型分析", format: "PDF" },
+    { id: "m7", name: "尽职调查报告", format: "PDF" },
+    { id: "m8", name: "商业计划书", format: "PDF" },
+  ]
 
   // Handle starting the first phase for new projects - creates pending request
   function handleStartFirstPhase() {
@@ -536,6 +625,123 @@ export function Workflow({
     setGeneratedSuggestions([])
   }
   
+  function handleCreateFromSuggestion(suggestion: GeneratedSuggestion) {
+    // Pre-fill form with suggestion data
+    setFormData({
+      direction: suggestion.direction,
+      category: suggestion.category,
+      name: suggestion.title,
+      valuePoints: suggestion.valuePoints.map((vp) => ({
+        ...vp,
+        evidenceMaterialIds: [],
+      })),
+      riskPoints: suggestion.riskPoints.map((rp) => ({
+        ...rp,
+        evidenceMaterialIds: [],
+      })),
+    })
+    setShowCreateDialog(true)
+  }
+  
+  function handleAddValuePoint() {
+    setFormData((prev) => ({
+      ...prev,
+      valuePoints: [
+        ...prev.valuePoints,
+        {
+          id: `vp-new-${Date.now()}`,
+          title: "",
+          evidenceDescription: "",
+          evidenceMaterialIds: [],
+          analysisContent: "",
+        },
+      ],
+    }))
+  }
+  
+  function handleRemoveValuePoint(id: string) {
+    setFormData((prev) => ({
+      ...prev,
+      valuePoints: prev.valuePoints.filter((vp) => vp.id !== id),
+    }))
+  }
+  
+  function handleAddRiskPoint() {
+    setFormData((prev) => ({
+      ...prev,
+      riskPoints: [
+        ...prev.riskPoints,
+        {
+          id: `rp-new-${Date.now()}`,
+          title: "",
+          evidenceDescription: "",
+          evidenceMaterialIds: [],
+          analysisContent: "",
+        },
+      ],
+    }))
+  }
+  
+  function handleRemoveRiskPoint(id: string) {
+    setFormData((prev) => ({
+      ...prev,
+      riskPoints: prev.riskPoints.filter((rp) => rp.id !== id),
+    }))
+  }
+  
+  function handleToggleMaterial(pointType: "value" | "risk", pointId: string, materialId: string) {
+    setFormData((prev) => {
+      const key = pointType === "value" ? "valuePoints" : "riskPoints"
+      return {
+        ...prev,
+        [key]: prev[key].map((point) =>
+          point.id === pointId
+            ? {
+                ...point,
+                evidenceMaterialIds: point.evidenceMaterialIds.includes(materialId)
+                  ? point.evidenceMaterialIds.filter((id) => id !== materialId)
+                  : [...point.evidenceMaterialIds, materialId],
+              }
+            : point
+        ),
+      }
+    })
+  }
+  
+  function handleCloseCreateDialog() {
+    setShowCreateDialog(false)
+    setFormData({
+      direction: "",
+      category: "",
+      name: "",
+      valuePoints: [],
+      riskPoints: [],
+    })
+  }
+  
+  function handleSubmitHypothesis() {
+    // Create a pending hypothesis change request
+    const pendingHypothesis: PendingProjectHypothesis = {
+      id: `pending-project-hyp-${Date.now()}`,
+      projectId,
+      projectName,
+      hypothesis: formData,
+      changeId: `CR-PH-${Date.now().toString().slice(-6)}`,
+      changeName: `创建项目假设: ${formData.name}`,
+      changeType: "create",
+      initiator: { id: "zhangwei", name: "张伟", initials: "张伟" },
+      initiatedAt: new Date().toISOString().split("T")[0],
+      reviewers: [
+        { id: "zhangwei", name: "张伟", initials: "张伟" },
+        { id: "lisi", name: "李四", initials: "李四" },
+      ],
+    }
+    
+    onCreatePendingProjectHypothesis?.(pendingHypothesis)
+    handleCloseCreateDialog()
+    handleCloseFullPageView()
+  }
+  
   function handleStartGeneration() {
     setIsGenerating(true)
     setGenerationComplete(false)
@@ -567,13 +773,15 @@ export function Workflow({
           prev.map((step) => ({ ...step, status: "completed" }))
         )
         
-        // Generate mock suggestions with linked items
+        // Generate mock suggestions with linked items - 5 suggestions
         setTimeout(() => {
           setGeneratedSuggestions([
             {
               id: "gs1",
               title: "补充技术壁垒假设",
-              content: "当前假设清单缺少对核心技术壁垒的系统性论证。建议增加关于专利布局、技术团队稳定性、技术迭代能力等方面的假设，以更全面评估投资标的的技术竞争力。特别是在AI大模型领域，需要关注模型训练数据的独特性、推理效率优化能力、以及多模态扩展潜力。",
+              direction: "技术攻关",
+              category: "技术壁垒",
+              content: "当前假设清单缺少对核心技术壁垒的系统性论证。建议增加关于专利布局、技术团队稳定性、技术迭代能力等方面的假设，以更全面评估投资标的的技术竞争力。",
               linkedHypotheses: [
                 { id: "h1", name: "大模型推理成本下降假设" },
                 { id: "h2", name: "技术团队核心成员稳定性假设" },
@@ -586,11 +794,20 @@ export function Workflow({
                 { id: "m1", name: "专利清单及技术白皮书" },
                 { id: "m2", name: "核心团队履历及期权安排" },
               ],
+              valuePoints: [
+                { id: "vp1", title: "专利布局完善", evidenceDescription: "公司在核心技术领域拥有20+项专利", analysisContent: "专利覆盖核心算法、模型架构和数据处理流程，形成完整的技术护城河。" },
+                { id: "vp2", title: "技术团队稳定", evidenceDescription: "核心技术人员平均在职时间超过3年", analysisContent: "团队稳定性有助于技术积累和持续创新。" },
+              ],
+              riskPoints: [
+                { id: "rp1", title: "技术迭代风险", evidenceDescription: "AI领域技术更新速度快", analysisContent: "需持续关注竞品技术动态，评估公司技术迭代能力。" },
+              ],
             },
             {
               id: "gs2",
               title: "细化市场规模假设",
-              content: "现有TAM/SAM/SOM假设过于笼统，建议从地区维度（国内/海外）、行业维度（金融/医疗/制造等）、客户规模维度（大企业/SMB）进行拆分，形成更精细的市场规模假设矩阵。同时需要补充市场增速假设和份额假设。",
+              direction: "市场判断",
+              category: "市场规模",
+              content: "现有TAM/SAM/SOM假设过于笼统，建议从地区维度、行业维度、客户规模维度进行拆分，形成更精细的市场规模假设矩阵。",
               linkedHypotheses: [
                 { id: "h3", name: "多模态融合市场假设" },
               ],
@@ -601,11 +818,19 @@ export function Workflow({
                 { id: "m3", name: "行业研究报告_2024Q4" },
                 { id: "m4", name: "竞品市场份额分析" },
               ],
+              valuePoints: [
+                { id: "vp3", title: "市场增长潜力大", evidenceDescription: "AI基础设施市场年复合增长率超30%", analysisContent: "市场处于快速增长期，先发优势明显。" },
+              ],
+              riskPoints: [
+                { id: "rp2", title: "市场竞争加剧", evidenceDescription: "行业玩家数量持续增加", analysisContent: "需评估公司差异化竞争能力。" },
+              ],
             },
             {
               id: "gs3",
               title: "添加商业模式可持续性假设",
-              content: "建议增加关于商业模式可持续性的假设，包括：客户获取成本(CAC)与客户生命周期价值(LTV)的比值假设、毛利率演变假设、规模效应假设等。这些假设对于评估公司长期盈利能力至关重要。",
+              direction: "商业模式",
+              category: "盈利能力",
+              content: "建议增加关于商业模式可持续性的假设，包括CAC/LTV比值假设、毛利率演变假设、规模效应假设等。",
               linkedHypotheses: [
                 { id: "h4", name: "开源模型生态竞争假设" },
               ],
@@ -616,6 +841,53 @@ export function Workflow({
               linkedMaterials: [
                 { id: "m5", name: "财务预测模型" },
                 { id: "m6", name: "单位经济模型分析" },
+              ],
+              valuePoints: [
+                { id: "vp4", title: "单位经济模型健康", evidenceDescription: "LTV/CAC比值大于3", analysisContent: "客户获取成本合理，具备规模化盈利基础。" },
+              ],
+              riskPoints: [
+                { id: "rp3", title: "毛利率承压", evidenceDescription: "算力成本占比高", analysisContent: "需关注算力成本下降对毛利率的影响。" },
+              ],
+            },
+            {
+              id: "gs4",
+              title: "补充团队执行力假设",
+              direction: "团队能力",
+              category: "执行力评估",
+              content: "建议增加对管理团队执行力的系统性评估假设，包括关键里程碑达成率、战略调整能力、组织扩张能力等维度。",
+              linkedHypotheses: [],
+              linkedTerms: [
+                { id: "t6", name: "创始人锁定条款" },
+              ],
+              linkedMaterials: [
+                { id: "m7", name: "尽职调查报告" },
+              ],
+              valuePoints: [
+                { id: "vp5", title: "里程碑达成率高", evidenceDescription: "过往融资轮次里程碑达成率超85%", analysisContent: "团队具备良好的目标管理和执行能力。" },
+              ],
+              riskPoints: [
+                { id: "rp4", title: "组织扩张风险", evidenceDescription: "团队规模计划快速增长", analysisContent: "需评估组织管理能力是否匹配扩张速度。" },
+              ],
+            },
+            {
+              id: "gs5",
+              title: "增加退出路径假设",
+              direction: "退出策略",
+              category: "退出可行性",
+              content: "建议补充关于退出路径可行性的假设，包括IPO可能性评估、并购退出场景分析、回购条款触发条件等。",
+              linkedHypotheses: [],
+              linkedTerms: [
+                { id: "t7", name: "回购条款" },
+                { id: "t8", name: "领售权条款" },
+              ],
+              linkedMaterials: [
+                { id: "m8", name: "商业计划书" },
+              ],
+              valuePoints: [
+                { id: "vp6", title: "IPO预期明确", evidenceDescription: "公司已启动上市辅导", analysisContent: "退出路径清晰，时间节点相对确定。" },
+              ],
+              riskPoints: [
+                { id: "rp5", title: "市场窗口不确定", evidenceDescription: "IPO市场波动较大", analysisContent: "需关注资本市场环境变化对上市计划的影响。" },
               ],
             },
           ])
@@ -780,7 +1052,17 @@ export function Workflow({
                           {idx + 1}
                         </div>
                         <div className="flex-1">
-                          <h3 className="text-base font-semibold text-[#111827] mb-2">{suggestion.title}</h3>
+                          <div className="flex items-start justify-between gap-4 mb-2">
+                            <h3 className="text-base font-semibold text-[#111827]">{suggestion.title}</h3>
+                            <div className="flex items-center gap-2">
+                              <Badge className="bg-blue-50 text-blue-700 border-blue-200 text-[10px]">
+                                {suggestion.direction}
+                              </Badge>
+                              <Badge className="bg-gray-50 text-gray-600 border-gray-200 text-[10px]">
+                                {suggestion.category}
+                              </Badge>
+                            </div>
+                          </div>
                           <p className="text-sm text-[#6B7280] leading-relaxed">{suggestion.content}</p>
                         </div>
                       </div>
@@ -837,6 +1119,17 @@ export function Workflow({
                             </div>
                           </div>
                         )}
+                        
+                        {/* Create Hypothesis Button */}
+                        <div className="pt-3 border-t border-[#F3F4F6]">
+                          <button
+                            onClick={() => handleCreateFromSuggestion(suggestion)}
+                            className="inline-flex items-center gap-2 rounded-lg bg-amber-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-amber-600"
+                          >
+                            <Plus className="h-4 w-4" />
+                            创建该假设
+                          </button>
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -863,6 +1156,313 @@ export function Workflow({
             )}
           </div>
         </div>
+        
+        {/* Hypothesis Creation Dialog */}
+        <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+          <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-50">
+                  <Lightbulb className="h-5 w-5 text-amber-600" />
+                </div>
+                <div>
+                  <div className="text-xl font-bold text-[#111827]">创建项目假设</div>
+                  <p className="text-sm font-normal text-[#6B7280]">基于AI建议创建新的项目假设</p>
+                </div>
+              </DialogTitle>
+            </DialogHeader>
+            
+            <div className="space-y-6 mt-4">
+              {/* Basic Info */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-[#374151] mb-1.5">假设方向</label>
+                  <Input
+                    value={formData.direction}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, direction: e.target.value }))}
+                    placeholder="如：技术攻关、市场判断"
+                    className="h-10"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-[#374151] mb-1.5">假设类别</label>
+                  <Input
+                    value={formData.category}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, category: e.target.value }))}
+                    placeholder="如：技术壁垒、市场规模"
+                    className="h-10"
+                  />
+                </div>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-[#374151] mb-1.5">假设名称</label>
+                <Input
+                  value={formData.name}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
+                  placeholder="输入假设名称"
+                  className="h-10"
+                />
+              </div>
+              
+              {/* Value Points */}
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <div className="flex h-6 w-6 items-center justify-center rounded bg-emerald-100">
+                      <Check className="h-3.5 w-3.5 text-emerald-600" />
+                    </div>
+                    <span className="text-sm font-semibold text-[#111827]">价值点</span>
+                  </div>
+                  <button
+                    onClick={handleAddValuePoint}
+                    className="inline-flex items-center gap-1 text-xs text-[#2563EB] hover:text-[#1D4ED8]"
+                  >
+                    <Plus className="h-3.5 w-3.5" />
+                    添加价值点
+                  </button>
+                </div>
+                
+                <div className="space-y-4">
+                  {formData.valuePoints.map((vp, idx) => (
+                    <div key={vp.id} className="rounded-lg border border-[#E5E7EB] p-4 bg-emerald-50/30">
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="text-xs font-medium text-emerald-700">价值点 {idx + 1}</span>
+                        <button
+                          onClick={() => handleRemoveValuePoint(vp.id)}
+                          className="text-gray-400 hover:text-red-500 transition-colors"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                      
+                      <div className="space-y-3">
+                        <Input
+                          value={vp.title}
+                          onChange={(e) => setFormData((prev) => ({
+                            ...prev,
+                            valuePoints: prev.valuePoints.map((p) =>
+                              p.id === vp.id ? { ...p, title: e.target.value } : p
+                            ),
+                          }))}
+                          placeholder="价值点标题"
+                          className="h-9 text-sm"
+                        />
+                        
+                        {/* Evidence Support */}
+                        <div>
+                          <div className="flex items-center gap-2 mb-2">
+                            <Link2 className="h-3.5 w-3.5 text-[#6B7280]" />
+                            <span className="text-xs font-medium text-[#374151]">论据支持</span>
+                          </div>
+                          <textarea
+                            value={vp.evidenceDescription}
+                            onChange={(e) => setFormData((prev) => ({
+                              ...prev,
+                              valuePoints: prev.valuePoints.map((p) =>
+                                p.id === vp.id ? { ...p, evidenceDescription: e.target.value } : p
+                              ),
+                            }))}
+                            placeholder="描述支持该价值点的论据"
+                            rows={2}
+                            className="w-full rounded-md border border-input bg-white px-3 py-2 text-sm resize-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                          />
+                          
+                          {/* Material Selection */}
+                          <div className="mt-2">
+                            <p className="text-xs text-[#6B7280] mb-1.5">关联项目材料：</p>
+                            <div className="flex flex-wrap gap-1.5">
+                              {availableMaterials.slice(0, 4).map((m) => (
+                                <button
+                                  key={m.id}
+                                  onClick={() => handleToggleMaterial("value", vp.id, m.id)}
+                                  className={cn(
+                                    "inline-flex items-center gap-1 px-2 py-1 rounded text-[10px] border transition-colors",
+                                    vp.evidenceMaterialIds.includes(m.id)
+                                      ? "bg-blue-50 text-blue-700 border-blue-200"
+                                      : "bg-white text-gray-600 border-gray-200 hover:bg-gray-50"
+                                  )}
+                                >
+                                  <FileText className="h-3 w-3" />
+                                  {m.name.slice(0, 15)}...
+                                </button>
+                              ))}
+                              <button className="inline-flex items-center gap-1 px-2 py-1 rounded text-[10px] border border-dashed border-gray-300 text-gray-500 hover:bg-gray-50">
+                                <Upload className="h-3 w-3" />
+                                上传新材料
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        {/* Analysis */}
+                        <div>
+                          <div className="flex items-center gap-2 mb-2">
+                            <FileText className="h-3.5 w-3.5 text-[#6B7280]" />
+                            <span className="text-xs font-medium text-[#374151]">论证分析</span>
+                          </div>
+                          <textarea
+                            value={vp.analysisContent}
+                            onChange={(e) => setFormData((prev) => ({
+                              ...prev,
+                              valuePoints: prev.valuePoints.map((p) =>
+                                p.id === vp.id ? { ...p, analysisContent: e.target.value } : p
+                              ),
+                            }))}
+                            placeholder="对该价值点进行分析论证"
+                            rows={2}
+                            className="w-full rounded-md border border-input bg-white px-3 py-2 text-sm resize-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                  
+                  {formData.valuePoints.length === 0 && (
+                    <div className="rounded-lg border border-dashed border-[#E5E7EB] p-6 text-center">
+                      <p className="text-sm text-[#6B7280]">暂无价值点，点击上方按钮添加</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+              
+              {/* Risk Points */}
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <div className="flex h-6 w-6 items-center justify-center rounded bg-red-100">
+                      <X className="h-3.5 w-3.5 text-red-600" />
+                    </div>
+                    <span className="text-sm font-semibold text-[#111827]">风险点</span>
+                  </div>
+                  <button
+                    onClick={handleAddRiskPoint}
+                    className="inline-flex items-center gap-1 text-xs text-[#2563EB] hover:text-[#1D4ED8]"
+                  >
+                    <Plus className="h-3.5 w-3.5" />
+                    添加风险点
+                  </button>
+                </div>
+                
+                <div className="space-y-4">
+                  {formData.riskPoints.map((rp, idx) => (
+                    <div key={rp.id} className="rounded-lg border border-[#E5E7EB] p-4 bg-red-50/30">
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="text-xs font-medium text-red-700">风险点 {idx + 1}</span>
+                        <button
+                          onClick={() => handleRemoveRiskPoint(rp.id)}
+                          className="text-gray-400 hover:text-red-500 transition-colors"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                      
+                      <div className="space-y-3">
+                        <Input
+                          value={rp.title}
+                          onChange={(e) => setFormData((prev) => ({
+                            ...prev,
+                            riskPoints: prev.riskPoints.map((p) =>
+                              p.id === rp.id ? { ...p, title: e.target.value } : p
+                            ),
+                          }))}
+                          placeholder="风险点标题"
+                          className="h-9 text-sm"
+                        />
+                        
+                        {/* Evidence Support */}
+                        <div>
+                          <div className="flex items-center gap-2 mb-2">
+                            <Link2 className="h-3.5 w-3.5 text-[#6B7280]" />
+                            <span className="text-xs font-medium text-[#374151]">论据支持</span>
+                          </div>
+                          <textarea
+                            value={rp.evidenceDescription}
+                            onChange={(e) => setFormData((prev) => ({
+                              ...prev,
+                              riskPoints: prev.riskPoints.map((p) =>
+                                p.id === rp.id ? { ...p, evidenceDescription: e.target.value } : p
+                              ),
+                            }))}
+                            placeholder="描述支持该风险点的论据"
+                            rows={2}
+                            className="w-full rounded-md border border-input bg-white px-3 py-2 text-sm resize-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                          />
+                          
+                          {/* Material Selection */}
+                          <div className="mt-2">
+                            <p className="text-xs text-[#6B7280] mb-1.5">关联项目材料：</p>
+                            <div className="flex flex-wrap gap-1.5">
+                              {availableMaterials.slice(0, 4).map((m) => (
+                                <button
+                                  key={m.id}
+                                  onClick={() => handleToggleMaterial("risk", rp.id, m.id)}
+                                  className={cn(
+                                    "inline-flex items-center gap-1 px-2 py-1 rounded text-[10px] border transition-colors",
+                                    rp.evidenceMaterialIds.includes(m.id)
+                                      ? "bg-blue-50 text-blue-700 border-blue-200"
+                                      : "bg-white text-gray-600 border-gray-200 hover:bg-gray-50"
+                                  )}
+                                >
+                                  <FileText className="h-3 w-3" />
+                                  {m.name.slice(0, 15)}...
+                                </button>
+                              ))}
+                              <button className="inline-flex items-center gap-1 px-2 py-1 rounded text-[10px] border border-dashed border-gray-300 text-gray-500 hover:bg-gray-50">
+                                <Upload className="h-3 w-3" />
+                                上传新材料
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        {/* Analysis */}
+                        <div>
+                          <div className="flex items-center gap-2 mb-2">
+                            <FileText className="h-3.5 w-3.5 text-[#6B7280]" />
+                            <span className="text-xs font-medium text-[#374151]">论证分析</span>
+                          </div>
+                          <textarea
+                            value={rp.analysisContent}
+                            onChange={(e) => setFormData((prev) => ({
+                              ...prev,
+                              riskPoints: prev.riskPoints.map((p) =>
+                                p.id === rp.id ? { ...p, analysisContent: e.target.value } : p
+                              ),
+                            }))}
+                            placeholder="对该风险点进行分析论证"
+                            rows={2}
+                            className="w-full rounded-md border border-input bg-white px-3 py-2 text-sm resize-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                  
+                  {formData.riskPoints.length === 0 && (
+                    <div className="rounded-lg border border-dashed border-[#E5E7EB] p-6 text-center">
+                      <p className="text-sm text-[#6B7280]">暂无风险点，点击上方按钮添加</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+              
+              {/* Action Buttons */}
+              <div className="flex justify-end gap-3 pt-4 border-t border-[#E5E7EB]">
+                <Button variant="outline" onClick={handleCloseCreateDialog}>
+                  取消
+                </Button>
+                <Button 
+                  className="bg-[#2563EB] hover:bg-[#1D4ED8]"
+                  onClick={handleSubmitHypothesis}
+                  disabled={!formData.name.trim() || !formData.direction.trim()}
+                >
+                  创建假设
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     )
   }
