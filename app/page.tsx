@@ -9,7 +9,7 @@ import { ProjectDetail } from "@/components/pages/project-detail"
 import { StrategyDetail } from "@/components/pages/strategy-detail"
 import { ChangeRequests } from "@/components/pages/change-requests"
 import { Login } from "@/components/pages/login"
-import type { Phase, PendingPhase, PendingProjectHypothesis, ProjectHypothesisFormData } from "@/components/pages/workflow"
+import type { Phase, PendingPhase, PendingProjectHypothesis, ProjectHypothesisFormData, GeneratedSuggestion } from "@/components/pages/workflow"
 import { type HypothesisTableItem, getTemplateHypothesesForStrategy } from "@/components/pages/hypothesis-checklist"
 import { type TermTableItem, getTemplateTermsForStrategy } from "@/components/pages/term-sheet"
 import { getTemplateMaterialsForStrategy } from "@/components/pages/project-materials"
@@ -47,6 +47,8 @@ export default function Page() {
   const [projectMaterialsMap, setProjectMaterialsMap] = useState<Record<string, StrategyMaterial[]>>({})
   // Pending project-level hypotheses
   const [pendingProjectHypotheses, setPendingProjectHypotheses] = useState<PendingProjectHypothesis[]>([])
+  // Saved generated hypothesis suggestions per project - keyed by projectId, persists for the session
+  const [savedProjectSuggestions, setSavedProjectSuggestions] = useState<Record<string, GeneratedSuggestion[]>>({})
   // Strategy AI recommendation generated flags - keyed by strategyId, persists for the session
   const [strategyRecommendations, setStrategyRecommendations] = useState<
     Record<string, { hypothesesGenerated: boolean; termsGenerated: boolean; materialsGenerated: boolean }>
@@ -288,6 +290,14 @@ export default function Page() {
     setPendingProjectHypotheses(pendingProjectHypotheses.filter((p) => p.id !== id))
   }
 
+  // Handler to save generated suggestions for a project
+  function handleSaveProjectSuggestions(projectId: string, suggestions: GeneratedSuggestion[]) {
+    setSavedProjectSuggestions((prev) => ({
+      ...prev,
+      [projectId]: suggestions,
+    }))
+  }
+
   // Term change request handlers
   function handleCreatePendingTerm(pending: PendingTerm) {
     setPendingTerms([pending, ...pendingTerms])
@@ -451,6 +461,8 @@ export default function Page() {
   projectHypotheses={projectHypotheses[view.projectId]}
   projectTerms={projectTerms[view.projectId]}
   projectMaterials={projectMaterialsMap[view.projectId]}
+  savedGeneratedSuggestions={savedProjectSuggestions[view.projectId]}
+  onSaveSuggestions={(suggestions) => handleSaveProjectSuggestions(view.projectId, suggestions)}
   />
         )}
         {view.type === "strategy-detail" && (

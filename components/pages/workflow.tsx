@@ -100,7 +100,7 @@ interface ThinkingStep {
 }
 
 // Generated hypothesis suggestion with linked items
-interface GeneratedSuggestion {
+export interface GeneratedSuggestion {
   id: string
   title: string
   direction: string
@@ -385,6 +385,9 @@ interface WorkflowProps {
   hypothesesCount?: number
   termsCount?: number
   materialsCount?: number
+  // Persisted hypothesis suggestion generation state
+  savedGeneratedSuggestions?: GeneratedSuggestion[]
+  onSaveSuggestions?: (suggestions: GeneratedSuggestion[]) => void
 }
 
 /* ─── New Project Phase Template ─────────────── */
@@ -420,6 +423,8 @@ export function Workflow({
   hypothesesCount,
   termsCount,
   materialsCount,
+  savedGeneratedSuggestions,
+  onSaveSuggestions,
 }: WorkflowProps) {
   const scrollRef = useRef<HTMLDivElement>(null)
 
@@ -448,9 +453,9 @@ export function Workflow({
   // Full page generation view state
   const [fullPageView, setFullPageView] = useState<FullPageView>(null)
   const [isGenerating, setIsGenerating] = useState(false)
-  const [generationComplete, setGenerationComplete] = useState(false)
+  const [generationComplete, setGenerationComplete] = useState(savedGeneratedSuggestions ? savedGeneratedSuggestions.length > 0 : false)
   const [thinkingSteps, setThinkingSteps] = useState<ThinkingStep[]>([])
-  const [generatedSuggestions, setGeneratedSuggestions] = useState<GeneratedSuggestion[]>([])
+  const [generatedSuggestions, setGeneratedSuggestions] = useState<GeneratedSuggestion[]>(savedGeneratedSuggestions || [])
   
   // Hypothesis creation dialog state
   const [showCreateDialog, setShowCreateDialog] = useState(false)
@@ -776,7 +781,7 @@ export function Workflow({
         
         // Generate mock suggestions with linked items - 5 suggestions
         setTimeout(() => {
-          setGeneratedSuggestions([
+          const suggestions: GeneratedSuggestion[] = [
             {
               id: "gs1",
               title: "补充技术壁垒假设",
@@ -891,7 +896,9 @@ export function Workflow({
                 { id: "rp5", title: "市场窗口不确定", evidenceDescription: "IPO市场波动较大", analysisContent: "需关注资本市场环境变化对上市计划的影响。" },
               ],
             },
-          ])
+          ]
+          setGeneratedSuggestions(suggestions)
+          onSaveSuggestions?.(suggestions)
           setIsGenerating(false)
           setGenerationComplete(true)
         }, 500)
