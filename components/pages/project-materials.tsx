@@ -129,6 +129,7 @@ interface MockFile {
   format: string
   size: string
   matchCategories: string[]
+  description?: string
 }
 
 interface MockFolder {

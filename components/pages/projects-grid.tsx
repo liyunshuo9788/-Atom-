@@ -356,15 +356,21 @@ export function ProjectsGrid({ projects, strategies, onProjectsChange, onSelectP
     setTimeout(() => {
       const allFiles = mockLocalFolders.flatMap((f) => f.files)
       const selected = allFiles.filter((f) => uploadSelectedFiles.has(f.id))
+      // Add description to each selected file
+      const selectedWithDescriptions = selected.map((f) => ({
+        ...f,
+        description: mockFileDescriptions[f.id] || `${f.name}：该文件可作为项目研究和分析的参考材料。`,
+      }))
       setUploadedFiles((prev) => {
         // Merge, avoid duplicates by id
         const existingIds = new Set(prev.map((f) => f.id))
-        return [...prev, ...selected.filter((f) => !existingIds.has(f.id))]
+        return [...prev, ...selectedWithDescriptions.filter((f) => !existingIds.has(f.id))]
       })
       setIsUploadOpen(false)
       setUploadState("idle")
       setUploadProgress(0)
       setUploadSelectedFiles(new Set())
+      setMaterialDescription("")
     }, 1400)
   }
 

@@ -179,7 +179,7 @@ export default function Page() {
         format: f.format,
         size: f.size,
         category: "",
-        description: "",
+        description: f.description || "",
         owner: "张伟",
         createdAt: today,
       }))
