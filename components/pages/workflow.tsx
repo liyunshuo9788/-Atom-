@@ -1372,7 +1372,7 @@ export function Workflow({
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-[#374151] mb-1.5">假���类别</label>
+                  <label className="block text-sm font-medium text-[#374151] mb-1.5">假设类别</label>
                   <Input
                     value={formData.category}
                     onChange={(e) => setFormData((prev) => ({ ...prev, category: e.target.value }))}
