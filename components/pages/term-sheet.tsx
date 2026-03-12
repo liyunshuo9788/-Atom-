@@ -79,7 +79,7 @@ interface ImplementationStatus {
   comments: { author: string; content: string; time: string }[]
 }
 
-interface TermDetail {
+export interface TermDetail {
   id: string
   title: string
   termId: string
@@ -387,9 +387,10 @@ interface TermSheetProps {
   isNewProject?: boolean
   project?: { strategyId?: string; strategyName?: string }
   inheritedTerms?: TermTableItem[]
+  extraDetails?: Record<string, TermDetail>
 }
 
-export function TermSheet({ isNewProject = false, project, inheritedTerms }: TermSheetProps) {
+export function TermSheet({ isNewProject = false, project, inheritedTerms, extraDetails }: TermSheetProps) {
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [showDetail, setShowDetail] = useState(false)
@@ -413,8 +414,10 @@ export function TermSheet({ isNewProject = false, project, inheritedTerms }: Ter
     )
   })
 
-  // Get detail for selected item
-  const selectedDetail = selectedId ? termDetails[selectedId] : null
+  // Get detail for selected item — extraDetails takes priority over built-in mock data
+  const selectedDetail = selectedId
+    ? (extraDetails?.[selectedId] ?? termDetails[selectedId] ?? null)
+    : null
 
   // Handle view detail
   function handleViewDetail(id: string) {
@@ -646,67 +649,73 @@ export function TermSheet({ isNewProject = false, project, inheritedTerms }: Ter
               <div className="h-1 w-1 rounded-full bg-[#0EA5E9]" />
               <h2 className="text-base font-semibold text-[#0EA5E9]">谈判结果</h2>
             </div>
-            <div className="bg-white rounded-xl border border-[#E5E7EB] overflow-hidden">
-              <div className="border-l-4 border-[#0EA5E9] p-5">
-                <div className="flex items-center justify-between mb-3">
-                  <h3 className="font-semibold text-[#111827]">最终结论</h3>
-                  <Badge className={cn(
-                    "text-xs",
-                    selectedDetail.negotiationResult.status === "agreed"
-                      ? "bg-[#DCFCE7] text-[#166534]"
-                      : selectedDetail.negotiationResult.status === "partial"
-                        ? "bg-[#FEF3C7] text-[#92400E]"
-                        : "bg-[#FEE2E2] text-[#991B1B]"
-                  )}>
-                    {selectedDetail.negotiationResult.conclusion}
-                  </Badge>
-                </div>
-                <div className="p-3 bg-[#F9FAFB] rounded-lg mb-4">
-                  <p className="text-sm text-[#374151] leading-relaxed">{selectedDetail.negotiationResult.content}</p>
-                </div>
-                <div className="flex items-center gap-4 text-xs text-[#6B7280] mb-4">
-                  <div className="flex items-center gap-1">
-                    <div className="h-5 w-5 rounded-full bg-[#2563EB] flex items-center justify-center">
-                      <span className="text-[8px] text-white">{selectedDetail.negotiationResult.creator.name.slice(0, 1)}</span>
-                    </div>
-                    <span>创建: {selectedDetail.negotiationResult.creator.name}</span>
+            {selectedDetail.negotiationResult.content ? (
+              <div className="bg-white rounded-xl border border-[#E5E7EB] overflow-hidden">
+                <div className="border-l-4 border-[#0EA5E9] p-5">
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="font-semibold text-[#111827]">最终结论</h3>
+                    <Badge className={cn(
+                      "text-xs",
+                      selectedDetail.negotiationResult.status === "agreed"
+                        ? "bg-[#DCFCE7] text-[#166534]"
+                        : selectedDetail.negotiationResult.status === "partial"
+                          ? "bg-[#FEF3C7] text-[#92400E]"
+                          : "bg-[#FEE2E2] text-[#991B1B]"
+                    )}>
+                      {selectedDetail.negotiationResult.conclusion}
+                    </Badge>
                   </div>
-                  <span>审批:</span>
-                  {selectedDetail.negotiationResult.reviewers.map((r, idx) => (
-                    <div key={idx} className="flex items-center gap-1">
-                      <div className="h-5 w-5 rounded-full bg-[#6B7280] flex items-center justify-center">
-                        <span className="text-[8px] text-white">{r.name.slice(0, 1)}</span>
+                  <div className="p-3 bg-[#F9FAFB] rounded-lg mb-4">
+                    <p className="text-sm text-[#374151] leading-relaxed">{selectedDetail.negotiationResult.content}</p>
+                  </div>
+                  <div className="flex items-center gap-4 text-xs text-[#6B7280] mb-4">
+                    <div className="flex items-center gap-1">
+                      <div className="h-5 w-5 rounded-full bg-[#2563EB] flex items-center justify-center">
+                        <span className="text-[8px] text-white">{selectedDetail.negotiationResult.creator.name.slice(0, 1)}</span>
                       </div>
-                      <span>{r.name}</span>
+                      <span>创建: {selectedDetail.negotiationResult.creator.name}</span>
                     </div>
-                  ))}
-                  <span>{selectedDetail.negotiationResult.createdAt}</span>
-                </div>
-                <div>
-                  <p className="text-xs text-[#6B7280] mb-2">评论</p>
-                  {selectedDetail.negotiationResult.comments.map((c, idx) => (
-                    <div key={idx} className="flex items-start gap-2 mb-2">
-                      <div className="h-6 w-6 rounded-full bg-[#E5E7EB] flex items-center justify-center shrink-0">
-                        <span className="text-[10px] text-[#6B7280]">{c.author.slice(0, 1)}</span>
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs font-medium text-[#111827]">{c.author}</span>
-                          <span className="text-xs text-[#9CA3AF]">{c.time}</span>
+                    <span>审批:</span>
+                    {selectedDetail.negotiationResult.reviewers.map((r, idx) => (
+                      <div key={idx} className="flex items-center gap-1">
+                        <div className="h-5 w-5 rounded-full bg-[#6B7280] flex items-center justify-center">
+                          <span className="text-[8px] text-white">{r.name.slice(0, 1)}</span>
                         </div>
-                        <p className="text-sm text-[#374151]">{c.content}</p>
+                        <span>{r.name}</span>
                       </div>
+                    ))}
+                    <span>{selectedDetail.negotiationResult.createdAt}</span>
+                  </div>
+                  <div>
+                    <p className="text-xs text-[#6B7280] mb-2">评论</p>
+                    {selectedDetail.negotiationResult.comments.map((c, idx) => (
+                      <div key={idx} className="flex items-start gap-2 mb-2">
+                        <div className="h-6 w-6 rounded-full bg-[#E5E7EB] flex items-center justify-center shrink-0">
+                          <span className="text-[10px] text-[#6B7280]">{c.author.slice(0, 1)}</span>
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs font-medium text-[#111827]">{c.author}</span>
+                            <span className="text-xs text-[#9CA3AF]">{c.time}</span>
+                          </div>
+                          <p className="text-sm text-[#374151]">{c.content}</p>
+                        </div>
+                      </div>
+                    ))}
+                    <div className="flex items-center gap-2 mt-3">
+                      <input type="text" placeholder="添加评论..." className="flex-1 text-sm border border-[#E5E7EB] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20 focus:border-[#2563EB]" />
+                      <button className="p-2 text-[#2563EB] hover:bg-[#EFF6FF] rounded-lg transition-colors">
+                        <Send className="h-4 w-4" />
+                      </button>
                     </div>
-                  ))}
-                  <div className="flex items-center gap-2 mt-3">
-                    <input type="text" placeholder="添加评论..." className="flex-1 text-sm border border-[#E5E7EB] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20 focus:border-[#2563EB]" />
-                    <button className="p-2 text-[#2563EB] hover:bg-[#EFF6FF] rounded-lg transition-colors">
-                      <Send className="h-4 w-4" />
-                    </button>
                   </div>
                 </div>
               </div>
-            </div>
+            ) : (
+              <div className="bg-white rounded-xl border border-[#E5E7EB] px-5 py-8 text-center text-sm text-[#9CA3AF]">
+                暂无
+              </div>
+            )}
           </div>
 
           {/* 落实情况 */}
@@ -715,55 +724,61 @@ export function TermSheet({ isNewProject = false, project, inheritedTerms }: Ter
               <div className="h-1 w-1 rounded-full bg-[#10B981]" />
               <h2 className="text-base font-semibold text-[#10B981]">落实情况</h2>
             </div>
-            <div className="bg-white rounded-xl border border-[#E5E7EB] overflow-hidden">
-              <div className="border-l-4 border-[#10B981] p-5">
-                <div className="flex items-center justify-between mb-3">
-                  <h3 className="font-semibold text-[#111827]">执行状态</h3>
-                  <Badge className={cn(
-                    "text-xs",
-                    selectedDetail.implementationStatus.status === "implemented"
-                      ? "bg-[#DCFCE7] text-[#166534]"
-                      : selectedDetail.implementationStatus.status === "in-progress"
-                        ? "bg-[#FEF3C7] text-[#92400E]"
-                        : "bg-[#F3F4F6] text-[#6B7280]"
-                  )}>
-                    {selectedDetail.implementationStatus.status === "implemented" ? "已落实" 
-                      : selectedDetail.implementationStatus.status === "in-progress" ? "执行中" 
-                      : "未开始"}
-                  </Badge>
-                </div>
-                <div className="p-3 bg-[#F9FAFB] rounded-lg mb-4">
-                  <p className="text-sm text-[#374151] leading-relaxed">{selectedDetail.implementationStatus.content}</p>
-                </div>
-                <div className="flex items-center gap-4 text-xs text-[#6B7280] mb-4">
-                  <div className="flex items-center gap-1">
-                    <div className="h-5 w-5 rounded-full bg-[#2563EB] flex items-center justify-center">
-                      <span className="text-[8px] text-white">{selectedDetail.implementationStatus.creator.name.slice(0, 1)}</span>
-                    </div>
-                    <span>创建: {selectedDetail.implementationStatus.creator.name}</span>
+            {selectedDetail.implementationStatus.content ? (
+              <div className="bg-white rounded-xl border border-[#E5E7EB] overflow-hidden">
+                <div className="border-l-4 border-[#10B981] p-5">
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="font-semibold text-[#111827]">执行状态</h3>
+                    <Badge className={cn(
+                      "text-xs",
+                      selectedDetail.implementationStatus.status === "implemented"
+                        ? "bg-[#DCFCE7] text-[#166534]"
+                        : selectedDetail.implementationStatus.status === "in-progress"
+                          ? "bg-[#FEF3C7] text-[#92400E]"
+                          : "bg-[#F3F4F6] text-[#6B7280]"
+                    )}>
+                      {selectedDetail.implementationStatus.status === "implemented" ? "已落实"
+                        : selectedDetail.implementationStatus.status === "in-progress" ? "执行中"
+                        : "未开始"}
+                    </Badge>
                   </div>
-                  <span>审批:</span>
-                  {selectedDetail.implementationStatus.reviewers.map((r, idx) => (
-                    <div key={idx} className="flex items-center gap-1">
-                      <div className="h-5 w-5 rounded-full bg-[#6B7280] flex items-center justify-center">
-                        <span className="text-[8px] text-white">{r.name.slice(0, 1)}</span>
+                  <div className="p-3 bg-[#F9FAFB] rounded-lg mb-4">
+                    <p className="text-sm text-[#374151] leading-relaxed">{selectedDetail.implementationStatus.content}</p>
+                  </div>
+                  <div className="flex items-center gap-4 text-xs text-[#6B7280] mb-4">
+                    <div className="flex items-center gap-1">
+                      <div className="h-5 w-5 rounded-full bg-[#2563EB] flex items-center justify-center">
+                        <span className="text-[8px] text-white">{selectedDetail.implementationStatus.creator.name.slice(0, 1)}</span>
                       </div>
-                      <span>{r.name}</span>
+                      <span>创建: {selectedDetail.implementationStatus.creator.name}</span>
                     </div>
-                  ))}
-                  <span>{selectedDetail.implementationStatus.createdAt}</span>
-                </div>
-                <div>
-                  <p className="text-xs text-[#6B7280] mb-2">评论</p>
-                  <div className="flex items-center gap-2 mt-3">
-                    <input type="text" placeholder="添加评论..." className="flex-1 text-sm border border-[#E5E7EB] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20 focus:border-[#2563EB]" />
-                    <button className="p-2 text-[#2563EB] hover:bg-[#EFF6FF] rounded-lg transition-colors">
-                      <Send className="h-4 w-4" />
-                    </button>
+                    <span>审批:</span>
+                    {selectedDetail.implementationStatus.reviewers.map((r, idx) => (
+                      <div key={idx} className="flex items-center gap-1">
+                        <div className="h-5 w-5 rounded-full bg-[#6B7280] flex items-center justify-center">
+                          <span className="text-[8px] text-white">{r.name.slice(0, 1)}</span>
+                        </div>
+                        <span>{r.name}</span>
+                      </div>
+                    ))}
+                    <span>{selectedDetail.implementationStatus.createdAt}</span>
+                  </div>
+                  <div>
+                    <p className="text-xs text-[#6B7280] mb-2">评论</p>
+                    <div className="flex items-center gap-2 mt-3">
+                      <input type="text" placeholder="添加评论..." className="flex-1 text-sm border border-[#E5E7EB] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20 focus:border-[#2563EB]" />
+                      <button className="p-2 text-[#2563EB] hover:bg-[#EFF6FF] rounded-lg transition-colors">
+                        <Send className="h-4 w-4" />
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+            ) : (
+              <div className="bg-white rounded-xl border border-[#E5E7EB] px-5 py-8 text-center text-sm text-[#9CA3AF]">
+                暂无
+              </div>
+            )}
           </div>
         </div>
       </div>

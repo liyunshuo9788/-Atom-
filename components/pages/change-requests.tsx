@@ -14,7 +14,7 @@ import {
 import { cn } from "@/lib/utils"
 import type { PendingStrategy, PendingHypothesis, PendingTerm, PendingMaterial } from "./strategies-grid"
 import type { PendingProject } from "./projects-grid"
-import type { PendingPhase, PendingProjectHypothesis } from "./workflow"
+import type { PendingPhase, PendingProjectHypothesis, PendingProjectTerm, PendingProjectMaterial } from "./workflow"
 
 type PendingRequest =
   | { type: "strategy"; data: PendingStrategy }
@@ -23,7 +23,9 @@ type PendingRequest =
   | { type: "hypothesis"; data: PendingHypothesis }
   | { type: "project-hypothesis"; data: PendingProjectHypothesis }
   | { type: "term"; data: PendingTerm }
+  | { type: "project-term"; data: PendingProjectTerm }
   | { type: "material"; data: PendingMaterial }
+  | { type: "project-material"; data: PendingProjectMaterial }
 
 interface ChangeRequestsProps {
   pendingStrategies: PendingStrategy[]
@@ -32,7 +34,9 @@ interface ChangeRequestsProps {
   pendingHypotheses: PendingHypothesis[]
   pendingProjectHypotheses: PendingProjectHypothesis[]
   pendingTerms: PendingTerm[]
+  pendingProjectTerms: PendingProjectTerm[]
   pendingMaterials: PendingMaterial[]
+  pendingProjectMaterials: PendingProjectMaterial[]
   onApproveStrategy: (id: string) => void
   onRejectStrategy: (id: string) => void
   onApproveProject: (id: string) => void
@@ -45,8 +49,12 @@ interface ChangeRequestsProps {
   onRejectProjectHypothesis: (id: string) => void
   onApproveTerm: (id: string) => void
   onRejectTerm: (id: string) => void
+  onApproveProjectTerm: (id: string) => void
+  onRejectProjectTerm: (id: string) => void
   onApproveMaterial: (id: string) => void
   onRejectMaterial: (id: string) => void
+  onApproveProjectMaterial: (id: string) => void
+  onRejectProjectMaterial: (id: string) => void
 }
 
 export function ChangeRequests({
@@ -56,7 +64,9 @@ export function ChangeRequests({
   pendingHypotheses,
   pendingProjectHypotheses,
   pendingTerms,
+  pendingProjectTerms,
   pendingMaterials,
+  pendingProjectMaterials,
   onApproveStrategy,
   onRejectStrategy,
   onApproveProject,
@@ -69,8 +79,12 @@ export function ChangeRequests({
   onRejectProjectHypothesis,
   onApproveTerm,
   onRejectTerm,
+  onApproveProjectTerm,
+  onRejectProjectTerm,
   onApproveMaterial,
   onRejectMaterial,
+  onApproveProjectMaterial,
+  onRejectProjectMaterial,
 }: ChangeRequestsProps) {
   const [searchQuery, setSearchQuery] = useState("")
   const [detailOpen, setDetailOpen] = useState(false)
@@ -85,7 +99,9 @@ export function ChangeRequests({
     ...pendingHypotheses.map((h) => ({ type: "hypothesis" as const, data: h })),
     ...pendingProjectHypotheses.map((h) => ({ type: "project-hypothesis" as const, data: h })),
     ...pendingTerms.map((t) => ({ type: "term" as const, data: t })),
+    ...pendingProjectTerms.map((t) => ({ type: "project-term" as const, data: t })),
     ...pendingMaterials.map((m) => ({ type: "material" as const, data: m })),
+    ...pendingProjectMaterials.map((m) => ({ type: "project-material" as const, data: m })),
   ].sort((a, b) => new Date(b.data.initiatedAt).getTime() - new Date(a.data.initiatedAt).getTime())
 
   const filteredRequests = allRequests.filter((r) => {
@@ -102,8 +118,8 @@ export function ChangeRequests({
   const phaseCount = pendingPhases.length
   const hypothesisCount = pendingHypotheses.length
   const projectHypothesisCount = pendingProjectHypotheses.length
-  const termCount = pendingTerms.length
-  const materialCount = pendingMaterials.length
+  const termCount = pendingTerms.length + pendingProjectTerms.length
+  const materialCount = pendingMaterials.length + pendingProjectMaterials.length
 
   function handleViewDetail(request: PendingRequest) {
     setSelectedRequest(request)
@@ -123,6 +139,10 @@ export function ChangeRequests({
       onApproveProjectHypothesis(request.data.id)
     } else if (request.type === "term") {
       onApproveTerm(request.data.id)
+    } else if (request.type === "project-term") {
+      onApproveProjectTerm(request.data.id)
+    } else if (request.type === "project-material") {
+      onApproveProjectMaterial(request.data.id)
     } else {
       onApproveMaterial(request.data.id)
     }
@@ -141,6 +161,10 @@ export function ChangeRequests({
       onRejectProjectHypothesis(request.data.id)
     } else if (request.type === "term") {
       onRejectTerm(request.data.id)
+    } else if (request.type === "project-term") {
+      onRejectProjectTerm(request.data.id)
+    } else if (request.type === "project-material") {
+      onRejectProjectMaterial(request.data.id)
     } else {
       onRejectMaterial(request.data.id)
     }
@@ -341,10 +365,12 @@ export function ChangeRequests({
   ? "bg-emerald-50 text-emerald-700 border-emerald-200"
   : request.type === "hypothesis" || request.type === "project-hypothesis"
   ? "bg-amber-50 text-amber-700 border-amber-200"
-  : request.type === "term"
+  : request.type === "term" || request.type === "project-term"
   ? "bg-violet-50 text-violet-700 border-violet-200"
   : request.type === "material"
   ? "bg-teal-50 text-teal-700 border-teal-200"
+  : request.type === "project-material"
+  ? "bg-amber-50 text-amber-700 border-amber-200"
   : "bg-purple-50 text-purple-700 border-purple-200"
   )}>
   {request.type === "strategy" ? "策略"
@@ -352,7 +378,9 @@ export function ChangeRequests({
   : request.type === "hypothesis" ? "假设"
   : request.type === "project-hypothesis" ? "项目假设"
   : request.type === "term" ? "条款"
+  : request.type === "project-term" ? "项目条款"
   : request.type === "material" ? "材料"
+  : request.type === "project-material" ? "项目材料"
   : "工作流"}
                     </Badge>
                   </div>
@@ -377,8 +405,12 @@ export function ChangeRequests({
   ? `项目: ${(request.data as PendingProjectHypothesis).projectName} / 方向: ${(request.data as PendingProjectHypothesis).hypothesis.direction}`
   : request.type === "term"
   ? `条款方向: ${(request.data as PendingTerm).term.direction}`
+  : request.type === "project-term"
+  ? `项目: ${(request.data as PendingProjectTerm).projectName} / 方向: ${(request.data as PendingProjectTerm).term.direction}`
   : request.type === "material"
   ? `材料类别: ${(request.data as PendingMaterial).category}`
+  : request.type === "project-material"
+  ? `项目: ${(request.data as PendingProjectMaterial).projectName} / 分类: ${(request.data as PendingProjectMaterial).material.category}`
   : `项目: ${(request.data as PendingPhase).projectName}`
   }
                     </p>
@@ -467,19 +499,24 @@ export function ChangeRequests({
                       ? "bg-blue-50 text-blue-700 border-blue-200"
                       : selectedRequest.type === "project"
                         ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-                        : selectedRequest.type === "hypothesis"
+                        : selectedRequest.type === "hypothesis" || selectedRequest.type === "project-hypothesis"
                           ? "bg-amber-50 text-amber-700 border-amber-200"
-                          : selectedRequest.type === "term"
+                          : selectedRequest.type === "term" || selectedRequest.type === "project-term"
                             ? "bg-violet-50 text-violet-700 border-violet-200"
                             : selectedRequest.type === "material"
                               ? "bg-teal-50 text-teal-700 border-teal-200"
-                              : "bg-purple-50 text-purple-700 border-purple-200"
+                              : selectedRequest.type === "project-material"
+                                ? "bg-amber-50 text-amber-700 border-amber-200"
+                                : "bg-purple-50 text-purple-700 border-purple-200"
                   )}>
                     {selectedRequest.type === "strategy" ? "策略"
                       : selectedRequest.type === "project" ? "项目"
                       : selectedRequest.type === "hypothesis" ? "假设"
+                      : selectedRequest.type === "project-hypothesis" ? "项目假设"
                       : selectedRequest.type === "term" ? "条款"
+                      : selectedRequest.type === "project-term" ? "项目条款"
                       : selectedRequest.type === "material" ? "材料"
+                      : selectedRequest.type === "project-material" ? "项目材料"
                       : "工作流"}
                   </Badge>
                 </div>
@@ -571,6 +608,33 @@ export function ChangeRequests({
                       </Badge>
                     </div>
                   </>
+                ) : selectedRequest.type === "project-term" ? (
+                  <>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-[#6B7280]">所属项目</span>
+                      <span className="text-sm font-medium text-[#111827]">
+                        {(selectedRequest.data as PendingProjectTerm).projectName}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-[#6B7280]">条款名称</span>
+                      <span className="text-sm font-medium text-[#111827] text-right max-w-[240px] leading-snug">
+                        {(selectedRequest.data as PendingProjectTerm).term.name}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-[#6B7280]">条款方向</span>
+                      <Badge className="bg-violet-50 text-violet-700 border-violet-200 text-xs">
+                        {(selectedRequest.data as PendingProjectTerm).term.direction}
+                      </Badge>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-[#6B7280]">条款类别</span>
+                      <Badge className="bg-gray-50 text-gray-600 border-gray-200 text-xs">
+                        {(selectedRequest.data as PendingProjectTerm).term.category}
+                      </Badge>
+                    </div>
+                  </>
                 ) : selectedRequest.type === "material" ? (
                   <>
                     <div className="flex items-center justify-between">
@@ -599,6 +663,33 @@ export function ChangeRequests({
                           </div>
                         ))}
                       </div>
+                    </div>
+                  </>
+                ) : selectedRequest.type === "project-material" ? (
+                  <>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-[#6B7280]">所属项目</span>
+                      <span className="text-sm font-medium text-[#111827]">
+                        {(selectedRequest.data as PendingProjectMaterial).projectName}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-[#6B7280]">材料名称</span>
+                      <span className="text-sm font-medium text-[#111827] text-right max-w-[240px] leading-snug">
+                        {(selectedRequest.data as PendingProjectMaterial).material.name}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-[#6B7280]">材料格式</span>
+                      <Badge className="bg-gray-50 text-gray-600 border-gray-200 text-xs">
+                        {(selectedRequest.data as PendingProjectMaterial).material.format}
+                      </Badge>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-[#6B7280]">材料分类</span>
+                      <Badge className="bg-amber-50 text-amber-700 border-amber-200 text-xs">
+                        {(selectedRequest.data as PendingProjectMaterial).material.category}
+                      </Badge>
                     </div>
                   </>
                 ) : (

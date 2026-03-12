@@ -86,6 +86,7 @@ type SidebarType =
 type FullPageView =
   | "hypothesis-generation"
   | "term-generation"
+  | "material-generation"
   | null
 
 interface ChatMessage {
@@ -219,6 +220,50 @@ export interface PendingProjectTerm {
   changeId: string
   changeName: string
   changeType: "create"
+  initiator: { id: string; name: string; initials: string }
+  initiatedAt: string
+  reviewers: { id: string; name: string; initials: string }[]
+}
+
+// Suggested material within a material suggestion card
+export interface SuggestionMaterial {
+  id: string
+  category: string      // 材料分类 (e.g., "行业报告", "财务材料", "技术文档")
+  format: string        // 格式 (PDF, XLSX, DOCX, etc.)
+  name: string          // 材料名称
+  description: string   // 描述
+  collectReason: string // 收集原因
+  isExisting: boolean   // 是否已在项目材料中
+}
+
+// Generated material suggestion with linked items
+export interface GeneratedMaterialSuggestion {
+  id: string
+  title: string
+  content: string
+  linkedHypotheses: { id: string; name: string }[]
+  linkedTerms: { id: string; name: string }[]
+  materials: SuggestionMaterial[]
+}
+
+// Project material creation form data
+export interface ProjectMaterialFormData {
+  name: string
+  format: string
+  category: string
+  description: string
+  collectReason: string
+}
+
+// Pending project material change request
+export interface PendingProjectMaterial {
+  id: string
+  projectId: string
+  projectName: string
+  material: ProjectMaterialFormData
+  changeId: string
+  changeName: string
+  changeType: "collect"
   initiator: { id: string; name: string; initials: string }
   initiatedAt: string
   reviewers: { id: string; name: string; initials: string }[]
@@ -457,6 +502,10 @@ interface WorkflowProps {
   // Persisted term suggestion generation state
   savedGeneratedTermSuggestions?: GeneratedTermSuggestion[]
   onSaveTermSuggestions?: (suggestions: GeneratedTermSuggestion[]) => void
+  // Persisted material suggestion generation state
+  savedGeneratedMaterialSuggestions?: GeneratedMaterialSuggestion[]
+  onSaveMaterialSuggestions?: (suggestions: GeneratedMaterialSuggestion[]) => void
+  onCreatePendingProjectMaterial?: (pending: PendingProjectMaterial) => void
 }
 
 /* ─── New Project Phase Template ─────────────── */
@@ -497,6 +546,9 @@ export function Workflow({
   onSaveSuggestions,
   savedGeneratedTermSuggestions,
   onSaveTermSuggestions,
+  savedGeneratedMaterialSuggestions,
+  onSaveMaterialSuggestions,
+  onCreatePendingProjectMaterial,
 }: WorkflowProps) {
   const scrollRef = useRef<HTMLDivElement>(null)
 
@@ -556,6 +608,22 @@ export function Workflow({
     bilateralConflict: { content: "" },
     ourBottomLine: { content: "" },
     compromiseSpace: { content: "" },
+  })
+
+  // Material generation state
+  const [isMaterialGenerating, setIsMaterialGenerating] = useState(false)
+  const [materialGenerationComplete, setMaterialGenerationComplete] = useState(savedGeneratedMaterialSuggestions ? savedGeneratedMaterialSuggestions.length > 0 : false)
+  const [materialThinkingSteps, setMaterialThinkingSteps] = useState<ThinkingStep[]>([])
+  const [generatedMaterialSuggestions, setGeneratedMaterialSuggestions] = useState<GeneratedMaterialSuggestion[]>(savedGeneratedMaterialSuggestions || [])
+
+  // Material creation dialog state
+  const [showMaterialCreateDialog, setShowMaterialCreateDialog] = useState(false)
+  const [materialFormData, setMaterialFormData] = useState<ProjectMaterialFormData>({
+    name: "",
+    format: "PDF",
+    category: "",
+    description: "",
+    collectReason: "",
   })
 
   // Mock available project materials
@@ -736,6 +804,22 @@ export function Workflow({
       return
     }
 
+    // For material-suggestions, open full page view instead of sidebar
+    if (type === "material-suggestions") {
+      setFullPageView("material-generation")
+      setIsMaterialGenerating(false)
+      setMaterialThinkingSteps([])
+      // Restore saved suggestions if available, otherwise reset
+      if (savedGeneratedMaterialSuggestions && savedGeneratedMaterialSuggestions.length > 0) {
+        setGeneratedMaterialSuggestions(savedGeneratedMaterialSuggestions)
+        setMaterialGenerationComplete(true)
+      } else {
+        setGeneratedMaterialSuggestions([])
+        setMaterialGenerationComplete(false)
+      }
+      return
+    }
+
     setActiveSidebar(type)
     if (type === "ai-chat") {
       setChatMessages([
@@ -755,6 +839,11 @@ export function Workflow({
     setTermGenerationComplete(false)
     setTermThinkingSteps([])
     setGeneratedTermSuggestions([])
+    // Also reset material generation state
+    setIsMaterialGenerating(false)
+    setMaterialGenerationComplete(false)
+    setMaterialThinkingSteps([])
+    setGeneratedMaterialSuggestions([])
   }
 
   function handleCreateFromHypothesis(hypothesis: SuggestionHypothesis) {
@@ -927,6 +1016,50 @@ export function Workflow({
     handleCloseFullPageView()
   }
 
+  // Material creation handlers
+  function handleCreateFromMaterial(material: SuggestionMaterial) {
+    setMaterialFormData({
+      name: material.name,
+      format: material.format,
+      category: material.category,
+      description: material.description,
+      collectReason: material.collectReason,
+    })
+    setShowMaterialCreateDialog(true)
+  }
+
+  function handleCloseMaterialCreateDialog() {
+    setShowMaterialCreateDialog(false)
+    setMaterialFormData({
+      name: "",
+      format: "PDF",
+      category: "",
+      description: "",
+      collectReason: "",
+    })
+  }
+
+  function handleSubmitMaterial() {
+    const pendingMaterial: PendingProjectMaterial = {
+      id: `pending-project-material-${Date.now()}`,
+      projectId,
+      projectName,
+      material: materialFormData,
+      changeId: `CR-PM-${Date.now().toString().slice(-6)}`,
+      changeName: `收集项目材料: ${materialFormData.name}`,
+      changeType: "collect",
+      initiator: { id: "zhangwei", name: "张伟", initials: "张伟" },
+      initiatedAt: new Date().toISOString().split("T")[0],
+      reviewers: [
+        { id: "zhangwei", name: "张伟", initials: "张伟" },
+        { id: "lisi", name: "李四", initials: "李四" },
+      ],
+    }
+    onCreatePendingProjectMaterial?.(pendingMaterial)
+    handleCloseMaterialCreateDialog()
+    handleCloseFullPageView()
+  }
+
   function handleStartTermGeneration() {
     setIsTermGenerating(true)
     setTermGenerationComplete(false)
@@ -1037,6 +1170,137 @@ export function Workflow({
           onSaveTermSuggestions?.(suggestions)
           setIsTermGenerating(false)
           setTermGenerationComplete(true)
+        }, 500)
+      }
+    }, 800)
+  }
+
+  function handleStartMaterialGeneration() {
+    setIsMaterialGenerating(true)
+    setMaterialGenerationComplete(false)
+
+    const steps: ThinkingStep[] = [
+      { id: "mg1", label: "读取当前阶段项目材料清单...", status: "waiting" },
+      { id: "mg2", label: "分析材料完整性与覆盖面...", status: "waiting" },
+      { id: "mg3", label: "检索关联假设与条款需求...", status: "waiting" },
+      { id: "mg4", label: "对比行业尽调材料标准...", status: "waiting" },
+      { id: "mg5", label: "生成材料收集建议...", status: "waiting" },
+    ]
+    setMaterialThinkingSteps(steps)
+
+    let currentStep = 0
+    const interval = setInterval(() => {
+      if (currentStep < steps.length) {
+        setMaterialThinkingSteps((prev) =>
+          prev.map((step, idx) => ({
+            ...step,
+            status: idx < currentStep ? "completed" : idx === currentStep ? "active" : "waiting",
+          }))
+        )
+        currentStep++
+      } else {
+        clearInterval(interval)
+        setMaterialThinkingSteps((prev) => prev.map((step) => ({ ...step, status: "completed" })))
+
+        setTimeout(() => {
+          const suggestions: GeneratedMaterialSuggestion[] = [
+            {
+              id: "gms1",
+              title: "补充核心团队背景材料",
+              content: "当前项目缺少对创始团队专业背景的系统性佐证材料。建议收集创始人简历、核心团队履历及期权安排文件，以支撑团队能力相关假设的验证。",
+              linkedHypotheses: [
+                { id: "h1", name: "创始人具有扎实的人工智能学术背景" },
+              ],
+              linkedTerms: [
+                { id: "t1", name: "创始人股权分配细则" },
+              ],
+              materials: [
+                {
+                  id: "sm1-1",
+                  category: "人员简历",
+                  format: "PDF",
+                  name: "创始人闫俊杰个人简历",
+                  description: "包含学历背景、工作经历、核心成就及行业影响力的完整个人简历",
+                  collectReason: "验证创始人AI学术背景假设，支撑董事会席位条款谈判依据",
+                  isExisting: false,
+                },
+                {
+                  id: "sm1-2",
+                  category: "人员简历",
+                  format: "PDF",
+                  name: "核心团队履历及期权安排",
+                  description: "核心技术团队成员的详细履历及股权激励方案说明",
+                  collectReason: "全面评估团队构成，验证技术执行能力",
+                  isExisting: false,
+                },
+              ],
+            },
+            {
+              id: "gms2",
+              title: "完善财务尽调材料",
+              content: "现有财务材料不足以支撑单位经济模型健康的假设验证。建议补充详细的财务预测模型和单位经济分析，以验证盈利能力假设并支撑相关条款谈判。",
+              linkedHypotheses: [
+                { id: "h4", name: "单位经济模型健康，具备规模化盈利基础" },
+              ],
+              linkedTerms: [
+                { id: "t2", name: "采用加权平均反稀释保护机制" },
+              ],
+              materials: [
+                {
+                  id: "sm2-1",
+                  category: "财务材料",
+                  format: "XLSX",
+                  name: "财务预测模型（3年）",
+                  description: "包含收入预测、成本结构、利润率分析及现金流预测的三年期财务模型",
+                  collectReason: "验证单位经济模型假设，为反稀释条款提供估值依据",
+                  isExisting: false,
+                },
+                {
+                  id: "sm2-2",
+                  category: "财务材料",
+                  format: "PDF",
+                  name: "单位经济模型分析报告",
+                  description: "CAC、LTV、毛利率等核心单位经济指标的详细分析",
+                  collectReason: "量化验证盈利能力假设，支持信息权条款中财务报告要求的合理性",
+                  isExisting: false,
+                },
+              ],
+            },
+            {
+              id: "gms3",
+              title: "加强技术壁垒验证材料",
+              content: "当前材料库缺少对公司核心技术壁垒的客观评估材料。建议收集第三方技术评估报告和专利清单，以强化技术竞争力相关假设的可信度。",
+              linkedHypotheses: [
+                { id: "h2", name: "核心技术具备可验证的技术壁垒" },
+                { id: "h3", name: "市场规模足够支撑高速增长" },
+              ],
+              linkedTerms: [],
+              materials: [
+                {
+                  id: "sm3-1",
+                  category: "技术文档",
+                  format: "PDF",
+                  name: "核心技术架构说明书",
+                  description: "系统架构、技术创新点、核心算法说明及技术护城河分析",
+                  collectReason: "验证技术壁垒假设，为董事会信息权条款提供技术背景",
+                  isExisting: false,
+                },
+                {
+                  id: "sm3-2",
+                  category: "技术文档",
+                  format: "PDF",
+                  name: "专利及知识产权清单",
+                  description: "已授权专利、申请中专利及核心技术的知识产权保护状态",
+                  collectReason: "量化评估技术壁垒的可持续性，支撑对应的假设和条款",
+                  isExisting: false,
+                },
+              ],
+            },
+          ]
+          setGeneratedMaterialSuggestions(suggestions)
+          onSaveMaterialSuggestions?.(suggestions)
+          setIsMaterialGenerating(false)
+          setMaterialGenerationComplete(true)
         }, 500)
       }
     }, 800)
@@ -2044,68 +2308,96 @@ export function Workflow({
                   </div>
                 </div>
 
-                <div className="space-y-6">
-                  {generatedTermSuggestions.map((suggestion) => (
-                    <div key={suggestion.id} className="rounded-2xl border border-[#E5E7EB] bg-white overflow-hidden shadow-sm">
-                      <div className="border-l-4 border-emerald-500 p-6">
-                        <div className="flex items-start justify-between mb-4">
-                          <div className="flex items-start gap-3">
-                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-emerald-50">
-                              <FileText className="h-5 w-5 text-emerald-600" />
+                <div className="space-y-4">
+                  {generatedTermSuggestions.map((suggestion, idx) => (
+                    <div
+                      key={suggestion.id}
+                      className="rounded-2xl border border-[#E5E7EB] bg-white p-6 shadow-sm transition-all hover:shadow-md"
+                    >
+                      <div className="flex items-start gap-4 mb-4">
+                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-emerald-100 text-sm font-semibold text-emerald-700">
+                          {idx + 1}
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="text-base font-semibold text-[#111827] mb-2">{suggestion.title}</h3>
+                          <p className="text-sm text-[#6B7280] leading-relaxed">{suggestion.content}</p>
+                        </div>
+                      </div>
+
+                      {/* Linked Items */}
+                      <div className="ml-12 space-y-3 pt-4 border-t border-[#F3F4F6]">
+                        {/* Linked Hypotheses */}
+                        {suggestion.linkedHypotheses.length > 0 && (
+                          <div className="flex items-start gap-2">
+                            <div className="flex items-center gap-1.5 shrink-0 text-xs text-[#6B7280]">
+                              <Lightbulb className="h-3.5 w-3.5 text-amber-500" />
+                              <span>关联假设:</span>
                             </div>
-                            <div>
-                              <h3 className="text-base font-semibold text-[#111827] mb-1">{suggestion.title}</h3>
-                              <p className="text-sm text-[#6B7280] leading-relaxed">{suggestion.content}</p>
+                            <div className="flex flex-wrap gap-1.5">
+                              {suggestion.linkedHypotheses.map((h) => (
+                                <Badge key={h.id} className="bg-amber-50 text-amber-700 border-amber-200 text-[10px] font-normal cursor-pointer hover:bg-amber-100">
+                                  {h.name}
+                                </Badge>
+                              ))}
                             </div>
                           </div>
-                        </div>
+                        )}
 
-                        {/* Linked items */}
-                        <div className="flex flex-wrap gap-2 mb-4">
-                          {suggestion.linkedHypotheses.map((h) => (
-                            <span key={h.id} className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-1 text-[11px] text-amber-700">
-                              <Lightbulb className="h-3 w-3" />
-                              {h.name}
-                            </span>
-                          ))}
-                          {suggestion.linkedMaterials.map((m) => (
-                            <span key={m.id} className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2.5 py-1 text-[11px] text-blue-700">
-                              <FileText className="h-3 w-3" />
-                              {m.name}
-                            </span>
-                          ))}
-                        </div>
-
-                        {/* Suggested terms */}
-                        <div className="border-t border-[#E5E7EB] pt-4 mt-4 space-y-3">
-                          <p className="text-xs font-medium text-[#6B7280] uppercase tracking-wider">建议条款</p>
-                          {suggestion.terms.map((term) => (
-                            <div key={term.id} className="flex items-center justify-between rounded-lg bg-[#F9FAFB] p-4">
-                              <div className="flex items-center gap-3">
-                                <div className="flex h-8 w-8 items-center justify-center rounded bg-emerald-100">
-                                  <FileText className="h-4 w-4 text-emerald-600" />
-                                </div>
-                                <div>
-                                  <p className="text-sm font-medium text-[#111827]">{term.name}</p>
-                                  <p className="text-xs text-[#6B7280]">{term.direction} · {term.category}</p>
-                                </div>
-                              </div>
-                              {term.isExisting ? (
-                                <button className="inline-flex items-center gap-1.5 rounded-md border border-[#E5E7EB] bg-white px-3 py-1.5 text-xs font-medium text-[#374151] transition-colors hover:bg-[#F3F4F6] shrink-0">
-                                  <Pencil className="h-3 w-3" />
-                                  修改该条款
-                                </button>
-                              ) : (
-                                <button
-                                  onClick={() => handleCreateFromTerm(term)}
-                                  className="inline-flex items-center gap-1.5 rounded-md bg-emerald-500 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-emerald-600 shrink-0"
-                                >
-                                  <Plus className="h-3 w-3" />
-                                  创建该条款
-                                </button>
-                              )}
+                        {/* Linked Materials */}
+                        {suggestion.linkedMaterials.length > 0 && (
+                          <div className="flex items-start gap-2">
+                            <div className="flex items-center gap-1.5 shrink-0 text-xs text-[#6B7280]">
+                              <FolderOpen className="h-3.5 w-3.5 text-blue-500" />
+                              <span>关联材料:</span>
                             </div>
-                          ))}
+                            <div className="flex flex-wrap gap-1.5">
+                              {suggestion.linkedMaterials.map((m) => (
+                                <Badge key={m.id} className="bg-blue-50 text-blue-700 border-blue-200 text-[10px] font-normal cursor-pointer hover:bg-blue-100">
+                                  {m.name}
+                                </Badge>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Terms List */}
+                        <div className="pt-3 border-t border-[#F3F4F6]">
+                          <div className="flex items-center gap-2 mb-3">
+                            <FileText className="h-4 w-4 text-emerald-500" />
+                            <span className="text-sm font-medium text-[#374151]">建议条款 ({suggestion.terms.length})</span>
+                          </div>
+                          <div className="space-y-2">
+                            {suggestion.terms.map((term) => (
+                              <div
+                                key={term.id}
+                                className="flex items-center justify-between gap-4 rounded-lg border border-[#E5E7EB] bg-[#F9FAFB] p-3"
+                              >
+                                <div className="flex items-center gap-3 flex-1 min-w-0">
+                                  <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200 text-[10px] shrink-0">
+                                    {term.direction}
+                                  </Badge>
+                                  <Badge className="bg-gray-50 text-gray-600 border-gray-200 text-[10px] shrink-0">
+                                    {term.category}
+                                  </Badge>
+                                  <span className="text-sm text-[#374151] truncate">{term.name}</span>
+                                </div>
+                                {term.isExisting ? (
+                                  <button className="inline-flex items-center gap-1.5 rounded-md border border-[#E5E7EB] bg-white px-3 py-1.5 text-xs font-medium text-[#374151] transition-colors hover:bg-[#F3F4F6] shrink-0">
+                                    <Pencil className="h-3 w-3" />
+                                    修改该条款
+                                  </button>
+                                ) : (
+                                  <button
+                                    onClick={() => handleCreateFromTerm(term)}
+                                    className="inline-flex items-center gap-1.5 rounded-md bg-emerald-500 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-emerald-600 shrink-0"
+                                  >
+                                    <Plus className="h-3 w-3" />
+                                    创建该条款
+                                  </button>
+                                )}
+                              </div>
+                            ))}
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -2288,6 +2580,325 @@ export function Workflow({
                   disabled={!termFormData.name.trim() || !termFormData.direction.trim()}
                 >
                   创建条款
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      </div>
+    )
+  }
+
+  // Show full page material generation view
+  if (fullPageView === "material-generation") {
+    return (
+      <div className="flex h-full flex-col bg-[#F9FAFB]">
+        {/* Header */}
+        <div className="shrink-0 border-b border-[#E5E7EB] bg-white px-8 py-5">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <button
+                onClick={handleCloseFullPageView}
+                className="flex items-center gap-2 text-sm text-[#6B7280] hover:text-[#111827] transition-colors"
+              >
+                <ArrowRight className="h-4 w-4 rotate-180" />
+                返回工作流
+              </button>
+              <div className="h-6 w-px bg-[#E5E7EB]" />
+              <div>
+                <h1 className="text-xl font-bold text-[#111827]">材料收集建议</h1>
+                <p className="text-sm text-[#6B7280]">{currentPhase?.fullLabel || "设立期 - 阶段1"}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="flex-1 overflow-auto p-8">
+          <div className="mx-auto max-w-4xl">
+            {!isMaterialGenerating && !materialGenerationComplete && (
+              <div className="flex flex-col items-center justify-center py-20">
+                <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-amber-100 to-amber-50 ring-8 ring-amber-50/50">
+                  <FolderSearch className="h-10 w-10 text-amber-600" />
+                </div>
+                <h2 className="text-xl font-semibold text-[#111827] mb-2">AI材料收集建议生成</h2>
+                <p className="text-sm text-[#6B7280] text-center max-w-md mb-8">
+                  基于当前阶段的假设清单、条款清单和已有材料，AI将为您生成针对性的材料收集建议，帮助您完善尽调材料体系。
+                </p>
+                <button
+                  onClick={handleStartMaterialGeneration}
+                  className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 px-8 py-3 text-sm font-semibold text-white shadow-lg transition-all hover:from-amber-600 hover:to-orange-600 hover:shadow-xl"
+                >
+                  <Brain className="h-5 w-5" />
+                  开始生成
+                </button>
+              </div>
+            )}
+
+            {isMaterialGenerating && (
+              <div className="py-12">
+                <div className="mb-8 text-center">
+                  <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-amber-50 px-4 py-2 text-sm text-amber-700">
+                    <div className="h-2 w-2 animate-pulse rounded-full bg-amber-500" />
+                    AI正在深度思考...
+                  </div>
+                </div>
+
+                <div className="rounded-2xl border border-[#E5E7EB] bg-white p-8 shadow-sm">
+                  <div className="space-y-4">
+                    {materialThinkingSteps.map((step) => (
+                      <div key={step.id} className="flex items-center gap-4">
+                        <div className={cn(
+                          "flex h-8 w-8 items-center justify-center rounded-full transition-all duration-300",
+                          step.status === "completed" ? "bg-amber-100" :
+                          step.status === "active" ? "bg-amber-500" : "bg-[#F3F4F6]"
+                        )}>
+                          {step.status === "completed" ? (
+                            <Check className="h-4 w-4 text-amber-600" />
+                          ) : step.status === "active" ? (
+                            <div className="h-3 w-3 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                          ) : (
+                            <div className="h-2 w-2 rounded-full bg-[#D1D5DB]" />
+                          )}
+                        </div>
+                        <span className={cn(
+                          "text-sm transition-colors",
+                          step.status === "completed" ? "text-amber-600" :
+                          step.status === "active" ? "text-[#111827] font-medium" : "text-[#9CA3AF]"
+                        )}>
+                          {step.label}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {materialGenerationComplete && generatedMaterialSuggestions.length > 0 && (
+              <div className="space-y-6">
+                <div className="text-center mb-8">
+                  <div className="inline-flex items-center gap-2 rounded-full bg-amber-50 px-4 py-2 text-sm text-amber-700 mb-4">
+                    <Check className="h-4 w-4" />
+                    已生成 {generatedMaterialSuggestions.length} 条材料建议
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  {generatedMaterialSuggestions.map((suggestion, idx) => (
+                    <div
+                      key={suggestion.id}
+                      className="rounded-2xl border border-[#E5E7EB] bg-white p-6 shadow-sm transition-all hover:shadow-md"
+                    >
+                      <div className="flex items-start gap-4 mb-4">
+                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-amber-100 text-sm font-semibold text-amber-700">
+                          {idx + 1}
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="text-base font-semibold text-[#111827] mb-2">{suggestion.title}</h3>
+                          <p className="text-sm text-[#6B7280] leading-relaxed">{suggestion.content}</p>
+                        </div>
+                      </div>
+
+                      {/* Linked Items */}
+                      <div className="ml-12 space-y-3 pt-4 border-t border-[#F3F4F6]">
+                        {/* Linked Hypotheses */}
+                        {suggestion.linkedHypotheses.length > 0 && (
+                          <div className="flex items-start gap-2">
+                            <div className="flex items-center gap-1.5 shrink-0 text-xs text-[#6B7280]">
+                              <Lightbulb className="h-3.5 w-3.5 text-amber-500" />
+                              <span>关联假设:</span>
+                            </div>
+                            <div className="flex flex-wrap gap-1.5">
+                              {suggestion.linkedHypotheses.map((h) => (
+                                <Badge key={h.id} className="bg-amber-50 text-amber-700 border-amber-200 text-[10px] font-normal cursor-pointer hover:bg-amber-100">
+                                  {h.name}
+                                </Badge>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Linked Terms */}
+                        {suggestion.linkedTerms.length > 0 && (
+                          <div className="flex items-start gap-2">
+                            <div className="flex items-center gap-1.5 shrink-0 text-xs text-[#6B7280]">
+                              <FileText className="h-3.5 w-3.5 text-emerald-500" />
+                              <span>关联条款:</span>
+                            </div>
+                            <div className="flex flex-wrap gap-1.5">
+                              {suggestion.linkedTerms.map((t) => (
+                                <Badge key={t.id} className="bg-emerald-50 text-emerald-700 border-emerald-200 text-[10px] font-normal cursor-pointer hover:bg-emerald-100">
+                                  {t.name}
+                                </Badge>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Materials List */}
+                        <div className="pt-3 border-t border-[#F3F4F6]">
+                          <div className="flex items-center gap-2 mb-3">
+                            <FolderSearch className="h-4 w-4 text-amber-500" />
+                            <span className="text-sm font-medium text-[#374151]">建议收集材料 ({suggestion.materials.length})</span>
+                          </div>
+                          <div className="space-y-2">
+                            {suggestion.materials.map((material) => (
+                              <div
+                                key={material.id}
+                                className="flex items-center justify-between gap-4 rounded-lg border border-[#E5E7EB] bg-[#F9FAFB] p-3"
+                              >
+                                <div className="flex items-center gap-3 flex-1 min-w-0">
+                                  <Badge className="bg-amber-50 text-amber-700 border-amber-200 text-[10px] shrink-0">
+                                    {material.category}
+                                  </Badge>
+                                  <Badge className="bg-gray-50 text-gray-600 border-gray-200 text-[10px] shrink-0">
+                                    {material.format}
+                                  </Badge>
+                                  <span className="text-sm text-[#374151] truncate">{material.name}</span>
+                                </div>
+                                {material.isExisting ? (
+                                  <span className="inline-flex items-center gap-1.5 rounded-md border border-[#E5E7EB] bg-white px-3 py-1.5 text-xs font-medium text-[#6B7280] shrink-0">
+                                    <Check className="h-3 w-3" />
+                                    已收集
+                                  </span>
+                                ) : (
+                                  <button
+                                    onClick={() => handleCreateFromMaterial(material)}
+                                    className="inline-flex items-center gap-1.5 rounded-md bg-amber-500 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-amber-600 shrink-0"
+                                  >
+                                    <Plus className="h-3 w-3" />
+                                    收集该材料
+                                  </button>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex items-center justify-center gap-4 pt-6">
+                  <button
+                    onClick={handleStartMaterialGeneration}
+                    className="inline-flex items-center gap-2 rounded-lg border border-[#E5E7EB] bg-white px-4 py-2.5 text-sm font-medium text-[#374151] transition-colors hover:bg-[#F9FAFB]"
+                  >
+                    <Brain className="h-4 w-4" />
+                    重新生成
+                  </button>
+                  <button
+                    onClick={handleCloseFullPageView}
+                    className="inline-flex items-center gap-2 rounded-lg bg-[#2563EB] px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#1D4ED8]"
+                  >
+                    <Check className="h-4 w-4" />
+                    完成并返回
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Material Collection Dialog */}
+        <Dialog open={showMaterialCreateDialog} onOpenChange={setShowMaterialCreateDialog}>
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-50">
+                  <FolderSearch className="h-5 w-5 text-amber-600" />
+                </div>
+                <div>
+                  <div className="text-xl font-bold text-[#111827]">收集项目材料</div>
+                </div>
+              </DialogTitle>
+              <DialogDescription className="text-sm text-[#6B7280]">
+                基于AI建议填写材料信息，提交后将创建变更请求等待审批
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-5 mt-4">
+              {/* Material Name */}
+              <div>
+                <label className="block text-sm font-medium text-[#374151] mb-1.5">材料名称</label>
+                <Input
+                  value={materialFormData.name}
+                  onChange={(e) => setMaterialFormData((prev) => ({ ...prev, name: e.target.value }))}
+                  placeholder="输入材料名称"
+                  className="h-10"
+                />
+              </div>
+
+              {/* Format & Category */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-[#374151] mb-1.5">材料格式</label>
+                  <select
+                    value={materialFormData.format}
+                    onChange={(e) => setMaterialFormData((prev) => ({ ...prev, format: e.target.value }))}
+                    className="w-full h-10 rounded-md border border-input bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  >
+                    <option value="PDF">PDF</option>
+                    <option value="XLSX">XLSX</option>
+                    <option value="DOCX">DOCX</option>
+                    <option value="PPTX">PPTX</option>
+                    <option value="其他">其他</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-[#374151] mb-1.5">材料分类</label>
+                  <Input
+                    value={materialFormData.category}
+                    onChange={(e) => setMaterialFormData((prev) => ({ ...prev, category: e.target.value }))}
+                    placeholder="如：人员简历、财务材料、技术文档"
+                    className="h-10"
+                  />
+                </div>
+              </div>
+
+              {/* Description */}
+              <div className="rounded-lg border border-[#E5E7EB] p-4 bg-blue-50/30">
+                <div className="flex items-center gap-2 mb-3">
+                  <FileText className="h-4 w-4 text-blue-600" />
+                  <span className="text-sm font-semibold text-[#111827]">材料描述</span>
+                </div>
+                <textarea
+                  value={materialFormData.description}
+                  onChange={(e) => setMaterialFormData((prev) => ({ ...prev, description: e.target.value }))}
+                  placeholder="描述该材料的主要内容和用途..."
+                  className="w-full rounded-md border border-[#E5E7EB] px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                  rows={3}
+                />
+              </div>
+
+              {/* Collect Reason */}
+              <div className="rounded-lg border border-[#E5E7EB] p-4 bg-amber-50/30">
+                <div className="flex items-center gap-2 mb-3">
+                  <Lightbulb className="h-4 w-4 text-amber-600" />
+                  <span className="text-sm font-semibold text-[#111827]">收集原因</span>
+                </div>
+                <textarea
+                  value={materialFormData.collectReason}
+                  onChange={(e) => setMaterialFormData((prev) => ({ ...prev, collectReason: e.target.value }))}
+                  placeholder="说明为何需要收集该材料，以及与哪些假设或条款相关..."
+                  className="w-full rounded-md border border-[#E5E7EB] px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
+                  rows={3}
+                />
+              </div>
+
+              {/* Actions */}
+              <div className="flex justify-end gap-3 pt-4 border-t border-[#E5E7EB]">
+                <Button variant="outline" onClick={handleCloseMaterialCreateDialog}>
+                  取消
+                </Button>
+                <Button
+                  onClick={handleSubmitMaterial}
+                  className="bg-amber-500 hover:bg-amber-600"
+                  disabled={!materialFormData.name.trim() || !materialFormData.category.trim()}
+                >
+                  提交收集申请
                 </Button>
               </div>
             </div>

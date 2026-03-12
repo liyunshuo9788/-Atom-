@@ -13,8 +13,8 @@ import {
 import { cn } from "@/lib/utils"
 import { HypothesisChecklist, type HypothesisTableItem, type HypothesisDetail } from "@/components/pages/hypothesis-checklist"
 import { ProjectOverview } from "@/components/pages/project-overview"
-import { TermSheet, type TermTableItem } from "@/components/pages/term-sheet"
-import { Workflow, type Phase, type PendingPhase, type PendingProjectHypothesis, type GeneratedSuggestion } from "@/components/pages/workflow"
+import { TermSheet, type TermTableItem, type TermDetail } from "@/components/pages/term-sheet"
+import { Workflow, type Phase, type PendingPhase, type PendingProjectHypothesis, type PendingProjectTerm, type GeneratedSuggestion, type GeneratedTermSuggestion, type PendingProjectMaterial, type GeneratedMaterialSuggestion } from "@/components/pages/workflow"
 import { ProjectMaterials } from "@/components/pages/project-materials"
 import { type Project } from "@/components/pages/projects-grid"
 import { type StrategyMaterial } from "@/components/pages/strategies-grid"
@@ -61,9 +61,16 @@ interface ProjectDetailProps {
   projectMaterials?: StrategyMaterial[]
   savedGeneratedSuggestions?: GeneratedSuggestion[]
   onSaveSuggestions?: (suggestions: GeneratedSuggestion[]) => void
+  savedGeneratedTermSuggestions?: GeneratedTermSuggestion[]
+  onSaveTermSuggestions?: (suggestions: GeneratedTermSuggestion[]) => void
+  onCreatePendingProjectTerm?: (pending: PendingProjectTerm) => void
+  projectTermDetails?: Record<string, TermDetail>
+  onCreatePendingProjectMaterial?: (pending: PendingProjectMaterial) => void
+  savedGeneratedMaterialSuggestions?: GeneratedMaterialSuggestion[]
+  onSaveMaterialSuggestions?: (suggestions: GeneratedMaterialSuggestion[]) => void
 }
 
-export function ProjectDetail({ projectId, project, phases, onPhasesChange, onCreatePendingPhase, onCreatePendingProjectHypothesis, projectHypotheses, projectHypothesisDetails, projectTerms, projectMaterials, savedGeneratedSuggestions, onSaveSuggestions }: ProjectDetailProps) {
+export function ProjectDetail({ projectId, project, phases, onPhasesChange, onCreatePendingPhase, onCreatePendingProjectHypothesis, projectHypotheses, projectHypothesisDetails, projectTerms, projectMaterials, savedGeneratedSuggestions, onSaveSuggestions, savedGeneratedTermSuggestions, onSaveTermSuggestions, onCreatePendingProjectTerm, projectTermDetails, onCreatePendingProjectMaterial, savedGeneratedMaterialSuggestions, onSaveMaterialSuggestions }: ProjectDetailProps) {
   const [activeSubPage, setActiveSubPage] = useState<SubPageKey>("overview")
   const [collapsed, setCollapsed] = useState(false)
   const isNewProject = projectId.startsWith("new-project-")
@@ -158,6 +165,12 @@ export function ProjectDetail({ projectId, project, phases, onPhasesChange, onCr
             materialsCount={projectMaterials?.length}
             savedGeneratedSuggestions={savedGeneratedSuggestions}
             onSaveSuggestions={onSaveSuggestions}
+            savedGeneratedTermSuggestions={savedGeneratedTermSuggestions}
+            onSaveTermSuggestions={onSaveTermSuggestions}
+            onCreatePendingProjectTerm={onCreatePendingProjectTerm}
+            savedGeneratedMaterialSuggestions={savedGeneratedMaterialSuggestions}
+            onSaveMaterialSuggestions={onSaveMaterialSuggestions}
+            onCreatePendingProjectMaterial={onCreatePendingProjectMaterial}
           />
         ) : activeSubPage === "hypotheses" ? (
           <HypothesisChecklist
@@ -171,6 +184,7 @@ export function ProjectDetail({ projectId, project, phases, onPhasesChange, onCr
             isNewProject={isNewProject}
             project={project}
             inheritedTerms={projectTerms}
+            extraDetails={projectTermDetails}
           />
         ) : activeSubPage === "overview" ? (
           <ProjectOverview project={project} isNewProject={isNewProject} />

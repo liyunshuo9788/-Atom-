@@ -9,9 +9,9 @@ import { ProjectDetail } from "@/components/pages/project-detail"
 import { StrategyDetail } from "@/components/pages/strategy-detail"
 import { ChangeRequests } from "@/components/pages/change-requests"
 import { Login } from "@/components/pages/login"
-import type { Phase, PendingPhase, PendingProjectHypothesis, ProjectHypothesisFormData, GeneratedSuggestion } from "@/components/pages/workflow"
+import type { Phase, PendingPhase, PendingProjectHypothesis, ProjectHypothesisFormData, GeneratedSuggestion, GeneratedTermSuggestion, PendingProjectTerm, PendingProjectMaterial, GeneratedMaterialSuggestion } from "@/components/pages/workflow"
 import { type HypothesisTableItem, type HypothesisDetail, getTemplateHypothesesForStrategy } from "@/components/pages/hypothesis-checklist"
-import { type TermTableItem, getTemplateTermsForStrategy } from "@/components/pages/term-sheet"
+import { type TermTableItem, type TermDetail, getTemplateTermsForStrategy } from "@/components/pages/term-sheet"
 import { getTemplateMaterialsForStrategy } from "@/components/pages/project-materials"
 
 type ViewState =
@@ -48,8 +48,13 @@ export default function Page() {
   const [projectMaterialsMap, setProjectMaterialsMap] = useState<Record<string, StrategyMaterial[]>>({})
   // Pending project-level hypotheses
   const [pendingProjectHypotheses, setPendingProjectHypotheses] = useState<PendingProjectHypothesis[]>([])
+  const [pendingProjectTerms, setPendingProjectTerms] = useState<PendingProjectTerm[]>([])
+  const [projectTermDetails, setProjectTermDetails] = useState<Record<string, Record<string, TermDetail>>>({})
   // Saved generated hypothesis suggestions per project - keyed by projectId, persists for the session
   const [savedProjectSuggestions, setSavedProjectSuggestions] = useState<Record<string, GeneratedSuggestion[]>>({})
+  const [savedProjectTermSuggestions, setSavedProjectTermSuggestions] = useState<Record<string, GeneratedTermSuggestion[]>>({})
+  const [pendingProjectMaterials, setPendingProjectMaterials] = useState<PendingProjectMaterial[]>([])
+  const [savedProjectMaterialSuggestions, setSavedProjectMaterialSuggestions] = useState<Record<string, GeneratedMaterialSuggestion[]>>({})
   // Strategy AI recommendation generated flags - keyed by strategyId, persists for the session
   const [strategyRecommendations, setStrategyRecommendations] = useState<
     Record<string, { hypothesesGenerated: boolean; termsGenerated: boolean; materialsGenerated: boolean }>
@@ -369,12 +374,139 @@ export default function Page() {
     setPendingProjectHypotheses(pendingProjectHypotheses.filter((p) => p.id !== id))
   }
 
+  function handleCreatePendingProjectTerm(pending: PendingProjectTerm) {
+    setPendingProjectTerms((prev) => [pending, ...prev])
+    setView({ type: "change-requests" })
+  }
+
+  function handleApproveProjectTerm(id: string) {
+    const pending = pendingProjectTerms.find((p) => p.id === id)
+    if (pending) {
+      const { projectId, term } = pending
+      const today = new Date().toISOString().split("T")[0]
+      const newId = `proj-term-${Date.now()}`
+      const newTerm: TermTableItem = {
+        id: newId,
+        direction: term.direction,
+        category: term.category,
+        name: term.name,
+        owner: "张伟",
+        createdAt: today,
+        updatedAt: today,
+        status: "pending" as const,
+      }
+      // Resolve material file info from materialOptions
+      const matMap = new Map((pending.materialOptions || []).map((m) => [m.id, m]))
+      const resolveMaterials = (ids: string[]) =>
+        ids
+          .map((mid) => matMap.get(mid))
+          .filter(Boolean)
+          .map((m) => ({ name: `${m!.name}.${m!.format.toLowerCase()}`, size: m!.size || "—", date: today }))
+      // Resolve hypothesis links
+      const hypMap = new Map((pending.hypothesisOptions || []).map((h) => [h.id, h]))
+      const resolveHypotheses = (ids: string[]) =>
+        ids
+          .map((hid) => hypMap.get(hid))
+          .filter(Boolean)
+          .map((h) => ({ id: h!.id, title: h!.name, status: "pending" as const }))
+
+      const buildSection = (src: { content: string; linkedMaterialIds: string[]; linkedHypothesisIds: string[] }) => ({
+        content: src.content,
+        files: resolveMaterials(src.linkedMaterialIds),
+        linkedHypotheses: resolveHypotheses(src.linkedHypothesisIds),
+        creator: { name: "张伟", role: "投资经理" },
+        reviewers: [],
+        createdAt: today,
+        comments: [],
+      })
+
+      const newDetail: TermDetail = {
+        id: newId,
+        title: term.name,
+        termId: `TM-${newId}`,
+        createdAt: today,
+        updatedAt: today,
+        status: "pending",
+        creator: { name: "张伟", role: "投资经理" },
+        ourDemand: buildSection(term.ourDemand),
+        ourBasis: buildSection(term.ourBasis),
+        bilateralConflict: { content: term.bilateralConflict.content, creator: { name: "张伟", role: "投资经理" }, reviewers: [], createdAt: today, comments: [] },
+        ourBottomLine: { content: term.ourBottomLine.content, creator: { name: "张伟", role: "投资经理" }, reviewers: [], createdAt: today, comments: [] },
+        compromiseSpace: { content: term.compromiseSpace.content, creator: { name: "张伟", role: "投资经理" }, reviewers: [], createdAt: today, comments: [] },
+        negotiationResult: { conclusion: "", status: "partial", content: "", creator: { name: "", role: "" }, reviewers: [], createdAt: "", comments: [] },
+        implementationStatus: { status: "not-started", content: "", creator: { name: "", role: "" }, reviewers: [], createdAt: "", comments: [] },
+      }
+      setProjectTerms((prev) => ({
+        ...prev,
+        [projectId]: [newTerm, ...(prev[projectId] || [])],
+      }))
+      setProjectTermDetails((prev) => ({
+        ...prev,
+        [projectId]: { ...(prev[projectId] || {}), [newId]: newDetail },
+      }))
+      setPendingProjectTerms((prev) => prev.filter((p) => p.id !== id))
+      setView({ type: "project-detail", projectId })
+    }
+  }
+
+  function handleRejectProjectTerm(id: string) {
+    setPendingProjectTerms((prev) => prev.filter((p) => p.id !== id))
+  }
+
   // Handler to save generated suggestions for a project
   function handleSaveProjectSuggestions(projectId: string, suggestions: GeneratedSuggestion[]) {
     setSavedProjectSuggestions((prev) => ({
       ...prev,
       [projectId]: suggestions,
     }))
+  }
+
+  function handleSaveProjectTermSuggestions(projectId: string, suggestions: GeneratedTermSuggestion[]) {
+    setSavedProjectTermSuggestions((prev) => ({
+      ...prev,
+      [projectId]: suggestions,
+    }))
+  }
+
+  function handleSaveProjectMaterialSuggestions(projectId: string, suggestions: GeneratedMaterialSuggestion[]) {
+    setSavedProjectMaterialSuggestions((prev) => ({
+      ...prev,
+      [projectId]: suggestions,
+    }))
+  }
+
+  function handleCreatePendingProjectMaterial(pending: PendingProjectMaterial) {
+    setPendingProjectMaterials((prev) => [pending, ...prev])
+    setView({ type: "change-requests" })
+  }
+
+  function handleApproveProjectMaterial(id: string) {
+    const pending = pendingProjectMaterials.find((p) => p.id === id)
+    if (pending) {
+      const { projectId, material } = pending
+      const today = new Date().toISOString().split("T")[0]
+      const newMaterial: StrategyMaterial = {
+        id: `proj-mat-${Date.now()}`,
+        strategyId: "",
+        name: material.name,
+        format: material.format,
+        size: "—",
+        description: material.description,
+        category: material.category,
+        owner: "张伟",
+        createdAt: today,
+      }
+      setProjectMaterialsMap((prev) => ({
+        ...prev,
+        [projectId]: [newMaterial, ...(prev[projectId] || [])],
+      }))
+      setPendingProjectMaterials((prev) => prev.filter((p) => p.id !== id))
+      setView({ type: "project-detail", projectId })
+    }
+  }
+
+  function handleRejectProjectMaterial(id: string) {
+    setPendingProjectMaterials((prev) => prev.filter((p) => p.id !== id))
   }
 
   // Term change request handlers
@@ -466,8 +598,8 @@ export default function Page() {
   }
 
   // Helper to get phases for a project
-  function getPhasesForProject(projectId: string): Phase[] {
-    return projectPhases[projectId] || []
+  function getPhasesForProject(projectId: string): Phase[] | undefined {
+    return projectPhases[projectId] || undefined
   }
 
   // Helper to update phases for a project
@@ -525,8 +657,14 @@ export default function Page() {
   onRejectProjectHypothesis={handleRejectProjectHypothesis}
   onApproveTerm={handleApproveTerm}
   onRejectTerm={handleRejectTerm}
+  pendingProjectTerms={pendingProjectTerms}
+  onApproveProjectTerm={handleApproveProjectTerm}
+  onRejectProjectTerm={handleRejectProjectTerm}
   onApproveMaterial={handleApproveMaterial}
   onRejectMaterial={handleRejectMaterial}
+  pendingProjectMaterials={pendingProjectMaterials}
+  onApproveProjectMaterial={handleApproveProjectMaterial}
+  onRejectProjectMaterial={handleRejectProjectMaterial}
   />
         )}
         {view.type === "project-detail" && (
@@ -543,6 +681,13 @@ export default function Page() {
   projectMaterials={projectMaterialsMap[view.projectId]}
   savedGeneratedSuggestions={savedProjectSuggestions[view.projectId]}
   onSaveSuggestions={(suggestions) => handleSaveProjectSuggestions(view.projectId, suggestions)}
+  savedGeneratedTermSuggestions={savedProjectTermSuggestions[view.projectId]}
+  onSaveTermSuggestions={(suggestions) => handleSaveProjectTermSuggestions(view.projectId, suggestions)}
+  onCreatePendingProjectTerm={handleCreatePendingProjectTerm}
+  projectTermDetails={projectTermDetails[view.projectId]}
+  onCreatePendingProjectMaterial={handleCreatePendingProjectMaterial}
+  savedGeneratedMaterialSuggestions={savedProjectMaterialSuggestions[view.projectId]}
+  onSaveMaterialSuggestions={(suggestions) => handleSaveProjectMaterialSuggestions(view.projectId, suggestions)}
   />
         )}
         {view.type === "strategy-detail" && (
