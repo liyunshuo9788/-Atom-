@@ -54,12 +54,14 @@ export interface HypothesisTableItem {
   status: "verified" | "pending" | "risky"
 }
 
+// 个人信息
 interface PersonInfo {
   name: string
   role: string
   avatar?: string
 }
 
+// 价值点
 export interface ValuePoint {
   id: string
   title: string
@@ -76,6 +78,7 @@ export interface ValuePoint {
   comments: { author: string; content: string; time: string }[]
 }
 
+// 风险点
 export interface RiskPoint {
   id: string
   title: string
@@ -92,6 +95,7 @@ export interface RiskPoint {
   comments: { author: string; content: string; time: string }[]
 }
 
+// 投委决议
 interface CommitteeDecision {
   conclusion: string
   status: "approved" | "rejected" | "pending"
@@ -102,6 +106,7 @@ interface CommitteeDecision {
   comments: { author: string; content: string; time: string }[]
 }
 
+// 验证情况
 interface Verification {
   conclusion: string
   status: "confirmed" | "invalidated" | "pending"
@@ -112,6 +117,7 @@ interface Verification {
   comments: { author: string; content: string; time: string }[]
 }
 
+// 关联条款
 interface LinkedTerm {
   id: string
   title: string
@@ -119,6 +125,7 @@ interface LinkedTerm {
   status: "approved" | "pending" | "rejected"
 }
 
+// 假设详情
 export interface HypothesisDetail {
   id: string
   title: string
@@ -135,7 +142,7 @@ export interface HypothesisDetail {
 }
 
 /* ------------------------------------------------------------------ */
-/*  Mock people                                                        */
+/*  项目人员数据                                                        */
 /* ------------------------------------------------------------------ */
 const PEOPLE: Record<string, PersonInfo> = {
   zhangwei: { name: "张伟", role: "投资经理" },
@@ -147,7 +154,7 @@ const PEOPLE: Record<string, PersonInfo> = {
 }
 
 /* ------------------------------------------------------------------ */
-/*  Mock data - table items                                            */
+/*  假设清单数据                                            */
 /* ------------------------------------------------------------------ */
 const hypothesisTableData: HypothesisTableItem[] = [
   {
@@ -156,8 +163,8 @@ const hypothesisTableData: HypothesisTableItem[] = [
     category: "创始人闫俊杰",
     name: "创始人闫俊杰具有扎实的人工智能学术背景",
     owner: "张伟",
-    createdAt: "2024-01-15",
-    updatedAt: "2024-02-20",
+    createdAt: "2026-01-15",
+    updatedAt: "2026-02-20",
     status: "verified",
   },
   {
@@ -166,8 +173,8 @@ const hypothesisTableData: HypothesisTableItem[] = [
     category: "创始人闫俊杰",
     name: "创始人具备丰富的AI产品商业化经验",
     owner: "李四",
-    createdAt: "2024-01-15",
-    updatedAt: "2024-02-18",
+    createdAt: "2026-01-15",
+    updatedAt: "2026-02-18",
     status: "pending",
   },
   {
@@ -176,8 +183,8 @@ const hypothesisTableData: HypothesisTableItem[] = [
     category: "创始人闫俊杰",
     name: "创始人展现出强大的团队凝聚力和战略规划能力",
     owner: "张伟",
-    createdAt: "2024-01-16",
-    updatedAt: "2024-02-19",
+    createdAt: "2026-01-16",
+    updatedAt: "2026-02-19",
     status: "pending",
   },
   {
@@ -186,8 +193,8 @@ const hypothesisTableData: HypothesisTableItem[] = [
     category: "核心团队",
     name: "技术团队在大模型训练和推理优化方面具备业界领先水平",
     owner: "王五",
-    createdAt: "2024-01-17",
-    updatedAt: "2024-02-21",
+    createdAt: "2026-01-17",
+    updatedAt: "2026-02-21",
     status: "pending",
   },
   {
@@ -196,8 +203,8 @@ const hypothesisTableData: HypothesisTableItem[] = [
     category: "核心团队",
     name: "市场团队拥有深厚的企业客户资源和渠道网络",
     owner: "李四",
-    createdAt: "2024-01-18",
-    updatedAt: "2024-02-22",
+    createdAt: "2026-01-18",
+    updatedAt: "2026-02-22",
     status: "pending",
   },
   {
@@ -206,8 +213,8 @@ const hypothesisTableData: HypothesisTableItem[] = [
     category: "市场规模",
     name: "中国大模型市场总规模在2025年将达到500亿元",
     owner: "张伟",
-    createdAt: "2024-01-20",
-    updatedAt: "2024-02-25",
+    createdAt: "2026-01-20",
+    updatedAt: "2026-02-25",
     status: "pending",
   },
   {
@@ -216,8 +223,8 @@ const hypothesisTableData: HypothesisTableItem[] = [
     category: "市场规模",
     name: "企业级AI应用市场可服务规模达到200亿元",
     owner: "李四",
-    createdAt: "2024-01-21",
-    updatedAt: "2024-02-26",
+    createdAt: "2026-01-21",
+    updatedAt: "2026-02-26",
     status: "risky",
   },
   {
@@ -226,8 +233,8 @@ const hypothesisTableData: HypothesisTableItem[] = [
     category: "市场规模",
     name: "MiniMax可触达市场规模约50亿元",
     owner: "王五",
-    createdAt: "2024-01-22",
-    updatedAt: "2024-02-27",
+    createdAt: "2026-01-22",
+    updatedAt: "2026-02-27",
     status: "pending",
   },
 ]
@@ -450,8 +457,8 @@ const hypothesisDetails: Record<string, HypothesisDetail> = {
     id: "tech-bg",
     title: "创始人闫俊杰具有扎实的人工智能学术背景",
     qaId: "QA-2024-001",
-    createdAt: "2024-01-15",
-    updatedAt: "2024-02-20",
+    createdAt: "2026-01-15",
+    updatedAt: "2026-02-20",
     status: "verified",
     creator: PEOPLE.zhangwei,
     valuePoints: [
@@ -520,7 +527,7 @@ const hypothesisDetails: Record<string, HypothesisDetail> = {
       content: "经投委会审议，创始人的学术背景得到充分验证，其在AI领域的研究深度和影响力均达到行业领先水平。虽然商业化经验存在一定风险，但团队整体配置可以弥补。建议持续跟踪其商业化进展。",
       creator: PEOPLE.wangzong,
       reviewers: [PEOPLE.chenzong, PEOPLE.zhangwei, PEOPLE.lisi],
-      createdAt: "2024-01-22",
+      createdAt: "2026-01-22",
       comments: [
         { author: "张伟", content: "同意投委结论，建议在条款中加入创始人竞业禁止条款", time: "2024-01-22 15:00" },
       ],
@@ -531,7 +538,7 @@ const hypothesisDetails: Record<string, HypothesisDetail> = {
       content: "投资后6个月跟踪显示，创始人的学术背景为公司招募顶级人才提供了重要背书，已成功吸引多名顶级学者加入。技术团队在大模型训练优化方面取得突破性进展，与创始人的学术积累密切相关。",
       creator: PEOPLE.zhangwei,
       reviewers: [PEOPLE.lisi, PEOPLE.wangwu],
-      createdAt: "2024-07-15",
+      createdAt: "2026-03-15",
       comments: [],
     },
     linkedTerms: [

@@ -482,11 +482,11 @@ export function ProjectMaterials({
             <div className="overflow-hidden rounded-xl border border-[#E5E7EB] bg-white">
               {/* Table Header */}
               <div className="grid grid-cols-[minmax(240px,2fr)_90px_80px_minmax(200px,3fr)_160px] items-center gap-4 border-b border-[#E5E7EB] bg-[#1E2A3B] px-6 py-3">
-                <span className="text-xs font-semibold uppercase tracking-wider text-[#94A3B8]">文件名称</span>
-                <span className="text-xs font-semibold uppercase tracking-wider text-[#94A3B8]">格式</span>
-                <span className="text-xs font-semibold uppercase tracking-wider text-[#94A3B8]">大小</span>
-                <span className="text-xs font-semibold uppercase tracking-wider text-[#94A3B8]">简介</span>
-                <span className="text-xs font-semibold uppercase tracking-wider text-[#94A3B8] text-right">操作</span>
+                <span className="text-xs font-semibold uppercase tracking-wider text-[#ffffff]">文件名称</span>
+                <span className="text-xs font-semibold uppercase tracking-wider text-[#ffffff]">格式</span>
+                <span className="text-xs font-semibold uppercase tracking-wider text-[#ffffff]">大小</span>
+                <span className="text-xs font-semibold uppercase tracking-wider text-[#ffffff]">简介</span>
+                <span className="text-xs font-semibold uppercase tracking-wider text-[#ffffff] text-right">操作</span>
               </div>
 
               {/* Table Body */}
