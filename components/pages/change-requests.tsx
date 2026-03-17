@@ -187,7 +187,7 @@ export function ChangeRequests({
 
   return (
     <div className="h-full overflow-auto bg-[#F3F4F6]">
-      <div className="mx-auto max-w-6xl px-8 py-8">
+      <div className="px-8 py-8">
         {/* Page Header */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
