@@ -682,6 +682,41 @@ function createNewPhase(phaseNumber: number, isSetup: boolean): Phase {
   }
 }
 
+/* ─── Core Team Material Mock File Structure ─── */
+interface MockPickerFile {
+  name: string
+  size: string
+  format: string
+}
+interface MockPickerFolder {
+  name: string
+  files: MockPickerFile[]
+}
+const CORE_TEAM_MOCK_FOLDERS: MockPickerFolder[] = [
+  {
+    name: "人员简历",
+    files: [
+      { name: "团队成员资料合集.pdf", size: "2.4 MB", format: "PDF" },
+      { name: "闫俊杰_CV.pdf", size: "1.1 MB", format: "PDF" },
+      { name: "技术团队成员简历.pdf", size: "3.2 MB", format: "PDF" },
+    ],
+  },
+  {
+    name: "公司文件",
+    files: [
+      { name: "营业执照.pdf", size: "0.8 MB", format: "PDF" },
+      { name: "公司章程.pdf", size: "1.5 MB", format: "PDF" },
+    ],
+  },
+  {
+    name: "财务文件",
+    files: [
+      { name: "2024年财务报告.xlsx", size: "2.1 MB", format: "XLSX" },
+      { name: "融资历史记录.xlsx", size: "1.3 MB", format: "XLSX" },
+    ],
+  },
+]
+
 /* ─── Component ──────────────────────────────── */
 export function Workflow({
   onSelectPhase,
@@ -814,7 +849,11 @@ export function Workflow({
   const [coreTeamFileSize, setCoreTeamFileSize] = useState("")
   const [isCoreTeamSummaryGenerating, setIsCoreTeamSummaryGenerating] = useState(false)
   const [coreTeamSummaryText, setCoreTeamSummaryText] = useState("")
-  const coreTeamFileInputRef = useRef<HTMLInputElement>(null)
+  const [showCoreTeamFilePicker, setShowCoreTeamFilePicker] = useState(false)
+  const [coreTeamPickerFolder, setCoreTeamPickerFolder] = useState<string | null>(null)
+  const [coreTeamPickerSelected, setCoreTeamPickerSelected] = useState<string | null>(null)
+  const [coreTeamPickerUploading, setCoreTeamPickerUploading] = useState(false)
+  const [coreTeamPickerProgress, setCoreTeamPickerProgress] = useState(0)
 
   // Mock available project materials
   const availableMaterials: ProjectMaterialOption[] = [
@@ -1435,33 +1474,42 @@ export function Workflow({
     })
   }
 
-  function handleCoreTeamFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]
+  function openCoreTeamFilePicker() {
+    setCoreTeamPickerFolder(null)
+    setCoreTeamPickerSelected(null)
+    setCoreTeamPickerUploading(false)
+    setCoreTeamPickerProgress(0)
+    setShowCoreTeamFilePicker(true)
+  }
+
+  function handleCoreTeamPickerConfirm() {
+    if (!coreTeamPickerSelected) return
+    const folder = CORE_TEAM_MOCK_FOLDERS.find((f) => f.name === coreTeamPickerFolder)
+    const file = folder?.files.find((f) => f.name === coreTeamPickerSelected)
     if (!file) return
-    e.target.value = ""
-    const bytes = file.size
-    const sizeStr = bytes > 1024 * 1024
-      ? `${(bytes / (1024 * 1024)).toFixed(1)} MB`
-      : `${(bytes / 1024).toFixed(0)} KB`
-    setCoreTeamUploadStage("uploading")
-    setCoreTeamUploadProgress(0)
+    setCoreTeamPickerUploading(true)
+    setCoreTeamPickerProgress(0)
     let progress = 0
     const interval = setInterval(() => {
       progress += 14
       if (progress >= 100) {
         clearInterval(interval)
-        setCoreTeamUploadProgress(100)
-        setCoreTeamUploadStage("done")
-        setCoreTeamFileSize(sizeStr)
-        setIsCoreTeamSummaryGenerating(true)
+        setCoreTeamPickerProgress(100)
         setTimeout(() => {
-          setIsCoreTeamSummaryGenerating(false)
-          setCoreTeamSummaryText(
-            "本文件收录公司创始人及核心管理团队成员的完整职业履历，包含各成员的教育背景（学历层次、毕业院校及专业方向）、历任重要职位及主要业绩贡献，并附有与核心技术研发、业务拓展及团队管理直接相关的项目经验摘要。材料涵盖CTO等关键技术岗位负责人在AI/ML领域的论文发表记录、行业任职情况及社会影响力评估，可直接用于支撑团队能力假设的验证，并为董事会席位条款及信息权条款的谈判提供客观人才背景参考。"
-          )
-        }, 2500)
+          setCoreTeamPickerUploading(false)
+          setShowCoreTeamFilePicker(false)
+          setCoreTeamUploadStage("done")
+          setCoreTeamFileSize(file.size)
+          setIsCoreTeamSummaryGenerating(true)
+          setTimeout(() => {
+            setIsCoreTeamSummaryGenerating(false)
+            setCoreTeamSummaryText(
+              "本文件收录公司创始人及核心管理团队成员的完整职业履历，包含各成员的教育背景（学历层次、毕业院校及专业方向）、历任重要职位及主要业绩贡献，并附有与核心技术研发、业务拓展及团队管理直接相关的项目经验摘要。材料涵盖CTO等关键技术岗位负责人在AI/ML领域的论文发表记录、行业任职情况及社会影响力评估，可直接用于支撑团队能力假设的验证，并为董事会席位条款及信息权条款的谈判提供客观人才背景参考。"
+            )
+          }, 2500)
+        }, 500)
       } else {
-        setCoreTeamUploadProgress(progress)
+        setCoreTeamPickerProgress(progress)
       }
     }, 150)
   }
@@ -3999,20 +4047,13 @@ ${logs}
                   <span className="text-sm font-semibold text-[#111827]">上传材料</span>
                   {coreTeamUploadStage === "idle" && (
                     <button
-                      onClick={() => coreTeamFileInputRef.current?.click()}
+                      onClick={openCoreTeamFilePicker}
                       className="inline-flex items-center gap-1.5 rounded-md bg-[#2563EB] px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-[#1D4ED8]"
                     >
                       <Upload className="h-3.5 w-3.5" />
                       上传材料
                     </button>
                   )}
-                  <input
-                    ref={coreTeamFileInputRef}
-                    type="file"
-                    accept=".pdf,.PDF,.docx,.DOCX,.pptx,.PPTX"
-                    className="hidden"
-                    onChange={handleCoreTeamFileSelect}
-                  />
                 </div>
 
                 {coreTeamUploadStage === "idle" && (
@@ -4092,6 +4133,111 @@ ${logs}
                 </Button>
               </div>
             </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Core Team Material File Picker Dialog */}
+        <Dialog
+          open={showCoreTeamFilePicker}
+          onOpenChange={(open) => { if (!open && !coreTeamPickerUploading) setShowCoreTeamFilePicker(false) }}
+        >
+          <DialogContent className="max-w-xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <FolderOpen className="h-5 w-5 text-[#6B7280]" />
+                <span>选择本地文件</span>
+              </DialogTitle>
+              <DialogDescription>
+                {coreTeamPickerFolder ? `本机文档 > ${coreTeamPickerFolder}` : "本机文档"}
+              </DialogDescription>
+            </DialogHeader>
+
+            {coreTeamPickerUploading ? (
+              <div className="space-y-3 py-4">
+                <div className="flex items-center gap-2 text-sm text-[#374151]">
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-amber-500 border-t-transparent" />
+                  <span>正在上传 {coreTeamPickerSelected}...</span>
+                </div>
+                <div className="h-1.5 w-full overflow-hidden rounded-full bg-[#F3F4F6]">
+                  <div
+                    className="h-full rounded-full bg-amber-500 transition-all duration-150"
+                    style={{ width: `${coreTeamPickerProgress}%` }}
+                  />
+                </div>
+                <p className="text-xs text-[#9CA3AF]">{coreTeamPickerProgress}%</p>
+              </div>
+            ) : coreTeamPickerFolder === null ? (
+              /* Folder list view */
+              <div className="space-y-1 py-2">
+                {CORE_TEAM_MOCK_FOLDERS.map((folder) => (
+                  <button
+                    key={folder.name}
+                    onClick={() => setCoreTeamPickerFolder(folder.name)}
+                    className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-colors hover:bg-[#F3F4F6]"
+                  >
+                    <FolderOpen className="h-5 w-5 text-amber-400 shrink-0" />
+                    <span className="text-sm text-[#111827]">{folder.name}</span>
+                    <ChevronRight className="h-4 w-4 text-[#9CA3AF] ml-auto" />
+                  </button>
+                ))}
+              </div>
+            ) : (
+              /* File list inside selected folder */
+              <div className="space-y-1 py-2">
+                <button
+                  onClick={() => { setCoreTeamPickerFolder(null); setCoreTeamPickerSelected(null) }}
+                  className="flex items-center gap-1.5 mb-2 text-sm text-[#6B7280] hover:text-[#111827] transition-colors"
+                >
+                  <ChevronRight className="h-3.5 w-3.5 rotate-180" />
+                  返回
+                </button>
+                {CORE_TEAM_MOCK_FOLDERS.find((f) => f.name === coreTeamPickerFolder)?.files.map((file) => (
+                  <button
+                    key={file.name}
+                    onClick={() => setCoreTeamPickerSelected(coreTeamPickerSelected === file.name ? null : file.name)}
+                    className={cn(
+                      "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-colors",
+                      coreTeamPickerSelected === file.name
+                        ? "bg-blue-50 border border-blue-200"
+                        : "hover:bg-[#F3F4F6]"
+                    )}
+                  >
+                    <div
+                      className={cn(
+                        "flex h-5 w-5 shrink-0 items-center justify-center rounded border-2 transition-colors",
+                        coreTeamPickerSelected === file.name
+                          ? "border-blue-500 bg-blue-500"
+                          : "border-[#D1D5DB]"
+                      )}
+                    >
+                      {coreTeamPickerSelected === file.name && (
+                        <Check className="h-3 w-3 text-white" />
+                      )}
+                    </div>
+                    <FileText className="h-4 w-4 text-red-500 shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm text-[#111827] truncate">{file.name}</p>
+                      <p className="text-xs text-[#6B7280]">{file.size}</p>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {!coreTeamPickerUploading && (
+              <div className="flex justify-end gap-3 pt-3 border-t border-[#E5E7EB]">
+                <Button variant="outline" onClick={() => setShowCoreTeamFilePicker(false)}>
+                  取消
+                </Button>
+                <Button
+                  onClick={handleCoreTeamPickerConfirm}
+                  disabled={!coreTeamPickerSelected}
+                  className="bg-[#2563EB] hover:bg-[#1D4ED8]"
+                >
+                  上传
+                </Button>
+              </div>
+            )}
           </DialogContent>
         </Dialog>
       </div>
