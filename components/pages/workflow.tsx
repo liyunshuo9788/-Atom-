@@ -693,6 +693,17 @@ interface MockPickerFolder {
   name: string
   files: MockPickerFile[]
 }
+// Canonical sizes for AI research materials — used as a fallback when the
+// material object in state was created before the size field was added
+const AI_RESEARCH_MATERIAL_SIZES: Record<string, string> = {
+  "arm1-1": "4.8 MB",
+  "arm1-2": "3.2 MB",
+  "arm2-1": "5.1 MB",
+  "arm2-2": "1.6 MB",
+  "arm3-1": "2.3 MB",
+  "arm3-2": "3.7 MB",
+}
+
 const CORE_TEAM_MOCK_FOLDERS: MockPickerFolder[] = [
   {
     name: "人员简历",
@@ -1684,6 +1695,10 @@ export function Workflow({
   }
 
   function handleUploadAiResearchMaterial(material: AiResearchMaterial) {
+    // Resolve size: prefer the value on the material object, fall back to the
+    // canonical map (handles sessions where the state was hydrated from data
+    // generated before the size field was introduced)
+    const resolvedSize = material.size || AI_RESEARCH_MATERIAL_SIZES[material.id] || ""
     const pendingMaterial: PendingProjectMaterial = {
       id: `pending-project-material-${Date.now()}`,
       projectId,
@@ -1691,7 +1706,7 @@ export function Workflow({
       material: {
         name: material.name,
         format: material.format,
-        size: material.size,
+        size: resolvedSize,
         category: material.category,
         description: material.description,
         collectReason: `AI调研生成，来源：${material.source}`,
