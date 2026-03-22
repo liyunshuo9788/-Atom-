@@ -81,10 +81,20 @@ export interface TouJueRecord {
 
 export interface HuaKuanRecord {
   details: string
+  currency: string
   amount: string
   owners: { id: string; name: string }[]
   time: string
 }
+
+const CURRENCY_OPTIONS = [
+  { value: "USD", label: "美元", symbol: "$" },
+  { value: "CNY", label: "人民币", symbol: "¥" },
+  { value: "EUR", label: "欧元", symbol: "€" },
+  { value: "GBP", label: "英镑", symbol: "£" },
+  { value: "JPY", label: "日元", symbol: "¥" },
+  { value: "HKD", label: "港币", symbol: "HK$" },
+]
 
 export interface TuiChuRecord {
   details: string
@@ -113,6 +123,7 @@ export interface PendingPhase {
   touJueOwners?: { id: string; name: string }[]
   // 划款-specific payload
   huaKuanDetails?: string
+  huaKuanCurrency?: string
   huaKuanAmount?: string
   huaKuanOwners?: { id: string; name: string }[]
   // 退出-specific payload
@@ -921,6 +932,7 @@ export function Workflow({
   // 划款 dialog state
   const [showHuaKuanDialog, setShowHuaKuanDialog] = useState(false)
   const [huaKuanDetailsInput, setHuaKuanDetailsInput] = useState("")
+  const [huaKuanCurrencyInput, setHuaKuanCurrencyInput] = useState("USD")
   const [huaKuanAmountInput, setHuaKuanAmountInput] = useState("")
   const [huaKuanSelectedOwners, setHuaKuanSelectedOwners] = useState<Set<string>>(new Set())
   const [huaKuanOwnerSearch, setHuaKuanOwnerSearch] = useState("")
@@ -1188,6 +1200,7 @@ export function Workflow({
 
   function handleDiKuan() {
     setHuaKuanDetailsInput("")
+    setHuaKuanCurrencyInput("USD")
     setHuaKuanAmountInput("")
     setHuaKuanSelectedOwners(new Set())
     setHuaKuanOwnerSearch("")
@@ -1205,6 +1218,7 @@ export function Workflow({
       changeName: `划款 - 进入${newPhase.fullLabel}`,
       changeType: "划款",
       huaKuanDetails: huaKuanDetailsInput,
+      huaKuanCurrency: huaKuanCurrencyInput,
       huaKuanAmount: huaKuanAmountInput,
       huaKuanOwners: selectedOwnerObjects,
       initiator: { id: "zhangwei", name: "张伟", initials: "张伟" },
@@ -5898,14 +5912,22 @@ ${logs}
             </div>
             <div className="space-y-1.5">
               <Label className="text-sm font-medium text-[#374151]">划款金额</Label>
-              <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-[#6B7280]">¥</span>
+              <div className="flex gap-2">
+                <select
+                  value={huaKuanCurrencyInput}
+                  onChange={(e) => setHuaKuanCurrencyInput(e.target.value)}
+                  className="h-9 rounded-md border border-[#E5E7EB] bg-white px-2.5 text-sm text-[#374151] outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB] shrink-0"
+                >
+                  {CURRENCY_OPTIONS.map((c) => (
+                    <option key={c.value} value={c.value}>{c.symbol} {c.label}</option>
+                  ))}
+                </select>
                 <Input
                   type="text"
                   value={huaKuanAmountInput}
                   onChange={(e) => setHuaKuanAmountInput(e.target.value)}
                   placeholder="请输入划款金额"
-                  className="pl-7 text-sm"
+                  className="text-sm flex-1"
                 />
               </div>
             </div>
@@ -5987,7 +6009,9 @@ ${logs}
             <div>
               <p className="mb-1 text-xs font-medium text-[#6B7280]">划款金额</p>
               <p className="rounded-lg border border-[#E5E7EB] bg-[#F9FAFB] px-3 py-2 text-sm font-semibold text-[#374151]">
-                {huaKuanRecord?.amount ? `¥${huaKuanRecord.amount}` : "—"}
+                {huaKuanRecord?.amount
+                  ? `${CURRENCY_OPTIONS.find((c) => c.value === huaKuanRecord.currency)?.symbol ?? "$"}${huaKuanRecord.amount} ${CURRENCY_OPTIONS.find((c) => c.value === huaKuanRecord.currency)?.label ?? ""}`
+                  : "—"}
               </p>
             </div>
             <div>

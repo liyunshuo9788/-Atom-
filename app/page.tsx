@@ -381,6 +381,7 @@ export default function Page() {
           ...prev,
           [projectId]: {
             details: pending.huaKuanDetails || "",
+            currency: pending.huaKuanCurrency || "USD",
             amount: pending.huaKuanAmount || "",
             owners: pending.huaKuanOwners || [],
             time: new Date().toISOString().split("T")[0],
