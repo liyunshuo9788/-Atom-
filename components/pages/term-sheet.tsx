@@ -290,7 +290,7 @@ const termDetails: Record<string, TermDetail> = {
     },
     implementationStatus: {
       status: "implemented",
-      content: "该条款已在投资协议正式条款中体现（第5.2条），并于2024年2月15日完成签署。张伟已正式被任命为公司董事，参加了2024年3月的首次董事会会议。保密协议已于2024年2月20日签署完毕，相关备案手续已完成。",
+      content: "该条款已在投资协议正式条款中体现（第5.2条），并于2024年2月15日完��签署。张伟已正式被任命为公司董事，参加了2024年3月的首次董事会会议。保密协议已于2024年2月20日签署完毕，相关备案手续已完成。",
       creator: PEOPLE.zhangwei,
       reviewers: [PEOPLE.zhaoliu],
       createdAt: "2024-03-01",
@@ -421,6 +421,82 @@ const aiInfrastructureTerms: TermTableItem[] = [
     createdAt: "2024-01-22",
     updatedAt: "2024-02-28",
     status: "rejected",
+  },
+]
+
+/* ------------------------------------------------------------------ */
+/*  Mid-investment terms (added when 投决 is approved)                 */
+/* ------------------------------------------------------------------ */
+export const midInvestmentTerms: TermTableItem[] = [
+  {
+    id: "mid-t1",
+    direction: "资本安全与下行保护",
+    category: "优先清偿权",
+    name: "在公司发生任何清算事件时，优先股股东有权就公司可依法分配的资产，优先获得相当于其所持 A 轮优先股原始发行价格 100%的清偿金额",
+    owner: "张伟",
+    createdAt: "2026-03-10",
+    updatedAt: "2026-03-10",
+    status: "approved",
+  },
+  {
+    id: "mid-t2",
+    direction: "资本安全与下行保护",
+    category: "优先清偿权",
+    name: "每一名 A 轮优先股股东均有权自行选择放弃其优先清偿金额，并按其所持优先股视同转换为普通股后的比例参与公司资产分配",
+    owner: "李四",
+    createdAt: "2026-03-10",
+    updatedAt: "2026-03-10",
+    status: "approved",
+  },
+  {
+    id: "mid-t3",
+    direction: "资本安全与下行保护",
+    category: "股权安排",
+    name: "股利为投资额百分比10%；A 轮优先股股东有权按照其原始投资额的年化 10%，享有优先股股利的分配权利。A 轮优先股股东每年最多可以拿到的股利上限，原始投资额 × 10%温和数字",
+    owner: "张伟",
+    createdAt: "2026-03-10",
+    updatedAt: "2026-03-10",
+    status: "approved",
+  },
+  {
+    id: "mid-t4",
+    direction: "资本安全与下行保护",
+    category: "股权安排",
+    name: "非自动股利。前述股利仅在董事会依法宣告并决定分配股利的情况下方可支付，公司未宣告分配股利的，任何股东均不得主张强制支付",
+    owner: "王五",
+    createdAt: "2026-03-10",
+    updatedAt: "2026-03-10",
+    status: "approved",
+  },
+  {
+    id: "mid-t5",
+    direction: "资本安全与下行保护",
+    category: "股权安排",
+    name: "非累计股利。若公司在任何会计年度未宣告或未支付股利，则该年度未支付的股利不予累计，亦不计入后续年度的股利计算基础。失败不被复利惩罚，成功不被事后剥夺",
+    owner: "李四",
+    createdAt: "2026-03-10",
+    updatedAt: "2026-03-10",
+    status: "rejected",
+  },
+  {
+    id: "mid-t6",
+    direction: "资本安全与下行保护",
+    category: "防稀释条款",
+    name: "股份数量不变。防稀释调整仅涉及 A 轮优先股的转换价格及转换比例，并不导致 A 轮优先股股份数量的增加",
+    owner: "张伟",
+    createdAt: "2026-03-10",
+    updatedAt: "2026-03-10",
+    status: "rejected",
+  },
+  {
+    id: "mid-t7",
+    direction: "资本安全与下行保护",
+    category: "防稀释条款",
+    name: "在后续融资中，A 轮优先股股东依法享有优先购买权；其行使或不行使优先购买权，不影响其依本条款享有的防稀释调整权利",
+    owner: "王五",
+    createdAt: "2026-03-10",
+    updatedAt: "2026-03-10",
+    status: "pending",
   },
 ]
 
