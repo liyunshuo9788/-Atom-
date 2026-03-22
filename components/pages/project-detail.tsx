@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils"
 import { HypothesisChecklist, type HypothesisTableItem, type HypothesisDetail, type ValuePoint, type RiskPoint } from "@/components/pages/hypothesis-checklist"
 import { ProjectOverview } from "@/components/pages/project-overview"
 import { TermSheet, type TermTableItem, type TermDetail } from "@/components/pages/term-sheet"
-import { Workflow, type Phase, type PendingPhase, type PendingProjectHypothesis, type PendingProjectTerm, type GeneratedSuggestion, type GeneratedTermSuggestion, type PendingProjectMaterial, type GeneratedMaterialSuggestion, type GeneratedAiResearchGroup, type CommitteeDecisionFormData, type NegotiationDecisionFormData, type VerificationFormData, type ImplementationStatusFormData } from "@/components/pages/workflow"
+import { Workflow, type Phase, type PendingPhase, type PendingProjectHypothesis, type PendingProjectTerm, type GeneratedSuggestion, type GeneratedTermSuggestion, type PendingProjectMaterial, type GeneratedMaterialSuggestion, type GeneratedAiResearchGroup, type CommitteeDecisionFormData, type NegotiationDecisionFormData, type VerificationFormData, type ImplementationStatusFormData, type LiXiangRecord } from "@/components/pages/workflow"
 import { ProjectMaterials } from "@/components/pages/project-materials"
 import { type Project } from "@/components/pages/projects-grid"
 import { type StrategyMaterial } from "@/components/pages/strategies-grid"
@@ -77,9 +77,10 @@ interface ProjectDetailProps {
   onCreateVerification?: (hypothesisId: string, hypothesisName: string, data: VerificationFormData) => void
   onCreateImplementationStatus?: (termId: string, termName: string, data: ImplementationStatusFormData) => void
   isExited?: boolean
+  liXiangRecord?: LiXiangRecord
 }
 
-export function ProjectDetail({ projectId, project, phases, onPhasesChange, onCreatePendingPhase, onCreatePendingProjectHypothesis, projectHypotheses, projectHypothesisDetails, projectTerms, projectMaterials, savedGeneratedSuggestions, onSaveSuggestions, savedGeneratedTermSuggestions, onSaveTermSuggestions, onCreatePendingProjectTerm, projectTermDetails, onCreatePendingProjectMaterial, savedGeneratedMaterialSuggestions, onSaveMaterialSuggestions, savedGeneratedAiResearchGroups, onSaveAiResearchGroups, onAddValuePoint, onAddRiskPoint, onCreateCommitteeDecision, onCreateNegotiationDecision, onCreateVerification, onCreateImplementationStatus, isExited }: ProjectDetailProps) {
+export function ProjectDetail({ projectId, project, phases, onPhasesChange, onCreatePendingPhase, onCreatePendingProjectHypothesis, projectHypotheses, projectHypothesisDetails, projectTerms, projectMaterials, savedGeneratedSuggestions, onSaveSuggestions, savedGeneratedTermSuggestions, onSaveTermSuggestions, onCreatePendingProjectTerm, projectTermDetails, onCreatePendingProjectMaterial, savedGeneratedMaterialSuggestions, onSaveMaterialSuggestions, savedGeneratedAiResearchGroups, onSaveAiResearchGroups, onAddValuePoint, onAddRiskPoint, onCreateCommitteeDecision, onCreateNegotiationDecision, onCreateVerification, onCreateImplementationStatus, isExited, liXiangRecord }: ProjectDetailProps) {
   const [activeSubPage, setActiveSubPage] = useState<SubPageKey>("overview")
   const [collapsed, setCollapsed] = useState(false)
   const isNewProject = projectId.startsWith("new-project-")
@@ -188,6 +189,7 @@ export function ProjectDetail({ projectId, project, phases, onPhasesChange, onCr
             savedGeneratedAiResearchGroups={savedGeneratedAiResearchGroups}
             onSaveAiResearchGroups={onSaveAiResearchGroups}
             isExited={isExited}
+            liXiangRecord={liXiangRecord}
           />
         ) : activeSubPage === "hypotheses" ? (
           <HypothesisChecklist

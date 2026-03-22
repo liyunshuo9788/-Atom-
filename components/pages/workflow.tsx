@@ -28,8 +28,11 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { Textarea } from "@/components/ui/textarea"
 import {
   Dialog,
   DialogContent,
@@ -63,6 +66,12 @@ export interface Phase {
   logs: PhaseLog[]
 }
 
+export interface LiXiangRecord {
+  details: string
+  owners: { id: string; name: string }[]
+  time: string
+}
+
 export interface PendingPhase {
   id: string
   projectId: string
@@ -76,6 +85,9 @@ export interface PendingPhase {
   initiator: { id: string; name: string; initials: string }
   initiatedAt: string
   reviewers: { id: string; name: string; initials: string }[]
+  // 立项-specific payload
+  liXiangDetails?: string
+  liXiangOwners?: { id: string; name: string }[]
 }
 
 type SidebarType =
@@ -643,6 +655,7 @@ interface WorkflowProps {
   savedGeneratedAiResearchGroups?: GeneratedAiResearchGroup[]
   onSaveAiResearchGroups?: (groups: GeneratedAiResearchGroup[]) => void
   isExited?: boolean
+  liXiangRecord?: LiXiangRecord
 }
 
 /* ─── New Project Phase Template ─────────────── */
@@ -682,6 +695,15 @@ function createNewPhase(phaseNumber: number, isSetup: boolean): Phase {
     logs: [],
   }
 }
+
+/* ─── 立项 Owner Options ──────────────────────── */
+const LIXIANG_OWNERS = [
+  { id: "zhangwei", name: "张伟" },
+  { id: "lisi",     name: "李四" },
+  { id: "wangfang", name: "王芳" },
+  { id: "zhaoqiang",name: "赵强" },
+  { id: "chenzong", name: "陈总" },
+]
 
 /* ─── Core Team Material Mock File Structure ─── */
 interface MockPickerFile {
@@ -753,6 +775,7 @@ export function Workflow({
   savedGeneratedAiResearchGroups,
   onSaveAiResearchGroups,
   isExited = false,
+  liXiangRecord,
 }: WorkflowProps) {
   const scrollRef = useRef<HTMLDivElement>(null)
   const chatEndRef = useRef<HTMLDivElement>(null)
@@ -840,6 +863,13 @@ export function Workflow({
   const [createdSuggestionHypothesisIds, setCreatedSuggestionHypothesisIds] = useState<Set<string>>(new Set())
   const [createdSuggestionTermIds, setCreatedSuggestionTermIds] = useState<Set<string>>(new Set())
   const [collectedSuggestionMaterialIds, setCollectedSuggestionMaterialIds] = useState<Set<string>>(new Set())
+
+  // 立项 dialog state
+  const [showLiXiangDialog, setShowLiXiangDialog] = useState(false)
+  const [liXiangDetailsInput, setLiXiangDetailsInput] = useState("")
+  const [liXiangSelectedOwners, setLiXiangSelectedOwners] = useState<Set<string>>(new Set())
+  // 已立项 info dialog state
+  const [showLiXiangInfoDialog, setShowLiXiangInfoDialog] = useState(false)
 
   // Tracking summary generation state (duration period)
   const [isTrackingGenerating, setIsTrackingGenerating] = useState(false)
@@ -981,7 +1011,14 @@ export function Workflow({
   // ── New investment lifecycle handlers ─────────────────────────────────────
 
   function handleLiXiang() {
+    setLiXiangDetailsInput("")
+    setLiXiangSelectedOwners(new Set())
+    setShowLiXiangDialog(true)
+  }
+
+  function handleSubmitLiXiang() {
     const newPhase = createPhase(1, "投前期")
+    const selectedOwnerObjects = LIXIANG_OWNERS.filter((o) => liXiangSelectedOwners.has(o.id))
     onCreatePendingPhase?.({
       id: `pending-phase-${Date.now()}`,
       projectId, projectName,
@@ -989,6 +1026,8 @@ export function Workflow({
       changeId: `CR-P-${Date.now().toString().slice(-6)}`,
       changeName: `立项 - 启动${newPhase.fullLabel}`,
       changeType: "立项",
+      liXiangDetails: liXiangDetailsInput,
+      liXiangOwners: selectedOwnerObjects,
       initiator: { id: "zhangwei", name: "张伟", initials: "张伟" },
       initiatedAt: new Date().toISOString().split("T")[0],
       reviewers: [
@@ -996,6 +1035,7 @@ export function Workflow({
         { id: "lisi", name: "李四", initials: "李四" },
       ],
     })
+    setShowLiXiangDialog(false)
   }
 
   function handleStartNextPreInvestmentPhase() {
@@ -5029,6 +5069,23 @@ ${logs}
           // Full timeline view
           <div ref={scrollRef} className="flex-1 overflow-x-auto overflow-y-hidden">
             <div className="flex items-start gap-4 p-6 min-w-max h-full">
+              {/* 已立项 badge — shown before 投前期-阶段一 when 立项 has been approved */}
+              {liXiangRecord && isNewProject && projectPhases.length > 0 && (
+                <div className="flex items-center shrink-0">
+                  <div className="flex flex-col items-center">
+                    {/* spacer matching group-header row height */}
+                    <div className="mb-3 h-[22px]" />
+                    <button
+                      onClick={() => setShowLiXiangInfoDialog(true)}
+                      className="inline-flex items-center gap-1.5 rounded-full border border-green-200 bg-green-50 px-3 py-1.5 text-xs font-semibold text-green-700 transition-colors hover:bg-green-100 whitespace-nowrap shadow-sm"
+                    >
+                      <CheckCircle className="h-3.5 w-3.5" />
+                      已立项
+                    </button>
+                  </div>
+                  <ChevronRight className="h-4 w-4 shrink-0 text-[#9CA3AF] mt-[33px]" />
+                </div>
+              )}
               {projectPhases.map((phase, idx) => {
                 const isSelected = selectedPhase === phase.id
                 const sc = statusConfig[phase.status]
@@ -5326,6 +5383,106 @@ ${logs}
           )}
         </div>
       )}
+
+      {/* ── 立项 Dialog ───────────────────────────────── */}
+      <Dialog open={showLiXiangDialog} onOpenChange={setShowLiXiangDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-50">
+                <GitBranch className="h-4 w-4 text-blue-600" />
+              </div>
+              立项
+            </DialogTitle>
+            <DialogDescription className="text-[#6B7280]">
+              填写立项说明并选择负责人，提交后将发起变更请求。
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-5 pt-1">
+            <div className="space-y-1.5">
+              <Label className="text-sm font-medium text-[#374151]">立项详情</Label>
+              <Textarea
+                value={liXiangDetailsInput}
+                onChange={(e) => setLiXiangDetailsInput(e.target.value)}
+                placeholder="请填写本次立项的说明、目标及背景..."
+                rows={4}
+                className="resize-none text-sm"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-sm font-medium text-[#374151]">负责人</Label>
+              <div className="space-y-2 rounded-lg border border-[#E5E7EB] p-3">
+                {LIXIANG_OWNERS.map((owner) => (
+                  <div key={owner.id} className="flex items-center gap-2">
+                    <Checkbox
+                      id={`lixiang-owner-${owner.id}`}
+                      checked={liXiangSelectedOwners.has(owner.id)}
+                      onCheckedChange={(checked) => {
+                        setLiXiangSelectedOwners((prev) => {
+                          const next = new Set(prev)
+                          if (checked) next.add(owner.id)
+                          else next.delete(owner.id)
+                          return next
+                        })
+                      }}
+                    />
+                    <Label
+                      htmlFor={`lixiang-owner-${owner.id}`}
+                      className="text-sm text-[#374151] cursor-pointer font-normal"
+                    >
+                      {owner.name}
+                    </Label>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+          <div className="flex justify-end gap-2 pt-2">
+            <Button variant="outline" onClick={() => setShowLiXiangDialog(false)}>取消</Button>
+            <Button onClick={handleSubmitLiXiang}>立项</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* ── 已立项 Info Dialog ─────────────────────────── */}
+      <Dialog open={showLiXiangInfoDialog} onOpenChange={setShowLiXiangInfoDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full border border-green-200 bg-green-50">
+                <CheckCircle className="h-4 w-4 text-green-600" />
+              </div>
+              立项信息
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 pt-1">
+            <div>
+              <p className="mb-1 text-xs font-medium text-[#6B7280]">立项详情</p>
+              <p className="rounded-lg border border-[#E5E7EB] bg-[#F9FAFB] px-3 py-2 text-sm text-[#374151]">
+                {liXiangRecord?.details || "—"}
+              </p>
+            </div>
+            <div>
+              <p className="mb-1.5 text-xs font-medium text-[#6B7280]">负责人</p>
+              <div className="flex flex-wrap gap-2">
+                {liXiangRecord?.owners && liXiangRecord.owners.length > 0 ? (
+                  liXiangRecord.owners.map((o) => (
+                    <Badge key={o.id} className="bg-blue-50 text-blue-700 border-blue-200">
+                      {o.name}
+                    </Badge>
+                  ))
+                ) : (
+                  <span className="text-sm text-[#9CA3AF]">—</span>
+                )}
+              </div>
+            </div>
+            <div>
+              <p className="mb-1 text-xs font-medium text-[#6B7280]">立项时间</p>
+              <p className="text-sm text-[#374151]">{liXiangRecord?.time || "—"}</p>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
