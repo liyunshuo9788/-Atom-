@@ -331,32 +331,32 @@ const emptyImplementation: ImplementationStatus = {
   comments: [],
 }
 
-;["ai-t1", "ai-t2", "ai-t3", "ai-t4", "ai-t5", "ai-t6"].forEach((tid, i) => {
-  const item = [
-    { name: "投资方有权获取被投企业月度财务报告", termId: "TM-2026-001", createdAt: "2026-01-10" },
-    { name: "投资方有权对重大技术决策进行知情和建议", termId: "TM-2026-002", createdAt: "2026-01-12" },
-    { name: "采用完全棘轮反稀释条款保护投资方权益", termId: "TM-2026-003", createdAt: "2026-01-15" },
-    { name: "投资方有权委派一名董事参与公司董事会", termId: "TM-2026-004", createdAt: "2026-01-18" },
-    { name: "对核心技术IP转让和授权享有一票否决权", termId: "TM-2026-005", createdAt: "2026-01-20" },
-    { name: "若公司未能在5年内实现IPO，投资方有权要求回购", termId: "TM-2026-006", createdAt: "2026-01-22" },
-  ][i]
-  termDetails[tid] = {
-    id: tid,
-    title: item.name,
-    termId: item.termId,
-    createdAt: item.createdAt,
-    updatedAt: item.createdAt,
-    status: "pending",
-    creator: PEOPLE.zhangwei,
-    ourDemand: emptySection(PEOPLE.zhangwei),
-    ourBasis: emptySection(PEOPLE.zhangwei),
-    bilateralConflict: emptySection(PEOPLE.lisi),
-    ourBottomLine: emptySection(PEOPLE.wangwu),
-    compromiseSpace: emptySection(PEOPLE.zhangwei),
-    negotiationResult: emptyNegotiation,
-    implementationStatus: emptyImplementation,
-  }
-})
+  ;["ai-t1", "ai-t2", "ai-t3", "ai-t4", "ai-t5", "ai-t6"].forEach((tid, i) => {
+    const item = [
+      { name: "投资方有权获取被投企业月度财务报告", termId: "TM-2026-001", createdAt: "2026-01-10" },
+      { name: "投资方有权对重大技术决策进行知情和建议", termId: "TM-2026-002", createdAt: "2026-01-12" },
+      { name: "采用完全棘轮反稀释条款保护投资方权益", termId: "TM-2026-003", createdAt: "2026-01-15" },
+      { name: "投资方有权委派一名董事参与公司董事会", termId: "TM-2026-004", createdAt: "2026-01-18" },
+      { name: "对核心技术IP转让和授权享有一票否决权", termId: "TM-2026-005", createdAt: "2026-01-20" },
+      { name: "若公司未能在5年内实现IPO，投资方有权要求回购", termId: "TM-2026-006", createdAt: "2026-01-22" },
+    ][i]
+    termDetails[tid] = {
+      id: tid,
+      title: item.name,
+      termId: item.termId,
+      createdAt: item.createdAt,
+      updatedAt: item.createdAt,
+      status: "pending",
+      creator: PEOPLE.zhangwei,
+      ourDemand: emptySection(PEOPLE.zhangwei),
+      ourBasis: emptySection(PEOPLE.zhangwei),
+      bilateralConflict: emptySection(PEOPLE.lisi),
+      ourBottomLine: emptySection(PEOPLE.wangwu),
+      compromiseSpace: emptySection(PEOPLE.zhangwei),
+      negotiationResult: emptyNegotiation,
+      implementationStatus: emptyImplementation,
+    }
+  })
 
 /* ------------------------------------------------------------------ */
 /*  AI基础设施策略模板条款数据                                          */
@@ -515,9 +515,9 @@ export function getTemplateTermsForStrategy(strategyId: string): TermTableItem[]
 /*  Status helpers                                                     */
 /* ------------------------------------------------------------------ */
 const statusConfig = {
-  approved: { label: "已批准", color: "bg-[#DCFCE7] text-[#166534]" },
+  approved: { label: "通过", color: "bg-[#DCFCE7] text-[#166534]" },
   pending: { label: "待审批", color: "bg-[#FEF3C7] text-[#92400E]" },
-  rejected: { label: "已拒绝", color: "bg-[#FEE2E2] text-[#991B1B]" },
+  rejected: { label: "否决", color: "bg-[#FEE2E2] text-[#991B1B]" },
 }
 
 /* ------------------------------------------------------------------ */
@@ -1162,7 +1162,7 @@ export function TermSheet({ isNewProject = false, isInDuration = false, isExited
                         {selectedDetail.implementationStatus.conclusion ||
                           (selectedDetail.implementationStatus.status === "implemented" ? "已落实"
                             : selectedDetail.implementationStatus.status === "in-progress" ? "执行中"
-                            : "未开始")}
+                              : "未开始")}
                       </Badge>
                       {isNewProject && !isInDuration && (
                         <div className="flex items-center gap-1">
@@ -1474,8 +1474,8 @@ export function TermSheet({ isNewProject = false, isInDuration = false, isExited
             </thead>
             <tbody>
               {filteredData.map((item, index) => (
-                <tr 
-                  key={item.id} 
+                <tr
+                  key={item.id}
                   className={cn(
                     "border-b border-[#E5E7EB] hover:bg-[#F9FAFB] transition-colors",
                     index % 2 === 1 && "bg-[#F9FAFB]"
@@ -1525,7 +1525,7 @@ export function TermSheet({ isNewProject = false, isInDuration = false, isExited
               ))}
             </tbody>
           </table>
-          
+
           {filteredData.length === 0 && (
             <div className="py-12 text-center">
               <FileText className="mx-auto h-12 w-12 text-[#D1D5DB]" />
