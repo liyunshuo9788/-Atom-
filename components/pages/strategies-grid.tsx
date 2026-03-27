@@ -274,16 +274,44 @@ const AVAILABLE_FRAMEWORKS = [
     name: "科技成长型框架",
     dimensionCount: 5,
     dimensions: ["产业阶段判断", "技术成熟度", "竞争格局", "商业模式", "团队评估"],
+    color: "bg-blue-50 border-blue-200 text-blue-700",
   },
   {
     name: "价值投资评估框架",
     dimensionCount: 4,
     dimensions: ["财务健康度", "内在价值", "安全边际", "催化剂"],
+    color: "bg-emerald-50 border-emerald-200 text-emerald-700",
+  },
+  {
+    name: "早期项目筛选框架",
+    dimensionCount: 4,
+    dimensions: ["创始团队", "市场规模", "产品验证", "竞争壁垒"],
+    color: "bg-violet-50 border-violet-200 text-violet-700",
+  },
+  {
+    name: "ESG合规审查框架",
+    dimensionCount: 3,
+    dimensions: ["环境影响", "社会责任", "治理结构"],
+    color: "bg-lime-50 border-lime-200 text-lime-700",
+  },
+  {
+    name: "并购整合分析框架",
+    dimensionCount: 4,
+    dimensions: ["战略协同", "财务整合", "文化融合", "风险控制"],
+    color: "bg-amber-50 border-amber-200 text-amber-700",
   },
 ]
 
 const EXISTING_STRATEGIES_REF = [
-  { name: "AI 基础设施", framework: "科技成长型框架", hypothesisCount: 12, termCount: 8 },
+  { id: "1", name: "AI基础设施", framework: "科技成长型框架", hypothesisCount: 12, termCount: 8 },
+  { id: "2", name: "大模型应用", framework: "科技成长型框架", hypothesisCount: 8, termCount: 6 },
+  { id: "7", name: "企业数字化", framework: "价值投资评估框架", hypothesisCount: 15, termCount: 10 },
+  { id: "3", name: "企业服务SaaS", framework: "早期项目筛选框架", hypothesisCount: 15, termCount: 12 },
+  { id: "4", name: "生物科技", framework: "早期项目筛选框架", hypothesisCount: 6, termCount: 5 },
+  { id: "8", name: "清洁能源", framework: "ESG合规审查框架", hypothesisCount: 10, termCount: 7 },
+  { id: "5", name: "新能源汽车", framework: "ESG合规审查框架", hypothesisCount: 10, termCount: 9 },
+  { id: "9", name: "国际贸易", framework: "并购整合分析框架", hypothesisCount: 9, termCount: 6 },
+  { id: "6", name: "出海电商", framework: "并购整合分析框架", hypothesisCount: 9, termCount: 8 },
 ]
 
 const CREATE_STEPS = [
@@ -298,7 +326,7 @@ const CREATE_STEPS = [
 function CreateStrategyStep1({
   name, setName, description, setDescription,
   tags, setTags, tagInput, setTagInput,
-  refStrategyChecked, setRefStrategyChecked,
+  selectedRefStrategies, setSelectedRefStrategies,
   selectedFramework, setSelectedFramework,
   onCancel, onNext,
 }: {
@@ -306,7 +334,7 @@ function CreateStrategyStep1({
   description: string; setDescription: (v: string) => void
   tags: string[]; setTags: (v: string[]) => void
   tagInput: string; setTagInput: (v: string) => void
-  refStrategyChecked: boolean; setRefStrategyChecked: (v: boolean) => void
+  selectedRefStrategies: string[]; setSelectedRefStrategies: (v: string[]) => void
   selectedFramework: string; setSelectedFramework: (v: string) => void
   onCancel: () => void; onNext: () => void
 }) {
@@ -388,72 +416,121 @@ function CreateStrategyStep1({
         )}
       </div>
 
-      {/* 参考已有策略 */}
+      {/* 参考已有策略 - 横向滚动多选 */}
       <div className="mb-6">
-        <label className="block text-sm font-medium text-[#374151] mb-2">参考已有策略（可选）</label>
-        {EXISTING_STRATEGIES_REF.map((ref) => (
-          <label
-            key={ref.name}
-            className={cn(
-              "flex items-start gap-3 rounded-xl border p-4 cursor-pointer transition-all",
-              refStrategyChecked
-                ? "border-[#2563EB] bg-blue-50/30"
-                : "border-[#E5E7EB] bg-white hover:border-[#D1D5DB]"
-            )}
-          >
-            <input
-              type="checkbox"
-              checked={refStrategyChecked}
-              onChange={(e) => setRefStrategyChecked(e.target.checked)}
-              className="mt-0.5 h-4 w-4 rounded border-[#D1D5DB] text-[#2563EB] focus:ring-[#2563EB]"
-            />
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-semibold text-[#111827]">
-                  {ref.name}（{ref.framework}）
-                </span>
-                <span className="text-xs text-[#9CA3AF]">
-                  {ref.hypothesisCount} 个假设 · {ref.termCount} 个条款
-                </span>
-              </div>
-              <p className="mt-1 text-xs text-[#6B7280]">
-                选中后，AI 生成时会参考此策略的三清单，避免重复分析已有的判断
-              </p>
-            </div>
-          </label>
-        ))}
+        <div className="flex items-center justify-between mb-3">
+          <label className="text-sm font-medium text-[#374151]">参考已有策略（可选，支持多选）</label>
+          <span className="text-xs text-[#9CA3AF]">
+            已选 <span className="font-medium text-[#2563EB]">{selectedRefStrategies.length}</span> 个
+          </span>
+        </div>
+        <p className="text-xs text-[#6B7280] mb-3">
+          选中后，AI 生成时会参考所选策略的假设和条款，避免重复分析
+        </p>
+        <div className="relative">
+          <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-[#E5E7EB] scrollbar-track-transparent">
+            {EXISTING_STRATEGIES_REF.map((ref) => {
+              const isSelected = selectedRefStrategies.includes(ref.id)
+              const fw = AVAILABLE_FRAMEWORKS.find((f) => f.name === ref.framework)
+              return (
+                <button
+                  key={ref.id}
+                  onClick={() => {
+                    if (isSelected) {
+                      setSelectedRefStrategies(selectedRefStrategies.filter((id) => id !== ref.id))
+                    } else {
+                      setSelectedRefStrategies([...selectedRefStrategies, ref.id])
+                    }
+                  }}
+                  className={cn(
+                    "relative flex-shrink-0 w-56 rounded-xl border p-4 text-left transition-all",
+                    isSelected
+                      ? "border-[#2563EB] bg-blue-50/50 shadow-sm ring-1 ring-[#2563EB]/20"
+                      : "border-[#E5E7EB] bg-white hover:border-[#D1D5DB] hover:shadow-sm"
+                  )}
+                >
+                  {isSelected && (
+                    <div className="absolute top-2 right-2 flex h-5 w-5 items-center justify-center rounded-full bg-[#2563EB]">
+                      <Check className="h-3 w-3 text-white" />
+                    </div>
+                  )}
+                  <h4 className="text-sm font-semibold text-[#111827] mb-2 pr-6">{ref.name}</h4>
+                  <span className={cn("inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-[10px] font-medium mb-2", fw?.color || "bg-gray-50 border-gray-200 text-gray-600")}>
+                    <svg className="h-2.5 w-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+                    {ref.framework}
+                  </span>
+                  <p className="text-[11px] text-[#6B7280]">
+                    {ref.hypothesisCount} 个假设 · {ref.termCount} 个条款
+                  </p>
+                </button>
+              )
+            })}
+          </div>
+          {/* Fade hints */}
+          <div className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-[#F3F4F6] to-transparent" />
+        </div>
       </div>
 
-      {/* 所用分析框架 */}
+      {/* 所用分析框架 - 横向滚动单选 */}
       <div className="mb-6">
-        <label className="block text-sm font-medium text-[#374151] mb-2">所用分析框架</label>
-        <div className="space-y-3">
-          {AVAILABLE_FRAMEWORKS.map((fw) => (
-            <button
-              key={fw.name}
-              onClick={() => setSelectedFramework(fw.name)}
-              className={cn(
-                "w-full flex items-center justify-between rounded-xl border p-4 text-left transition-all",
-                selectedFramework === fw.name
-                  ? "border-[#2563EB] bg-blue-50/30 shadow-sm"
-                  : "border-[#E5E7EB] bg-white hover:border-[#D1D5DB]"
-              )}
-            >
-              <div>
-                <h4 className="text-sm font-semibold text-[#111827]">{fw.name}</h4>
-                <div className="mt-2 flex flex-wrap gap-1.5">
-                  {fw.dimensions.map((d) => (
-                    <span key={d} className="rounded-md border border-[#E5E7EB] bg-[#F9FAFB] px-2 py-0.5 text-[11px] text-[#6B7280]">
-                      {d}
+        <div className="flex items-center justify-between mb-3">
+          <label className="text-sm font-medium text-[#374151]">所用分析框架</label>
+          {selectedFramework && (
+            <span className="text-xs text-[#6B7280]">
+              已选择 <span className="font-medium text-[#2563EB]">{selectedFramework}</span>
+            </span>
+          )}
+        </div>
+        <p className="text-xs text-[#6B7280] mb-3">
+          选择一个分析框架，AI 将基于该框架的维度生成假设和条款
+        </p>
+        <div className="relative">
+          <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-[#E5E7EB] scrollbar-track-transparent">
+            {AVAILABLE_FRAMEWORKS.map((fw) => {
+              const isSelected = selectedFramework === fw.name
+              return (
+                <button
+                  key={fw.name}
+                  onClick={() => setSelectedFramework(fw.name)}
+                  className={cn(
+                    "relative flex-shrink-0 w-64 rounded-xl border p-4 text-left transition-all",
+                    isSelected
+                      ? "border-[#2563EB] bg-blue-50/50 shadow-sm ring-1 ring-[#2563EB]/20"
+                      : "border-[#E5E7EB] bg-white hover:border-[#D1D5DB] hover:shadow-sm"
+                  )}
+                >
+                  {isSelected && (
+                    <div className="absolute top-2 right-2 flex h-5 w-5 items-center justify-center rounded-full bg-[#2563EB]">
+                      <Check className="h-3 w-3 text-white" />
+                    </div>
+                  )}
+                  <div className="flex items-center justify-between mb-2 pr-6">
+                    <h4 className="text-sm font-semibold text-[#111827]">{fw.name}</h4>
+                    <span className="text-[10px] font-medium text-[#2563EB] bg-blue-50 px-1.5 py-0.5 rounded">
+                      {fw.dimensionCount} 维度
                     </span>
-                  ))}
-                </div>
-              </div>
-              <span className="shrink-0 text-xs text-[#2563EB] font-medium">
-                {fw.dimensionCount} 个分析维度
-              </span>
-            </button>
-          ))}
+                  </div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {fw.dimensions.map((d) => (
+                      <span
+                        key={d}
+                        className={cn(
+                          "rounded-md border px-2 py-0.5 text-[10px] font-medium",
+                          isSelected
+                            ? "border-[#BFDBFE] bg-blue-50 text-[#1D4ED8]"
+                            : "border-[#E5E7EB] bg-[#F9FAFB] text-[#6B7280]"
+                        )}
+                      >
+                        {d}
+                      </span>
+                    ))}
+                  </div>
+                </button>
+              )
+            })}
+          </div>
+          {/* Fade hint */}
+          <div className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-[#F3F4F6] to-transparent" />
         </div>
       </div>
 
@@ -488,7 +565,7 @@ function CreateStrategy({ onCancel, onSave, strategies }: { onCancel: () => void
   const [description, setDescription] = useState("")
   const [tags, setTags] = useState<string[]>(["AI", "基础设施", "大模型"])
   const [tagInput, setTagInput] = useState("")
-  const [refStrategyChecked, setRefStrategyChecked] = useState(true)
+  const [selectedRefStrategies, setSelectedRefStrategies] = useState<string[]>(["1"])
   const [selectedFramework, setSelectedFramework] = useState("科技成长型框架")
 
   function handleSave() {
@@ -553,7 +630,7 @@ function CreateStrategy({ onCancel, onSave, strategies }: { onCancel: () => void
               description={description} setDescription={setDescription}
               tags={tags} setTags={setTags}
               tagInput={tagInput} setTagInput={setTagInput}
-              refStrategyChecked={refStrategyChecked} setRefStrategyChecked={setRefStrategyChecked}
+              selectedRefStrategies={selectedRefStrategies} setSelectedRefStrategies={setSelectedRefStrategies}
               selectedFramework={selectedFramework} setSelectedFramework={setSelectedFramework}
               onCancel={onCancel} onNext={() => setStep(2)}
             />
@@ -623,7 +700,7 @@ function CreateStrategy({ onCancel, onSave, strategies }: { onCancel: () => void
                   </div>
                   <div>
                     <p className="text-xs text-[#9CA3AF] mb-1">参考策略</p>
-                    <p className="text-sm font-semibold text-[#111827]">{refStrategyChecked ? "AI 基础设施" : "无"}</p>
+                    <p className="text-sm font-semibold text-[#111827]">{selectedRefStrategies.length > 0 ? EXISTING_STRATEGIES_REF.filter((s) => selectedRefStrategies.includes(s.id)).map((s) => s.name).join("、") : "无"}</p>
                   </div>
                 </div>
                 {description && (
