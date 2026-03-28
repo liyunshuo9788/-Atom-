@@ -644,10 +644,10 @@ function CreateStrategy({ onCancel, onSave, strategies }: { onCancel: () => void
                 <div className="flex items-center gap-2">
                   <div
                     className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-semibold ${isCompleted
+                      ? "bg-[#2563EB] text-white"
+                      : isActive
                         ? "bg-[#2563EB] text-white"
-                        : isActive
-                          ? "bg-[#2563EB] text-white"
-                          : "border border-[#D1D5DB] bg-white text-[#9CA3AF]"
+                        : "border border-[#D1D5DB] bg-white text-[#9CA3AF]"
                       }`}
                   >
                     {isCompleted ? <Check className="h-3.5 w-3.5" /> : s.num}
@@ -1001,7 +1001,7 @@ export function StrategiesGrid({ strategies, onStrategiesChange, onSelectStrateg
               <Briefcase className="h-6 w-6 text-white" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-[#111827]">策略中心</h1>
+              <h1 className="text-xl font-bold text-[#111827]">策略列表</h1>
               <p className="mt-0.5 text-sm text-[#6B7280]">
                 构建投资策略，可用于投资项目的初始化
               </p>
