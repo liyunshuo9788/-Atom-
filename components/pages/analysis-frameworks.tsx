@@ -522,18 +522,16 @@ function FrameworkDetail({ onBack, data }: { onBack: () => void; data?: Framewor
                     <div>
                       <div className="flex items-center gap-2 mb-0.5">
                         <h3 className="text-sm font-semibold text-[#111827]">{s.name}</h3>
-                        <span className={`inline-flex rounded-md border px-2 py-0.5 text-[11px] font-medium ${
-                          s.type === "主题策略"
+                        <span className={`inline-flex rounded-md border px-2 py-0.5 text-[11px] font-medium ${s.type === "主题策略"
                             ? "bg-blue-50 text-blue-700 border-blue-200"
                             : "bg-violet-50 text-violet-700 border-violet-200"
-                        }`}>
+                          }`}>
                           {s.type}
                         </span>
-                        <span className={`inline-flex rounded-md border px-2 py-0.5 text-[11px] font-medium ${
-                          s.status === "active"
+                        <span className={`inline-flex rounded-md border px-2 py-0.5 text-[11px] font-medium ${s.status === "active"
                             ? "bg-emerald-50 text-emerald-700 border-emerald-200"
                             : "bg-gray-100 text-gray-500 border-gray-200"
-                        }`}>
+                          }`}>
                           {s.status === "active" ? "运行中" : "已暂停"}
                         </span>
                       </div>
@@ -582,11 +580,10 @@ function CreateFrameworkPicker({ onBack, onNext }: { onBack: () => void; onNext:
           {/* AI 辅助创建 */}
           <button
             onClick={() => setSelected("ai")}
-            className={`relative flex flex-col rounded-xl border-2 bg-white p-6 text-left transition-all ${
-              selected === "ai"
+            className={`relative flex flex-col rounded-xl border-2 bg-white p-6 text-left transition-all ${selected === "ai"
                 ? "border-[#2563EB] shadow-lg shadow-blue-100/50"
                 : "border-[#E5E7EB] hover:border-[#D1D5DB]"
-            }`}
+              }`}
           >
             {/* Selection indicator */}
             {selected === "ai" && (
@@ -611,11 +608,10 @@ function CreateFrameworkPicker({ onBack, onNext }: { onBack: () => void; onNext:
           {/* 手动创建 */}
           <button
             onClick={() => setSelected("manual")}
-            className={`relative flex flex-col rounded-xl border-2 bg-white p-6 text-left transition-all ${
-              selected === "manual"
+            className={`relative flex flex-col rounded-xl border-2 bg-white p-6 text-left transition-all ${selected === "manual"
                 ? "border-[#2563EB] shadow-lg shadow-blue-100/50"
                 : "border-[#E5E7EB] hover:border-[#D1D5DB]"
-            }`}
+              }`}
           >
             {selected === "manual" && (
               <div className="absolute top-4 right-4">
@@ -718,20 +714,18 @@ function DescribeMethodology({ onBack, onBackToList, onNext }: { onBack: () => v
                 {idx > 0 && <div className={`mx-2 h-px w-10 ${step.num <= 2 ? "bg-[#2563EB]" : "bg-[#D1D5DB]"}`} />}
                 <div className="flex items-center gap-2">
                   <div
-                    className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-semibold ${
-                      isCompleted
+                    className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-semibold ${isCompleted
                         ? "bg-[#2563EB] text-white"
                         : isActive
                           ? "bg-[#2563EB] text-white"
                           : "border border-[#D1D5DB] bg-white text-[#9CA3AF]"
-                    }`}
+                      }`}
                   >
                     {isCompleted ? <Check className="h-3.5 w-3.5" /> : step.num}
                   </div>
                   <span
-                    className={`text-sm font-medium ${
-                      isActive ? "text-[#2563EB]" : isCompleted ? "text-[#111827]" : "text-[#9CA3AF]"
-                    }`}
+                    className={`text-sm font-medium ${isActive ? "text-[#2563EB]" : isCompleted ? "text-[#111827]" : "text-[#9CA3AF]"
+                      }`}
                   >
                     {step.label}
                   </span>
@@ -756,7 +750,7 @@ function DescribeMethodology({ onBack, onBackToList, onNext }: { onBack: () => v
             <div className="mb-6">
               <label className="block text-sm font-medium text-[#374151] mb-2">框架名称</label>
               <Input
-                placeholder="如：科技成长型框架"
+                placeholder="科技成长型框架"
                 value={frameworkName}
                 onChange={(e) => setFrameworkName(e.target.value)}
                 className="bg-white border-[#E5E7EB]"
@@ -1087,20 +1081,18 @@ function ConfigureDimensions({ onBack, onBackToList, onNext }: { onBack: () => v
                 {idx > 0 && <div className={`mx-2 h-px w-10 ${step.num <= 3 ? "bg-[#2563EB]" : "bg-[#D1D5DB]"}`} />}
                 <div className="flex items-center gap-2">
                   <div
-                    className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-semibold ${
-                      isCompleted
+                    className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-semibold ${isCompleted
                         ? "bg-[#2563EB] text-white"
                         : isActive
                           ? "bg-[#2563EB] text-white"
                           : "border border-[#D1D5DB] bg-white text-[#9CA3AF]"
-                    }`}
+                      }`}
                   >
                     {isCompleted ? <Check className="h-3.5 w-3.5" /> : step.num}
                   </div>
                   <span
-                    className={`text-sm font-medium ${
-                      isActive ? "text-[#2563EB]" : isCompleted ? "text-[#111827]" : "text-[#9CA3AF]"
-                    }`}
+                    className={`text-sm font-medium ${isActive ? "text-[#2563EB]" : isCompleted ? "text-[#111827]" : "text-[#9CA3AF]"
+                      }`}
                   >
                     {step.label}
                   </span>
@@ -1129,11 +1121,10 @@ function ConfigureDimensions({ onBack, onBackToList, onNext }: { onBack: () => v
               <button
                 key={d.id}
                 onClick={() => setActiveDimId(d.id)}
-                className={`w-full rounded-lg px-3 py-2.5 text-left transition-colors ${
-                  d.id === activeDimId
+                className={`w-full rounded-lg px-3 py-2.5 text-left transition-colors ${d.id === activeDimId
                     ? "bg-[#2563EB] text-white"
                     : "bg-[#F9FAFB] text-[#374151] hover:bg-[#F3F4F6]"
-                }`}
+                  }`}
               >
                 <p className={`text-sm font-medium ${d.id === activeDimId ? "text-white" : "text-[#111827]"}`}>
                   {d.name}
@@ -1444,20 +1435,18 @@ function JudgmentRules({ onBack, onBackToList, onNext }: { onBack: () => void; o
                 {idx > 0 && <div className={`mx-2 h-px w-10 ${step.num <= 4 ? "bg-[#2563EB]" : "bg-[#D1D5DB]"}`} />}
                 <div className="flex items-center gap-2">
                   <div
-                    className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-semibold ${
-                      isCompleted
+                    className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-semibold ${isCompleted
                         ? "bg-[#2563EB] text-white"
                         : isActive
                           ? "bg-[#2563EB] text-white"
                           : "border border-[#D1D5DB] bg-white text-[#9CA3AF]"
-                    }`}
+                      }`}
                   >
                     {isCompleted ? <Check className="h-3.5 w-3.5" /> : step.num}
                   </div>
                   <span
-                    className={`text-sm font-medium ${
-                      isActive ? "text-[#2563EB]" : isCompleted ? "text-[#111827]" : "text-[#9CA3AF]"
-                    }`}
+                    className={`text-sm font-medium ${isActive ? "text-[#2563EB]" : isCompleted ? "text-[#111827]" : "text-[#9CA3AF]"
+                      }`}
                   >
                     {step.label}
                   </span>
@@ -1650,20 +1639,18 @@ function ConfirmSave({ onBack, onBackToList, onSave }: { onBack: () => void; onB
                 {idx > 0 && <div className="mx-2 h-px w-10 bg-[#2563EB]" />}
                 <div className="flex items-center gap-2">
                   <div
-                    className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-semibold ${
-                      isCompleted
+                    className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-semibold ${isCompleted
                         ? "bg-[#2563EB] text-white"
                         : isActive
                           ? "bg-[#2563EB] text-white"
                           : "border border-[#D1D5DB] bg-white text-[#9CA3AF]"
-                    }`}
+                      }`}
                   >
                     {isCompleted ? <Check className="h-3.5 w-3.5" /> : step.num}
                   </div>
                   <span
-                    className={`text-sm font-medium ${
-                      isActive ? "text-[#2563EB]" : isCompleted ? "text-[#111827]" : "text-[#9CA3AF]"
-                    }`}
+                    className={`text-sm font-medium ${isActive ? "text-[#2563EB]" : isCompleted ? "text-[#111827]" : "text-[#9CA3AF]"
+                      }`}
                   >
                     {step.label}
                   </span>
