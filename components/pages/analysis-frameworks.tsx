@@ -524,14 +524,14 @@ function FrameworkDetail({ onBack, data }: { onBack: () => void; data?: Framewor
                       <div className="flex items-center gap-2 mb-0.5">
                         <h3 className="text-sm font-semibold text-[#111827]">{s.name}</h3>
                         <span className={`inline-flex rounded-md border px-2 py-0.5 text-[11px] font-medium ${s.type === "主题策略"
-                            ? "bg-blue-50 text-blue-700 border-blue-200"
-                            : "bg-violet-50 text-violet-700 border-violet-200"
+                          ? "bg-blue-50 text-blue-700 border-blue-200"
+                          : "bg-violet-50 text-violet-700 border-violet-200"
                           }`}>
                           {s.type}
                         </span>
                         <span className={`inline-flex rounded-md border px-2 py-0.5 text-[11px] font-medium ${s.status === "active"
-                            ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-                            : "bg-gray-100 text-gray-500 border-gray-200"
+                          ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                          : "bg-gray-100 text-gray-500 border-gray-200"
                           }`}>
                           {s.status === "active" ? "运行中" : "已暂停"}
                         </span>
@@ -582,8 +582,8 @@ function CreateFrameworkPicker({ onBack, onNext }: { onBack: () => void; onNext:
           <button
             onClick={() => setSelected("ai")}
             className={`relative flex flex-col rounded-xl border-2 bg-white p-6 text-left transition-all ${selected === "ai"
-                ? "border-[#2563EB] shadow-lg shadow-blue-100/50"
-                : "border-[#E5E7EB] hover:border-[#D1D5DB]"
+              ? "border-[#2563EB] shadow-lg shadow-blue-100/50"
+              : "border-[#E5E7EB] hover:border-[#D1D5DB]"
               }`}
           >
             {/* Selection indicator */}
@@ -610,8 +610,8 @@ function CreateFrameworkPicker({ onBack, onNext }: { onBack: () => void; onNext:
           <button
             onClick={() => setSelected("manual")}
             className={`relative flex flex-col rounded-xl border-2 bg-white p-6 text-left transition-all ${selected === "manual"
-                ? "border-[#2563EB] shadow-lg shadow-blue-100/50"
-                : "border-[#E5E7EB] hover:border-[#D1D5DB]"
+              ? "border-[#2563EB] shadow-lg shadow-blue-100/50"
+              : "border-[#E5E7EB] hover:border-[#D1D5DB]"
               }`}
           >
             {selected === "manual" && (
@@ -693,27 +693,27 @@ function DescribeMethodology({ onBack, onBackToList, onNext }: { onBack: () => v
   const [frameworkName, setFrameworkName] = useState("")
   const [description, setDescription] = useState(SAMPLE_DESCRIPTION)
   const [uploadedFiles, setUploadedFiles] = useState<{ name: string; size: string; type: string; description: string }[]>([])
-  
+
   // File browser modal state
   const [showFileBrowser, setShowFileBrowser] = useState(false)
   const [selectedBrowserFiles, setSelectedBrowserFiles] = useState<string[]>([])
   const [isUploading, setIsUploading] = useState(false)
-  
+
   // AI analysis animation state
   const [isAnalyzing, setIsAnalyzing] = useState(false)
   const [analysisStep, setAnalysisStep] = useState(0)
-  
+
   const AI_ANALYSIS_STEPS = [
     { label: "解析方法论描述", icon: "parse" },
     { label: "提取核心概念", icon: "extract" },
     { label: "匹配分析模式", icon: "match" },
     { label: "生成维度结构", icon: "generate" },
   ]
-  
+
   function handleStartAnalysis() {
     setIsAnalyzing(true)
     setAnalysisStep(0)
-    
+
     // Animate through steps
     let currentStep = 0
     const interval = setInterval(() => {
@@ -788,10 +788,10 @@ function DescribeMethodology({ onBack, onBackToList, onNext }: { onBack: () => v
                 <div className="flex items-center gap-2">
                   <div
                     className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-semibold ${isCompleted
+                      ? "bg-[#2563EB] text-white"
+                      : isActive
                         ? "bg-[#2563EB] text-white"
-                        : isActive
-                          ? "bg-[#2563EB] text-white"
-                          : "border border-[#D1D5DB] bg-white text-[#9CA3AF]"
+                        : "border border-[#D1D5DB] bg-white text-[#9CA3AF]"
                       }`}
                   >
                     {isCompleted ? <Check className="h-3.5 w-3.5" /> : step.num}
@@ -850,7 +850,7 @@ function DescribeMethodology({ onBack, onBackToList, onNext }: { onBack: () => v
                   <span className="text-xs text-[#6B7280]">已上传 {uploadedFiles.length} 个文件</span>
                 )}
               </div>
-              
+
               {/* Upload card - always visible */}
               <button
                 onClick={() => setShowFileBrowser(true)}
@@ -882,13 +882,12 @@ function DescribeMethodology({ onBack, onBackToList, onNext }: { onBack: () => v
                           className="flex-shrink-0 w-64 rounded-xl border border-[#E5E7EB] bg-white p-3 hover:border-[#D1D5DB] transition-colors group"
                         >
                           <div className="flex items-start gap-3">
-                            <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-[10px] font-bold ${
-                              file.type === "PDF" ? "bg-red-50 text-red-600" :
-                              file.type === "DOCX" ? "bg-blue-50 text-blue-600" :
-                              file.type === "XLSX" ? "bg-emerald-50 text-emerald-600" :
-                              file.type === "PPTX" ? "bg-orange-50 text-orange-600" :
-                              "bg-gray-50 text-gray-600"
-                            }`}>
+                            <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-[10px] font-bold ${file.type === "PDF" ? "bg-red-50 text-red-600" :
+                                file.type === "DOCX" ? "bg-blue-50 text-blue-600" :
+                                  file.type === "XLSX" ? "bg-emerald-50 text-emerald-600" :
+                                    file.type === "PPTX" ? "bg-orange-50 text-orange-600" :
+                                      "bg-gray-50 text-gray-600"
+                              }`}>
                               {file.type}
                             </div>
                             <div className="flex-1 min-w-0">
@@ -966,11 +965,10 @@ function DescribeMethodology({ onBack, onBackToList, onNext }: { onBack: () => v
                         return (
                           <label
                             key={file.id}
-                            className={`flex items-start gap-3 rounded-xl border p-3 cursor-pointer transition-all ${
-                              isSelected
+                            className={`flex items-start gap-3 rounded-xl border p-3 cursor-pointer transition-all ${isSelected
                                 ? "border-[#2563EB] bg-blue-50/50"
                                 : "border-[#E5E7EB] bg-white hover:border-[#D1D5DB]"
-                            }`}
+                              }`}
                           >
                             <input
                               type="checkbox"
@@ -984,12 +982,11 @@ function DescribeMethodology({ onBack, onBackToList, onNext }: { onBack: () => v
                               }}
                               className="mt-1 h-4 w-4 rounded border-[#D1D5DB] text-[#2563EB] focus:ring-[#2563EB]"
                             />
-                            <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-[10px] font-bold ${
-                              file.type === "PDF" ? "bg-red-50 text-red-600" :
-                              file.type === "DOCX" ? "bg-blue-50 text-blue-600" :
-                              file.type === "XLSX" ? "bg-emerald-50 text-emerald-600" :
-                              "bg-gray-50 text-gray-600"
-                            }`}>
+                            <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-[10px] font-bold ${file.type === "PDF" ? "bg-red-50 text-red-600" :
+                                file.type === "DOCX" ? "bg-blue-50 text-blue-600" :
+                                  file.type === "XLSX" ? "bg-emerald-50 text-emerald-600" :
+                                    "bg-gray-50 text-gray-600"
+                              }`}>
                               {file.type}
                             </div>
                             <div className="flex-1 min-w-0">
@@ -1086,12 +1083,11 @@ function DescribeMethodology({ onBack, onBackToList, onNext }: { onBack: () => v
             disabled={isAnalyzing}
             className="flex items-center gap-2 rounded-lg bg-[#1F2937] px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#111827] disabled:opacity-70 disabled:cursor-not-allowed"
           >
-            <Sparkles className="h-4 w-4" />
             下一步：AI生成分析维度
           </button>
         </div>
       </div>
-      
+
       {/* AI Analysis Animation Overlay */}
       {isAnalyzing && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
@@ -1108,23 +1104,21 @@ function DescribeMethodology({ onBack, onBackToList, onNext }: { onBack: () => v
               <h2 className="text-lg font-semibold text-[#111827]">AI 正在分析</h2>
               <p className="text-sm text-[#6B7280] mt-1">基于方法论生成分析维度结构</p>
             </div>
-            
+
             {/* Analysis Steps */}
             <div className="space-y-3">
               {AI_ANALYSIS_STEPS.map((step, idx) => (
                 <div
                   key={step.label}
-                  className={`flex items-center gap-3 rounded-xl border p-3 transition-all duration-300 ${
-                    idx < analysisStep ? "border-[#10B981] bg-emerald-50" :
-                    idx === analysisStep ? "border-[#2563EB] bg-blue-50" :
-                    "border-[#E5E7EB] bg-white opacity-50"
-                  }`}
+                  className={`flex items-center gap-3 rounded-xl border p-3 transition-all duration-300 ${idx < analysisStep ? "border-[#10B981] bg-emerald-50" :
+                      idx === analysisStep ? "border-[#2563EB] bg-blue-50" :
+                        "border-[#E5E7EB] bg-white opacity-50"
+                    }`}
                 >
-                  <div className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${
-                    idx < analysisStep ? "bg-[#10B981] text-white" :
-                    idx === analysisStep ? "bg-[#2563EB] text-white" :
-                    "bg-[#F3F4F6] text-[#9CA3AF]"
-                  }`}>
+                  <div className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${idx < analysisStep ? "bg-[#10B981] text-white" :
+                      idx === analysisStep ? "bg-[#2563EB] text-white" :
+                        "bg-[#F3F4F6] text-[#9CA3AF]"
+                    }`}>
                     {idx < analysisStep ? (
                       <Check className="h-4 w-4" />
                     ) : idx === analysisStep ? (
@@ -1136,19 +1130,18 @@ function DescribeMethodology({ onBack, onBackToList, onNext }: { onBack: () => v
                       <span className="text-xs font-medium">{idx + 1}</span>
                     )}
                   </div>
-                  <span className={`text-sm font-medium ${
-                    idx <= analysisStep ? "text-[#111827]" : "text-[#9CA3AF]"
-                  }`}>
+                  <span className={`text-sm font-medium ${idx <= analysisStep ? "text-[#111827]" : "text-[#9CA3AF]"
+                    }`}>
                     {step.label}
                   </span>
                 </div>
               ))}
             </div>
-            
+
             {/* Progress bar */}
             <div className="mt-6">
               <div className="h-1.5 w-full rounded-full bg-[#E5E7EB] overflow-hidden">
-                <div 
+                <div
                   className="h-full bg-gradient-to-r from-[#2563EB] to-[#7C3AED] rounded-full transition-all duration-500 ease-out"
                   style={{ width: `${((analysisStep + 1) / AI_ANALYSIS_STEPS.length) * 100}%` }}
                 />
@@ -1383,10 +1376,10 @@ function ConfigureDimensions({ onBack, onBackToList, onNext }: { onBack: () => v
                 <div className="flex items-center gap-2">
                   <div
                     className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-semibold ${isCompleted
+                      ? "bg-[#2563EB] text-white"
+                      : isActive
                         ? "bg-[#2563EB] text-white"
-                        : isActive
-                          ? "bg-[#2563EB] text-white"
-                          : "border border-[#D1D5DB] bg-white text-[#9CA3AF]"
+                        : "border border-[#D1D5DB] bg-white text-[#9CA3AF]"
                       }`}
                   >
                     {isCompleted ? <Check className="h-3.5 w-3.5" /> : step.num}
@@ -1423,8 +1416,8 @@ function ConfigureDimensions({ onBack, onBackToList, onNext }: { onBack: () => v
                 key={d.id}
                 onClick={() => setActiveDimId(d.id)}
                 className={`w-full rounded-lg px-3 py-2.5 text-left transition-colors ${d.id === activeDimId
-                    ? "bg-[#2563EB] text-white"
-                    : "bg-[#F9FAFB] text-[#374151] hover:bg-[#F3F4F6]"
+                  ? "bg-[#2563EB] text-white"
+                  : "bg-[#F9FAFB] text-[#374151] hover:bg-[#F3F4F6]"
                   }`}
               >
                 <p className={`text-sm font-medium ${d.id === activeDimId ? "text-white" : "text-[#111827]"}`}>
@@ -1737,10 +1730,10 @@ function JudgmentRules({ onBack, onBackToList, onNext }: { onBack: () => void; o
                 <div className="flex items-center gap-2">
                   <div
                     className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-semibold ${isCompleted
+                      ? "bg-[#2563EB] text-white"
+                      : isActive
                         ? "bg-[#2563EB] text-white"
-                        : isActive
-                          ? "bg-[#2563EB] text-white"
-                          : "border border-[#D1D5DB] bg-white text-[#9CA3AF]"
+                        : "border border-[#D1D5DB] bg-white text-[#9CA3AF]"
                       }`}
                   >
                     {isCompleted ? <Check className="h-3.5 w-3.5" /> : step.num}
@@ -1941,10 +1934,10 @@ function ConfirmSave({ onBack, onBackToList, onSave }: { onBack: () => void; onB
                 <div className="flex items-center gap-2">
                   <div
                     className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-semibold ${isCompleted
+                      ? "bg-[#2563EB] text-white"
+                      : isActive
                         ? "bg-[#2563EB] text-white"
-                        : isActive
-                          ? "bg-[#2563EB] text-white"
-                          : "border border-[#D1D5DB] bg-white text-[#9CA3AF]"
+                        : "border border-[#D1D5DB] bg-white text-[#9CA3AF]"
                       }`}
                   >
                     {isCompleted ? <Check className="h-3.5 w-3.5" /> : step.num}
