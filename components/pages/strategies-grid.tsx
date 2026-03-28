@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Briefcase, Search, Plus, Target, TrendingUp, Building2, Cpu, Zap, Leaf, X, Check, MoreHorizontal, ChevronRight, ArrowLeft, Upload, Folder } from "lucide-react"
+import { Briefcase, Search, Plus, Target, TrendingUp, Building2, Cpu, Zap, Leaf, X, Check, MoreHorizontal, ChevronRight, ArrowLeft, Upload, Folder, Eye, Pencil, Trash2 } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { cn } from "@/lib/utils"
@@ -614,6 +614,69 @@ function CreateStrategy({ onCancel, onSave, strategies }: { onCancel: () => void
     setUploadedFiles((prev) => prev.filter((f) => f.name !== fileName))
   }
 
+  // Step 3 state - AI analysis animation and review
+  const [isAnalyzing, setIsAnalyzing] = useState(false)
+  const [analysisStep, setAnalysisStep] = useState(0)
+  const [analysisComplete, setAnalysisComplete] = useState(false)
+  const [reviewTab, setReviewTab] = useState<"materials" | "hypotheses" | "terms">("hypotheses")
+  const [reviewSearchQuery, setReviewSearchQuery] = useState("")
+
+  // Generated hypotheses and terms (mirrors AI基础设施 preset)
+  const [generatedHypotheses] = useState([
+    { id: "gen-h1", direction: "技术攻关", category: "算力与芯片", name: "国产AI芯片在推理场景下可替代英伟达方案", owner: "AI生成", createdAt: new Date().toISOString().split("T")[0], status: "pending" },
+    { id: "gen-h2", direction: "技术攻关", category: "算力与芯片", name: "云端AI芯片市场将在3年内达到500亿美元规模", owner: "AI生成", createdAt: new Date().toISOString().split("T")[0], status: "pending" },
+    { id: "gen-h3", direction: "技术攻关", category: "模型训练框架", name: "开源大模型训练框架将成为主流技术路线", owner: "AI生成", createdAt: new Date().toISOString().split("T")[0], status: "pending" },
+    { id: "gen-h4", direction: "技术攻关", category: "模型训练框架", name: "分布式训练效率提升是大模型竞争关键", owner: "AI生成", createdAt: new Date().toISOString().split("T")[0], status: "pending" },
+    { id: "gen-h5", direction: "技术攻关", category: "基础软件生态", name: "AI编译器将成为新的基础软件投资赛道", owner: "AI生成", createdAt: new Date().toISOString().split("T")[0], status: "pending" },
+    { id: "gen-h6", direction: "技术攻关", category: "基础软件生态", name: "MLOps平台市场需求将快速增长", owner: "AI生成", createdAt: new Date().toISOString().split("T")[0], status: "pending" },
+    { id: "gen-h7", direction: "团队能力", category: "创始人", name: "创始人具备丰富的AI产品商业化经验", owner: "AI生成", createdAt: new Date().toISOString().split("T")[0], status: "pending" },
+  ])
+
+  const [generatedTerms] = useState([
+    { id: "gen-t1", direction: "投资保护条款", category: "信息权", name: "投资方有权获取被投企业月度财务报告", owner: "AI生成", createdAt: new Date().toISOString().split("T")[0], status: "pending" },
+    { id: "gen-t2", direction: "投资保护条款", category: "信息权", name: "投资方有权对重大技术决策进行知情和建议", owner: "AI生成", createdAt: new Date().toISOString().split("T")[0], status: "pending" },
+    { id: "gen-t3", direction: "投资保护条款", category: "反稀释条款", name: "采用完全棘轮反稀释条款保护投资方权益", owner: "AI生成", createdAt: new Date().toISOString().split("T")[0], status: "pending" },
+    { id: "gen-t4", direction: "控制权条款", category: "董事会席位", name: "投资方有权委派一名董事参与公司董事会", owner: "AI生成", createdAt: new Date().toISOString().split("T")[0], status: "pending" },
+    { id: "gen-t5", direction: "控制权条款", category: "重大事项否决权", name: "对核心技术IP转让和授权享有一票否决权", owner: "AI生成", createdAt: new Date().toISOString().split("T")[0], status: "pending" },
+    { id: "gen-t6", direction: "退出条款", category: "回购条款", name: "若公司未能在5年内实现IPO，投资方有权要求回购", owner: "AI生成", createdAt: new Date().toISOString().split("T")[0], status: "pending" },
+  ])
+
+  const ANALYSIS_STEPS = [
+    { label: "分析已有策略", icon: "strategy" },
+    { label: "解析分析框架", icon: "framework" },
+    { label: "处理上传材料", icon: "files" },
+    { label: "AI自动调研", icon: "research" },
+    { label: "生成假设清单", icon: "hypothesis" },
+    { label: "生成条款清单", icon: "terms" },
+  ]
+
+  function startAnalysis() {
+    setIsAnalyzing(true)
+    setAnalysisStep(0)
+    setAnalysisComplete(false)
+    
+    // Animate through steps
+    let currentStep = 0
+    const interval = setInterval(() => {
+      currentStep++
+      if (currentStep < ANALYSIS_STEPS.length) {
+        setAnalysisStep(currentStep)
+      } else {
+        clearInterval(interval)
+        setTimeout(() => {
+          setIsAnalyzing(false)
+          setAnalysisComplete(true)
+        }, 500)
+      }
+    }, 800)
+  }
+
+  // Navigate to Step 3 triggers analysis
+  function handleGoToStep3() {
+    setStep(3)
+    startAnalysis()
+  }
+
   function handleSave() {
     onSave({
       name: name.trim(),
@@ -772,7 +835,7 @@ function CreateStrategy({ onCancel, onSave, strategies }: { onCancel: () => void
                   返回上一步
                 </button>
                 <button
-                  onClick={() => setStep(3)}
+                  onClick={handleGoToStep3}
                   className="rounded-lg bg-[#1F2937] px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#111827]"
                 >
                   下一步: 生成策略并审核
@@ -902,59 +965,270 @@ function CreateStrategy({ onCancel, onSave, strategies }: { onCancel: () => void
           )}
 
           {step === 3 && (
-            <div>
-              <h1 className="text-xl font-bold text-[#111827] mb-2">策略审核</h1>
-              <p className="text-sm text-[#6B7280] mb-8">
-                确认策略信息后，AI 将基于分析框架和数据来源自动生成策略内容
-              </p>
-
-              {/* Summary card */}
-              <div className="rounded-xl border border-[#E5E7EB] bg-white p-6 mb-6 space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-xs text-[#9CA3AF] mb-1">策略名称</p>
-                    <p className="text-sm font-semibold text-[#111827]">{name || "—"}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-[#9CA3AF] mb-1">分析框架</p>
-                    <p className="text-sm font-semibold text-[#111827]">{selectedFramework || "—"}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-[#9CA3AF] mb-1">标签</p>
-                    <div className="flex flex-wrap gap-1">
-                      {tags.map((t) => (
-                        <span key={t} className="rounded-md border border-[#E5E7EB] bg-[#F9FAFB] px-2 py-0.5 text-[11px] text-[#6B7280]">{t}</span>
-                      ))}
+            <div className="min-h-[500px]">
+              {/* AI Analysis Animation */}
+              {isAnalyzing && (
+                <div className="flex flex-col items-center justify-center py-16">
+                  <div className="relative mb-8">
+                    <div className="h-20 w-20 rounded-2xl bg-gradient-to-br from-[#2563EB] to-[#7C3AED] flex items-center justify-center shadow-lg shadow-blue-200/50">
+                      <svg className="h-10 w-10 text-white animate-pulse" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+                      </svg>
                     </div>
+                    <div className="absolute -inset-4 rounded-3xl border-2 border-[#2563EB]/30 animate-ping" />
                   </div>
-                  <div>
-                    <p className="text-xs text-[#9CA3AF] mb-1">参考策略</p>
-                    <p className="text-sm font-semibold text-[#111827]">{selectedRefStrategies.length > 0 ? EXISTING_STRATEGIES_REF.filter((s) => selectedRefStrategies.includes(s.id)).map((s) => s.name).join("、") : "无"}</p>
+                  <h2 className="text-lg font-semibold text-[#111827] mb-2">AI 正在生成策略</h2>
+                  <p className="text-sm text-[#6B7280] mb-8">基于分析框架和数据来源自动生成假设与条款</p>
+                  
+                  <div className="w-full max-w-md space-y-3">
+                    {ANALYSIS_STEPS.map((s, idx) => (
+                      <div
+                        key={s.label}
+                        className={cn(
+                          "flex items-center gap-3 rounded-xl border p-3 transition-all duration-300",
+                          idx < analysisStep ? "border-[#10B981] bg-emerald-50" :
+                          idx === analysisStep ? "border-[#2563EB] bg-blue-50 animate-pulse" :
+                          "border-[#E5E7EB] bg-white opacity-50"
+                        )}
+                      >
+                        <div className={cn(
+                          "flex h-8 w-8 items-center justify-center rounded-lg transition-colors",
+                          idx < analysisStep ? "bg-[#10B981] text-white" :
+                          idx === analysisStep ? "bg-[#2563EB] text-white" :
+                          "bg-[#F3F4F6] text-[#9CA3AF]"
+                        )}>
+                          {idx < analysisStep ? (
+                            <Check className="h-4 w-4" />
+                          ) : idx === analysisStep ? (
+                            <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                            </svg>
+                          ) : (
+                            <span className="text-xs font-medium">{idx + 1}</span>
+                          )}
+                        </div>
+                        <span className={cn(
+                          "text-sm font-medium",
+                          idx <= analysisStep ? "text-[#111827]" : "text-[#9CA3AF]"
+                        )}>
+                          {s.label}
+                        </span>
+                      </div>
+                    ))}
                   </div>
                 </div>
-                {description && (
-                  <div>
-                    <p className="text-xs text-[#9CA3AF] mb-1">策略描述</p>
-                    <p className="text-sm text-[#374151] leading-relaxed">{description}</p>
-                  </div>
-                )}
-              </div>
+              )}
 
-              <div className="flex items-center justify-between pt-4 border-t border-[#E5E7EB]">
-                <button
-                  onClick={() => setStep(2)}
-                  className="rounded-lg border border-[#D1D5DB] bg-white px-5 py-2.5 text-sm font-medium text-[#374151] transition-colors hover:bg-[#F9FAFB]"
-                >
-                  返回上一步
-                </button>
-                <button
-                  onClick={handleSave}
-                  disabled={!name.trim()}
-                  className="rounded-lg bg-[#1F2937] px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#111827] disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  确认创建策略
-                </button>
-              </div>
+              {/* Review Interface */}
+              {analysisComplete && !isAnalyzing && (
+                <div>
+                  <div className="flex items-center justify-between mb-6">
+                    <div>
+                      <h1 className="text-xl font-bold text-[#111827]">策略审核</h1>
+                      <p className="mt-1 text-sm text-[#6B7280]">
+                        审核 AI 生成的假设和条款，可进行编辑、删除或新增
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="relative">
+                        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#9CA3AF]" />
+                        <input
+                          type="text"
+                          placeholder="搜索..."
+                          value={reviewSearchQuery}
+                          onChange={(e) => setReviewSearchQuery(e.target.value)}
+                          className="w-48 rounded-lg border border-[#E5E7EB] bg-white pl-9 pr-3 py-2 text-sm text-[#374151] outline-none placeholder:text-[#9CA3AF] focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB]"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Tabs */}
+                  <div className="flex gap-1 rounded-xl bg-[#F3F4F6] p-1 mb-6">
+                    {[
+                      { key: "hypotheses", label: "假设清单", count: generatedHypotheses.length },
+                      { key: "terms", label: "条款清单", count: generatedTerms.length },
+                      { key: "materials", label: "参考材料", count: uploadedFiles.length },
+                    ].map((tab) => (
+                      <button
+                        key={tab.key}
+                        onClick={() => setReviewTab(tab.key as typeof reviewTab)}
+                        className={cn(
+                          "flex-1 flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-colors",
+                          reviewTab === tab.key
+                            ? "bg-white text-[#111827] shadow-sm"
+                            : "text-[#6B7280] hover:text-[#374151]"
+                        )}
+                      >
+                        {tab.label}
+                        <span className={cn(
+                          "rounded-full px-2 py-0.5 text-xs",
+                          reviewTab === tab.key ? "bg-[#2563EB] text-white" : "bg-[#E5E7EB] text-[#6B7280]"
+                        )}>
+                          {tab.count}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Hypotheses Tab */}
+                  {reviewTab === "hypotheses" && (
+                    <div className="space-y-3 mb-6">
+                      <div className="flex items-center justify-between mb-4">
+                        <span className="text-sm text-[#6B7280]">
+                          共 {generatedHypotheses.filter((h) => h.name.toLowerCase().includes(reviewSearchQuery.toLowerCase()) || h.direction.includes(reviewSearchQuery) || h.category.includes(reviewSearchQuery)).length} 个假设
+                        </span>
+                        <button className="flex items-center gap-1.5 rounded-lg bg-[#2563EB] px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-[#1D4ED8]">
+                          <Plus className="h-4 w-4" />
+                          新增假设
+                        </button>
+                      </div>
+                      {generatedHypotheses
+                        .filter((h) => h.name.toLowerCase().includes(reviewSearchQuery.toLowerCase()) || h.direction.includes(reviewSearchQuery) || h.category.includes(reviewSearchQuery))
+                        .map((h) => (
+                        <div key={h.id} className="flex items-center justify-between rounded-xl border border-[#E5E7EB] bg-white p-4 hover:border-[#D1D5DB] transition-colors">
+                          <div className="flex-1 min-w-0 mr-4">
+                            <div className="flex items-center gap-2 mb-1.5">
+                              <span className="rounded-md bg-blue-50 border border-blue-200 px-2 py-0.5 text-[10px] font-medium text-blue-700">{h.direction}</span>
+                              <span className="rounded-md bg-violet-50 border border-violet-200 px-2 py-0.5 text-[10px] font-medium text-violet-700">{h.category}</span>
+                            </div>
+                            <p className="text-sm font-medium text-[#111827] truncate">{h.name}</p>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <button className="flex h-8 w-8 items-center justify-center rounded-lg text-[#6B7280] hover:bg-[#F3F4F6] hover:text-[#2563EB] transition-colors" title="查看详情">
+                              <Eye className="h-4 w-4" />
+                            </button>
+                            <button className="flex h-8 w-8 items-center justify-center rounded-lg text-[#6B7280] hover:bg-[#F3F4F6] hover:text-[#F59E0B] transition-colors" title="编辑">
+                              <Pencil className="h-4 w-4" />
+                            </button>
+                            <button className="flex h-8 w-8 items-center justify-center rounded-lg text-[#6B7280] hover:bg-[#FEE2E2] hover:text-[#EF4444] transition-colors" title="删除">
+                              <Trash2 className="h-4 w-4" />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Terms Tab */}
+                  {reviewTab === "terms" && (
+                    <div className="space-y-3 mb-6">
+                      <div className="flex items-center justify-between mb-4">
+                        <span className="text-sm text-[#6B7280]">
+                          共 {generatedTerms.filter((t) => t.name.toLowerCase().includes(reviewSearchQuery.toLowerCase()) || t.direction.includes(reviewSearchQuery) || t.category.includes(reviewSearchQuery)).length} 个条款
+                        </span>
+                        <button className="flex items-center gap-1.5 rounded-lg bg-[#2563EB] px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-[#1D4ED8]">
+                          <Plus className="h-4 w-4" />
+                          新增条款
+                        </button>
+                      </div>
+                      {generatedTerms
+                        .filter((t) => t.name.toLowerCase().includes(reviewSearchQuery.toLowerCase()) || t.direction.includes(reviewSearchQuery) || t.category.includes(reviewSearchQuery))
+                        .map((t) => (
+                        <div key={t.id} className="flex items-center justify-between rounded-xl border border-[#E5E7EB] bg-white p-4 hover:border-[#D1D5DB] transition-colors">
+                          <div className="flex-1 min-w-0 mr-4">
+                            <div className="flex items-center gap-2 mb-1.5">
+                              <span className="rounded-md bg-emerald-50 border border-emerald-200 px-2 py-0.5 text-[10px] font-medium text-emerald-700">{t.direction}</span>
+                              <span className="rounded-md bg-amber-50 border border-amber-200 px-2 py-0.5 text-[10px] font-medium text-amber-700">{t.category}</span>
+                            </div>
+                            <p className="text-sm font-medium text-[#111827] truncate">{t.name}</p>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <button className="flex h-8 w-8 items-center justify-center rounded-lg text-[#6B7280] hover:bg-[#F3F4F6] hover:text-[#2563EB] transition-colors" title="查看详情">
+                              <Eye className="h-4 w-4" />
+                            </button>
+                            <button className="flex h-8 w-8 items-center justify-center rounded-lg text-[#6B7280] hover:bg-[#F3F4F6] hover:text-[#F59E0B] transition-colors" title="编辑">
+                              <Pencil className="h-4 w-4" />
+                            </button>
+                            <button className="flex h-8 w-8 items-center justify-center rounded-lg text-[#6B7280] hover:bg-[#FEE2E2] hover:text-[#EF4444] transition-colors" title="删除">
+                              <Trash2 className="h-4 w-4" />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Materials Tab */}
+                  {reviewTab === "materials" && (
+                    <div className="space-y-3 mb-6">
+                      <div className="flex items-center justify-between mb-4">
+                        <span className="text-sm text-[#6B7280]">
+                          共 {uploadedFiles.length} 个材料
+                        </span>
+                        <button
+                          onClick={() => setShowFileBrowser(true)}
+                          className="flex items-center gap-1.5 rounded-lg bg-[#2563EB] px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-[#1D4ED8]"
+                        >
+                          <Plus className="h-4 w-4" />
+                          添加材料
+                        </button>
+                      </div>
+                      {uploadedFiles.length === 0 ? (
+                        <div className="rounded-xl border border-dashed border-[#D1D5DB] bg-[#F9FAFB] p-8 text-center">
+                          <p className="text-sm text-[#6B7280]">暂无上传材料</p>
+                        </div>
+                      ) : (
+                        uploadedFiles.map((file) => (
+                          <div key={file.name} className="flex items-center justify-between rounded-xl border border-[#E5E7EB] bg-white p-4 hover:border-[#D1D5DB] transition-colors">
+                            <div className="flex items-center gap-3">
+                              <div className={cn(
+                                "flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-xs font-bold",
+                                file.type === "PDF" ? "bg-red-50 text-red-600" :
+                                file.type === "DOCX" ? "bg-blue-50 text-blue-600" :
+                                file.type === "XLSX" ? "bg-emerald-50 text-emerald-600" :
+                                "bg-gray-50 text-gray-600"
+                              )}>
+                                {file.type}
+                              </div>
+                              <div>
+                                <p className="text-sm font-medium text-[#111827]">{file.name}</p>
+                                <p className="text-xs text-[#9CA3AF]">{file.size}</p>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <button className="flex h-8 w-8 items-center justify-center rounded-lg text-[#6B7280] hover:bg-[#F3F4F6] hover:text-[#2563EB] transition-colors" title="查看">
+                                <Eye className="h-4 w-4" />
+                              </button>
+                              <button
+                                onClick={() => handleRemoveFile(file.name)}
+                                className="flex h-8 w-8 items-center justify-center rounded-lg text-[#6B7280] hover:bg-[#FEE2E2] hover:text-[#EF4444] transition-colors"
+                                title="删除"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </button>
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  )}
+
+                  <div className="flex items-center justify-between pt-4 border-t border-[#E5E7EB]">
+                    <button
+                      onClick={() => { setStep(2); setAnalysisComplete(false) }}
+                      className="rounded-lg border border-[#D1D5DB] bg-white px-5 py-2.5 text-sm font-medium text-[#374151] transition-colors hover:bg-[#F9FAFB]"
+                    >
+                      返回上一步
+                    </button>
+                    <button
+                      onClick={handleSave}
+                      disabled={!name.trim()}
+                      className="rounded-lg bg-[#1F2937] px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#111827] disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      确认创建策略
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Initial state before analysis (fallback) */}
+              {!isAnalyzing && !analysisComplete && (
+                <div className="flex flex-col items-center justify-center py-16">
+                  <p className="text-sm text-[#6B7280]">正在准备...</p>
+                </div>
+              )}
             </div>
           )}
         </div>
