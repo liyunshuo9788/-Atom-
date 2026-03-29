@@ -1079,7 +1079,7 @@ function DescribeMethodology({ onBack, onBackToList, onNext }: { onBack: () => v
           <button
             onClick={handleStartAnalysis}
             disabled={isAnalyzing}
-            className="flex items-center gap-2 rounded-lg bg-[#1F2937] px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#111827] disabled:opacity-70 disabled:cursor-not-allowed"
+            className="flex items-center gap-2 rounded-lg bg-[#2563EB] px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#111827] disabled:opacity-70 disabled:cursor-not-allowed"
           >
             下一步：AI生成分析维度
           </button>
