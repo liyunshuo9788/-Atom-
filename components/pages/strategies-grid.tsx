@@ -234,7 +234,7 @@ export const initialStrategies: Strategy[] = [
     name: "国际贸易",
     icon: TrendingUp,
     iconBg: "bg-amber-100 text-amber-600",
-    description: "聚焦跨境贸易、全球供应链和国际化业务拓展",
+    description: "聚焦跨境贸易、全��供应链和国际化业务拓展",
     projectCount: 9,
     totalInvest: "6.3亿",
     returnRate: "+22%",
@@ -731,7 +731,7 @@ function CreateStrategy({ onCancel, onSave, strategies }: { onCancel: () => void
 
           {step === 2 && (
             <div>
-              <h1 className="text-xl font-bold text-[#111827] mb-2">配置数据来源</h1>
+              <h1 className="text-xl font-bold text-[#111827] mb-2">配��数据来源</h1>
               <p className="text-sm text-[#6B7280] mb-6">
                 上传相关材料，AI 将基于这些数据生成投资策略
               </p>
@@ -957,56 +957,105 @@ function CreateStrategy({ onCancel, onSave, strategies }: { onCancel: () => void
 
           {step === 3 && (
             <div className="min-h-[500px]">
-              {/* AI Analysis Animation */}
+              {/* AI Analysis Animation - Full screen overlay with dark theme */}
               {isAnalyzing && (
-                <div className="flex flex-col items-center justify-center py-16">
-                  <div className="relative mb-8">
-                    <div className="h-20 w-20 rounded-2xl bg-gradient-to-br from-[#2563EB] to-[#7C3AED] flex items-center justify-center shadow-lg shadow-blue-200/50">
-                      <svg className="h-10 w-10 text-white animate-pulse" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-                      </svg>
-                    </div>
-                    <div className="absolute -inset-4 rounded-3xl border-2 border-[#2563EB]/30 animate-ping" />
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0A0F1E]/80 backdrop-blur-md">
+                  {/* Animated background */}
+                  <div className="absolute inset-0 overflow-hidden">
+                    <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: "linear-gradient(rgba(99,102,241,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(99,102,241,0.3) 1px, transparent 1px)", backgroundSize: "60px 60px" }} />
+                    <div className="absolute top-1/3 left-1/3 h-64 w-64 rounded-full bg-[#7C3AED]/10 blur-3xl animate-pulse" />
+                    <div className="absolute bottom-1/3 right-1/3 h-48 w-48 rounded-full bg-[#2563EB]/10 blur-3xl animate-pulse" style={{ animationDelay: "0.5s" }} />
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-96 w-96 rounded-full bg-[#06B6D4]/5 blur-3xl animate-pulse" style={{ animationDelay: "1s" }} />
                   </div>
-                  <h2 className="text-lg font-semibold text-[#111827] mb-2">AI 正在生成策略</h2>
-                  <p className="text-sm text-[#6B7280] mb-8">基于分析框架和数据来源自动生成假设与条款</p>
 
-                  <div className="w-full max-w-md space-y-3">
-                    {ANALYSIS_STEPS.map((s, idx) => (
-                      <div
-                        key={s.label}
-                        className={cn(
-                          "flex items-center gap-3 rounded-xl border p-3 transition-all duration-300",
-                          idx < analysisStep ? "border-[#10B981] bg-emerald-50" :
-                            idx === analysisStep ? "border-[#2563EB] bg-blue-50 animate-pulse" :
-                              "border-[#E5E7EB] bg-white opacity-50"
-                        )}
-                      >
-                        <div className={cn(
-                          "flex h-8 w-8 items-center justify-center rounded-lg transition-colors",
-                          idx < analysisStep ? "bg-[#10B981] text-white" :
-                            idx === analysisStep ? "bg-[#2563EB] text-white" :
-                              "bg-[#F3F4F6] text-[#9CA3AF]"
-                        )}>
-                          {idx < analysisStep ? (
-                            <Check className="h-4 w-4" />
-                          ) : idx === analysisStep ? (
-                            <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
-                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                            </svg>
-                          ) : (
-                            <span className="text-xs font-medium">{idx + 1}</span>
-                          )}
+                  <div className="relative w-full max-w-lg">
+                    {/* Central AI icon */}
+                    <div className="flex flex-col items-center mb-10">
+                      <div className="relative mb-6">
+                        <div className="absolute -inset-8 rounded-full border border-[#7C3AED]/20 animate-spin" style={{ animationDuration: "8s" }}>
+                          <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 h-2 w-2 rounded-full bg-[#7C3AED]/60" />
+                          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 h-1.5 w-1.5 rounded-full bg-[#2563EB]/60" />
                         </div>
-                        <span className={cn(
-                          "text-sm font-medium",
-                          idx <= analysisStep ? "text-[#111827]" : "text-[#9CA3AF]"
-                        )}>
-                          {s.label}
-                        </span>
+                        <div className="absolute -inset-5 rounded-full border border-[#2563EB]/20 animate-spin" style={{ animationDuration: "5s", animationDirection: "reverse" }}>
+                          <div className="absolute top-1/2 right-0 translate-x-1/2 -translate-y-1/2 h-1.5 w-1.5 rounded-full bg-[#06B6D4]/80" />
+                        </div>
+                        <div className="absolute -inset-3 rounded-full bg-gradient-to-r from-[#7C3AED]/20 via-[#2563EB]/20 to-[#06B6D4]/20 animate-pulse blur-sm" />
+                        <div className="relative h-20 w-20 rounded-2xl bg-gradient-to-br from-[#7C3AED] via-[#4F46E5] to-[#2563EB] flex items-center justify-center shadow-2xl shadow-[#7C3AED]/30">
+                          <Sparkles className="h-10 w-10 text-white animate-pulse" />
+                        </div>
                       </div>
-                    ))}
+                      <h2 className="text-xl font-bold text-white mb-1.5 tracking-wide">AI 正在生成策略</h2>
+                      <p className="text-sm text-[#94A3B8]">基于分析框架和数据来源自动生成假设与条款</p>
+                    </div>
+
+                    {/* Analysis steps */}
+                    <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm p-6">
+                      <div className="space-y-3">
+                        {ANALYSIS_STEPS.map((s, idx) => {
+                          const isComplete = idx < analysisStep
+                          const isCurrent = idx === analysisStep
+                          return (
+                            <div
+                              key={s.label}
+                              className={`flex items-center gap-4 rounded-xl border px-4 py-3.5 transition-all duration-500 ${isComplete
+                                ? "border-emerald-500/30 bg-emerald-500/10"
+                                : isCurrent
+                                  ? "border-[#7C3AED]/50 bg-[#7C3AED]/10 shadow-lg shadow-[#7C3AED]/10"
+                                  : "border-white/5 bg-white/[0.02] opacity-40"
+                                }`}
+                            >
+                              <div className={`flex h-9 w-9 items-center justify-center rounded-lg transition-all duration-500 ${isComplete
+                                ? "bg-emerald-500 shadow-md shadow-emerald-500/30"
+                                : isCurrent
+                                  ? "bg-gradient-to-br from-[#7C3AED] to-[#2563EB] shadow-md shadow-[#7C3AED]/30"
+                                  : "bg-white/10"
+                                }`}>
+                                {isComplete ? (
+                                  <Check className="h-4.5 w-4.5 text-white" />
+                                ) : isCurrent ? (
+                                  <svg className="h-4.5 w-4.5 animate-spin text-white" viewBox="0 0 24 24" fill="none">
+                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                                  </svg>
+                                ) : (
+                                  <span className="text-xs font-medium text-white/40">{idx + 1}</span>
+                                )}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <span className={`text-sm font-medium transition-colors duration-300 ${isComplete ? "text-emerald-300" : isCurrent ? "text-white" : "text-white/40"
+                                  }`}>
+                                  {s.label}
+                                </span>
+                                {isCurrent && (
+                                  <div className="mt-1.5 h-1 w-full rounded-full bg-white/10 overflow-hidden">
+                                    <div className="h-full rounded-full bg-gradient-to-r from-[#7C3AED] to-[#2563EB] animate-pulse" style={{ width: "70%" }} />
+                                  </div>
+                                )}
+                              </div>
+                              {isComplete && (
+                                <span className="text-[10px] font-medium text-emerald-400/80">完成</span>
+                              )}
+                            </div>
+                          )
+                        })}
+                      </div>
+
+                      {/* Overall progress */}
+                      <div className="mt-5 pt-4 border-t border-white/10">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-xs text-[#94A3B8]">总体进度</span>
+                          <span className="text-xs font-mono text-[#7C3AED]">
+                            {Math.round(((analysisStep + 1) / ANALYSIS_STEPS.length) * 100)}%
+                          </span>
+                        </div>
+                        <div className="h-1.5 w-full rounded-full bg-white/10 overflow-hidden">
+                          <div
+                            className="h-full rounded-full bg-gradient-to-r from-[#7C3AED] via-[#2563EB] to-[#06B6D4] transition-all duration-700 ease-out"
+                            style={{ width: `${((analysisStep + 1) / ANALYSIS_STEPS.length) * 100}%` }}
+                          />
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               )}
