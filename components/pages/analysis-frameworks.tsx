@@ -660,7 +660,7 @@ const STEPS = [
   { num: 2, label: "描述方法论" },
   { num: 3, label: "配置维度" },
   { num: 4, label: "研判规则" },
-  { num: 5, label: "策略审核" },
+  { num: 5, label: "框架审核" },
 ]
 
 const SAMPLE_DESCRIPTION = `我们投科技项目主要看这几个方面：
@@ -2137,7 +2137,7 @@ function JudgmentRules({ onBack, onBackToList, onNext }: { onBack: () => void; o
               disabled={isGenerating}
               className="flex items-center gap-2 rounded-lg bg-[#2563EB] px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#1D4ED8] disabled:opacity-70 disabled:cursor-not-allowed"
             >
-              下一步: 生成策略并审核
+              下一步: 生成分析框架并审核
               <ArrowRight className="h-4 w-4" />
             </button>
           </div>
@@ -2251,7 +2251,7 @@ function JudgmentRules({ onBack, onBackToList, onNext }: { onBack: () => void; o
 }
 
 /* ------------------------------------------------------------------ */
-/*  Step 5 — Strategy Review (策略审核)                                 */
+/*  Step 5 — 框架审核                                 */
 /* ------------------------------------------------------------------ */
 function ConfirmSave({ onBack, onBackToList, onCreatePending }: { onBack: () => void; onBackToList: () => void; onCreatePending: () => void }) {
   const totalDimensions = INITIAL_DIMENSIONS.length
@@ -2325,9 +2325,9 @@ function ConfirmSave({ onBack, onBackToList, onCreatePending }: { onBack: () => 
       <div className="flex-1 overflow-auto px-8 pb-8">
         <div className="max-w-4xl mx-auto">
           {/* Page title */}
-          <h1 className="text-xl font-bold text-[#111827] mb-2">策略审核</h1>
+          <h1 className="text-xl font-bold text-[#111827] mb-2">框架审核</h1>
           <p className="text-sm text-[#6B7280] mb-8">
-            审核 AI 基于分析框架生成的完整策略内容，确认无误后保存
+            审核 AI 基于分析框架生成的完整框架内容，确认无误后保存
           </p>
 
           {/* Stats row */}
