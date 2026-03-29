@@ -143,7 +143,7 @@ export const initialStrategies: Strategy[] = [
     returnRate: "+32%",
     owner: { id: "zhangwei", name: "张伟", initials: "张伟" },
     createdAt: "2023-06-15",
-    frameworkName: "科技成长型框架",
+    frameworkName: "早期项目筛选框架",
   },
   {
     id: "2",
@@ -156,7 +156,7 @@ export const initialStrategies: Strategy[] = [
     returnRate: "+18%",
     owner: { id: "lisi", name: "李四", initials: "李四" },
     createdAt: "2023-07-20",
-    frameworkName: "科技成长型框架",
+    frameworkName: "早期项目筛选框架",
     parentStrategyId: "1",
     parentStrategyName: "AI基础设施",
   },
@@ -303,8 +303,8 @@ const AVAILABLE_FRAMEWORKS = [
 ]
 
 const EXISTING_STRATEGIES_REF = [
-  { id: "1", name: "AI基础设施", framework: "科技成长型框架", hypothesisCount: 12, termCount: 8 },
-  { id: "2", name: "大模型应用", framework: "科技成长型框架", hypothesisCount: 8, termCount: 6 },
+  { id: "1", name: "AI基础设施", framework: "早期项目筛选框架", hypothesisCount: 12, termCount: 8 },
+  { id: "2", name: "大模型应用", framework: "早期项目筛选框架", hypothesisCount: 8, termCount: 6 },
   { id: "7", name: "企业数字化", framework: "价值投资评估框架", hypothesisCount: 15, termCount: 10 },
   { id: "3", name: "企业服务SaaS", framework: "早期项目筛选框架", hypothesisCount: 15, termCount: 12 },
   { id: "4", name: "生物科技", framework: "早期项目筛选框架", hypothesisCount: 6, termCount: 5 },
@@ -731,7 +731,7 @@ function CreateStrategy({ onCancel, onSave, strategies }: { onCancel: () => void
 
           {step === 2 && (
             <div>
-              <h1 className="text-xl font-bold text-[#111827] mb-2">配置数据来源</h1>
+              <h1 className="text-xl font-bold text-[#111827] mb-2">配置数据来��</h1>
               <p className="text-sm text-[#6B7280] mb-6">
                 上传相关材料，AI 将基于这些数据生成投资策略
               </p>
