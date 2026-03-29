@@ -731,7 +731,7 @@ function CreateStrategy({ onCancel, onSave, strategies }: { onCancel: () => void
 
           {step === 2 && (
             <div>
-              <h1 className="text-xl font-bold text-[#111827] mb-2">配置数据来��</h1>
+              <h1 className="text-xl font-bold text-[#111827] mb-2">配置数据来源</h1>
               <p className="text-sm text-[#6B7280] mb-6">
                 上传相关材料，AI 将基于这些数据生成投资策略
               </p>
