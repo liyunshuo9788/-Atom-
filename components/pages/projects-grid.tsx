@@ -399,7 +399,7 @@ export function ProjectsGrid({ projects, strategies, onProjectsChange, onSelectP
                 className="w-48 bg-transparent text-sm text-[#374151] outline-none placeholder:text-[#9CA3AF]"
               />
             </div>
-            <button 
+            <button
               onClick={() => setIsCreateOpen(true)}
               className="flex items-center gap-1.5 rounded-lg bg-[#2563EB] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[#1D4ED8]"
             >
@@ -519,27 +519,16 @@ export function ProjectsGrid({ projects, strategies, onProjectsChange, onSelectP
             </div>
 
             {/* Project Logo & Name */}
-            <div className="grid grid-cols-[80px_1fr] gap-4">
-              <div className="space-y-2">
-                <Label className="text-sm font-medium text-[#374151]">Logo</Label>
-                <Input
-                  placeholder="M"
-                  value={newLogo}
-                  onChange={(e) => setNewLogo(e.target.value.slice(0, 2))}
-                  className="text-center text-lg font-bold"
-                  maxLength={2}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label className="text-sm font-medium text-[#374151]">
-                  项目名称 <span className="text-red-500">*</span>
-                </Label>
-                <Input
-                  placeholder="输入项目名称"
-                  value={newName}
-                  onChange={(e) => setNewName(e.target.value)}
-                />
-              </div>
+
+            <div className="space-y-2">
+              <Label className="text-sm font-medium text-[#374151]">
+                项目名称 <span className="text-red-500">*</span>
+              </Label>
+              <Input
+                placeholder="输入项目名称"
+                value={newName}
+                onChange={(e) => setNewName(e.target.value)}
+              />
             </div>
 
             {/* Description */}
